@@ -390,7 +390,7 @@ function initMonaco() {
   // Monaco is served from the binary, not a CDN.
   require.config({ paths: { vs: '/vendor/monaco/vs' } });
   require(['vs/editor/editor.main'], () => {
-    monaco.editor.defineTheme('jr-architect-light', {
+    monaco.editor.defineTheme('monarch-light', {
       base: 'vs', inherit: true,
       rules: [],
       colors: {
@@ -403,7 +403,7 @@ function initMonaco() {
         'editor.lineHighlightBackground': '#FAFAFA',
       }
     });
-    monaco.editor.defineTheme('jr-architect-dark', {
+    monaco.editor.defineTheme('monarch-dark', {
       base: 'vs-dark', inherit: true,
       rules: [],
       colors: {
@@ -419,7 +419,7 @@ function initMonaco() {
       }
     });
     IDE.editor = monaco.editor.create(document.getElementById('monaco-container'), {
-      theme: IDE.darkMode ? 'jr-architect-dark' : 'jr-architect-light',
+      theme: IDE.darkMode ? 'monarch-dark' : 'monarch-light',
       fontSize: 14, fontFamily: "'JetBrains Mono', Consolas, monospace",
       minimap: { enabled: true }, scrollBeyondLastLine: false, automaticLayout: true,
       padding: { top: 8 }, smoothScrolling: true, cursorBlinking: 'smooth',
@@ -470,7 +470,7 @@ function showDiffModal(path, before, after) {
   const lang = getLang(path);
   _diffEditor = monaco.editor.createDiffEditor(host, {
     readOnly: true, automaticLayout: true, renderSideBySide: true,
-    theme: IDE.darkMode ? 'jr-architect-dark' : 'jr-architect-light',
+    theme: IDE.darkMode ? 'monarch-dark' : 'monarch-light',
     minimap: { enabled: false }, scrollBeyondLastLine: false, fontSize: 12.5,
   });
   _diffEditor.setModel({
@@ -1110,7 +1110,7 @@ function setDarkMode(enabled) {
     return;
   }
   if (IDE.editor && typeof monaco !== 'undefined') {
-    monaco.editor.setTheme(enabled ? 'jr-architect-dark' : 'jr-architect-light');
+    monaco.editor.setTheme(enabled ? 'monarch-dark' : 'monarch-light');
   }
   const termTheme = getTerminalTheme();
   IDE.terminals.forEach(t => { if (t.term) t.term.options.theme = termTheme; });

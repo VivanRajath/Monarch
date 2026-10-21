@@ -69,7 +69,7 @@ class D:
                 + STYLE + defs + ''.join(self.parts) + '</svg>')
 
 # ---------- Diagram 1: the system as built ----------
-d = D(1760, 1240, 'Jr Architect: system architecture',
+d = D(1760, 1240, 'Monarch: system architecture',
       'One Go control plane, a Node agent service, isolated sandboxes, MongoDB. Orange and red dashed areas are untrusted; the server decides everything security-relevant.')
 
 # Browser (untrusted)
@@ -167,7 +167,7 @@ open(os.path.join(OUT, 'architecture.svg'), 'w', encoding='utf-8').write(d.svg()
 
 # ---------- Diagram 2: deploying and scaling Architect 2.0 in the cloud (proposal) ----------
 s = D(1760, 1000, 'Architect 2.0 in the cloud: deployment and scaling (proposed)',
-      'How the same design scales to thousands of concurrent builders. Today Jr Architect runs on one host; this is the target, not the current deployment.')
+      'How the same design scales to thousands of concurrent builders. Today Monarch runs on one host; this is the target, not the current deployment.')
 s.zone(30, 110, 230, 860, 'Users', '', 'untrusted')
 s.box(45, 200, 200, 70, 'Browser', 'builders and developers')
 s.box(45, 300, 200, 70, 'Generated apps', 'their end users')

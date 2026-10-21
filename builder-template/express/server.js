@@ -27,7 +27,7 @@ app.post('/api/workflows/:key', async (req, res) => {
     res.status(r.ok ? 200 : r.status).json({ status: run.status || 'failed', output: run.output, error: run.error });
   } catch (e) {
     console.log(`[workflow] ${req.params.key}: could not reach ${cfg.base} (${e.message})`);
-    res.status(502).json({ status: 'failed', error: `Could not reach Jr Architect at ${cfg.base}` });
+    res.status(502).json({ status: 'failed', error: `Could not reach Monarch at ${cfg.base}` });
   }
 });
 

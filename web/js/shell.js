@@ -98,7 +98,7 @@
     const item = ([ic, label, href]) => `<a class="jr-rail-item" href="${href}" data-nav="${ic}">${icon(ic, 16)}<span>${label}</span></a>`;
     const group = (name) => `<div class="jr-rail-group"><div class="jr-rail-label">${name}</div>${NAV.filter((n) => n[4] === name).map(item).join('')}</div>`;
     rail.innerHTML = `
-      <a class="jr-rail-brand" href="/"><span class="jr-rail-logo">Jr</span><span class="jr-rail-name">Jr Architect</span></a>
+      <a class="jr-rail-brand" href="/"><span class="jr-rail-logo">M</span><span class="jr-rail-name">Monarch</span></a>
       ${group('Workspace')}
       ${group('Automation')}
       <div class="jr-rail-foot">

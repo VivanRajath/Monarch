@@ -24,7 +24,7 @@ $ctx = stream_context_create(['http' => [
 ]]);
 $raw = @file_get_contents("{$cfg['base']}/hooks/workflows/{$flow['id']}/run", false, $ctx);
 if ($raw === false) { error_log('[workflow] ' . $_GET['workflow'] . ": could not reach {$cfg['base']}"); }
-if ($raw === false) reply(502, ['status' => 'failed', 'error' => "Could not reach Jr Architect at {$cfg['base']}"]);
+if ($raw === false) reply(502, ['status' => 'failed', 'error' => "Could not reach Monarch at {$cfg['base']}"]);
 
 preg_match('{HTTP/\S+ (\d{3})}', $http_response_header[0] ?? '', $m);
 $code = (int)($m[1] ?? 502);

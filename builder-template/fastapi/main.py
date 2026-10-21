@@ -52,7 +52,7 @@ async def run_workflow(key: str, request: Request):
         run, code = await asyncio.to_thread(call_workflow, cfg, flow, payload)
     except OSError as e:
         print(f"[workflow] {key}: could not reach {cfg.get('base')} ({e})", flush=True)
-        return JSONResponse({"status": "failed", "error": f"Could not reach Jr Architect at {cfg.get('base')}"}, status_code=502)
+        return JSONResponse({"status": "failed", "error": f"Could not reach Monarch at {cfg.get('base')}"}, status_code=502)
     print(f"[workflow] {key} -> {run.get('status', code)} in {int((time.monotonic() - started) * 1000)}ms" + (f": {run.get('error')}" if run.get("error") else ""), flush=True)
     return JSONResponse({"status": run.get("status", "failed"), "output": run.get("output"), "error": run.get("error")}, status_code=code)
 

@@ -163,7 +163,7 @@ function scmPublishHTML(st) {
   const base = (document.querySelector('.repo-name')?.textContent || 'my-app').split('/').pop().replace(/[^A-Za-z0-9_.-]+/g, '-').replace(/^-+|-+$/g, '') || 'my-app';
   return `<div class="scm-card">
     <h4>Publish to GitHub</h4>
-    <p class="scm-p">${st.repo ? 'This repository has no GitHub remote yet.' : 'This project is not in a repository yet.'} Create one on <b>${ghEsc(SCM.account.login)}</b> and push everything to it. Files Jr Architect adds (agent specs, <code>.env.local</code>, <code>node_modules</code>) are left out.</p>
+    <p class="scm-p">${st.repo ? 'This repository has no GitHub remote yet.' : 'This project is not in a repository yet.'} Create one on <b>${ghEsc(SCM.account.login)}</b> and push everything to it. Files Monarch adds (agent specs, <code>.env.local</code>, <code>node_modules</code>) are left out.</p>
     <form class="scm-publish" id="scm-publish">
       <input name="name" type="text" value="${ghEsc(base)}" spellcheck="false" aria-label="Repository name" required>
       <input name="description" type="text" placeholder="Description (optional)" aria-label="Description">

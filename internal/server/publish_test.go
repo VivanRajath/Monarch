@@ -24,7 +24,7 @@ func TestReadmeFromABuild(t *testing.T) {
 	flows := []builder.BuiltWorkflow{{Name: "Generate Hint", Description: "Hint | for the code", Token: "wt_secret_123", Input: map[string]string{"code": "x"}, Output: map[string]string{"hint": "y"}}}
 	md := renderReadme(readmeInput{Name: prd.Name, Tagline: prd.Tagline, Repo: "octo/debugmate", StackLabel: "Next.js (React)", Language: "JavaScript",
 		Install: "npm install", Start: "npm run dev", Port: 3000, PRD: prd, Flows: flows, Entries: []string{"app/", "lib/", ".env.local", "package.json"}, EnvFile: ".env.local"})
-	for _, want := range []string{"# DebugMate", "> A live coding tutor", "## Features", "- Weekly roadmap", "**Generate Hint**", "Hint \\| for the code", "`code`", "Hint Coach", "git clone https://github.com/octo/debugmate.git", "cd debugmate", "npm run dev", "http://localhost:3000", ".env.example", "| Lesson | title, level |", "**Next.js (React)** (JavaScript)", "Built with [Jr Architect]"} {
+	for _, want := range []string{"# DebugMate", "> A live coding tutor", "## Features", "- Weekly roadmap", "**Generate Hint**", "Hint \\| for the code", "`code`", "Hint Coach", "git clone https://github.com/octo/debugmate.git", "cd debugmate", "npm run dev", "http://localhost:3000", ".env.example", "| Lesson | title, level |", "**Next.js (React)** (JavaScript)", "Built with [Monarch]"} {
 		if !strings.Contains(md, want) {
 			t.Errorf("README misses %q", want)
 		}
@@ -59,7 +59,7 @@ func TestSecretFilesGetBlankExamples(t *testing.T) {
 }
 
 func TestRepoSlugAndCommandCleanup(t *testing.T) {
-	for in, want := range map[string]string{"Coding Tutor Pro!": "coding-tutor-pro", "  ": "jr-architect-app", "Café ✨ App": "caf-app"} {
+	for in, want := range map[string]string{"Coding Tutor Pro!": "coding-tutor-pro", "  ": "monarch-app", "Café ✨ App": "caf-app"} {
 		if got := repoSlug(in); got != want {
 			t.Errorf("repoSlug(%q) = %q, want %q", in, got, want)
 		}
@@ -132,10 +132,10 @@ func TestCollaboratorMustExistBeforeTheInvite(t *testing.T) {
 			t.Fatal("sent an invite for a missing account")
 		}
 	}
-	if _, err := inviteCollaborator(context.Background(), gh, "octo", "app", "jr-architect"); err != nil {
+	if _, err := inviteCollaborator(context.Background(), gh, "octo", "app", "monarch"); err != nil {
 		t.Fatal(err)
 	}
-	if last := (*calls)[len(*calls)-1]; last != "PUT /repos/octo/app/collaborators/jr-architect" {
+	if last := (*calls)[len(*calls)-1]; last != "PUT /repos/octo/app/collaborators/monarch" {
 		t.Fatalf("invite call: %s", last)
 	}
 }

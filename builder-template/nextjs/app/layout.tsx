@@ -12,7 +12,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "App",
-  description: "Built with Jr Architect",
+  description: "Built with Monarch",
 };
 
 // Applies the saved or system theme before first paint, so dark mode never flashes light.

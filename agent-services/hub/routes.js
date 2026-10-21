@@ -35,7 +35,7 @@ export function sampleFor(schema) {
 export function n8nWorkflow(def, token) {
   const url = `${publicBase()}/hooks/agents/${def.id}/run`;
   return {
-    name: `Jr-Architect: ${def.identity.name}`,
+    name: `Monarch: ${def.identity.name}`,
     nodes: [
       { parameters: {}, id: "trigger", name: "When clicking 'Test workflow'", type: "n8n-nodes-base.manualTrigger", typeVersion: 1, position: [0, 0] },
       {

@@ -15,7 +15,7 @@ import (
 // Every container we start carries this label, so a restart can find what it orphaned.
 const SandboxLabel = "jrarch.sandbox"
 
-// Which server started a container, so a second Jr Architect on the same machine never removes the first one's sandboxes.
+// Which server started a container, so a second Monarch on the same machine never removes the first one's sandboxes.
 const InstanceLabel = "jrarch.instance"
 
 // Stable per data folder and port: a restart of the same server recognises its own containers.

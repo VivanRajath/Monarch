@@ -59,7 +59,7 @@ func runWorkflow(w http.ResponseWriter, r *http.Request) {
 	res, err := (&http.Client{Timeout: 3 * time.Minute}).Do(req)
 	if err != nil {
 		log.Printf("[workflow] %s: could not reach %s (%v)", key, cfg.Base, err)
-		writeJSON(w, 502, map[string]string{"status": "failed", "error": "Could not reach Jr Architect at " + cfg.Base})
+		writeJSON(w, 502, map[string]string{"status": "failed", "error": "Could not reach Monarch at " + cfg.Base})
 		return
 	}
 	defer res.Body.Close()

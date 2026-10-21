@@ -1106,7 +1106,7 @@ async function runEditModeWS(ws, dir, message, model, container) {
 }
 
 
-// Registers a sandbox dir once Jr Architect has cloned it and generated its agent spec.
+// Registers a sandbox dir once Monarch has cloned it and generated its agent spec.
 function agentSpecPresent(dir) {
   return existsSync(join(dir, ".gitagent", "agent.yaml")) || existsSync(join(dir, "agent.yaml"));
 }

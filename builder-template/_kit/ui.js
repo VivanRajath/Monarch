@@ -1,4 +1,4 @@
-// Jr Architect UI kit helpers: icons (<i data-icon="plus"></i>), toasts, dialogs, tabs, theme and busy buttons. Icons are from Lucide (lucide.dev, ISC licence).
+// Monarch UI kit helpers: icons (<i data-icon="plus"></i>), toasts, dialogs, tabs, theme and busy buttons. Icons are from Lucide (lucide.dev, ISC licence).
 (function () {
   var ICONS = {
     plus: '<path d="M5 12h14"/><path d="M12 5v14"/>',

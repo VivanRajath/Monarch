@@ -1,12 +1,12 @@
 #!/usr/bin/env node
-// Usage: jr-architect review --base main; reads .gitagent/pipeline.json, clones the packs it names and applies them to a diff.
+// Usage: monarch review --base main; reads .gitagent/pipeline.json, clones the packs it names and applies them to a diff.
 
 import { reviewRange } from "./review.js";
 
-const USAGE = `jr-architect — run a repository's own GitAgent pipeline
+const USAGE = `monarch — run a repository's own GitAgent pipeline
 
 USAGE
-  jr-architect review [options]
+  monarch review [options]
 
 OPTIONS
   --base <ref>     what to compare against            (default: origin/main)
@@ -100,13 +100,13 @@ async function main() {
     return 0;
   }
   if (cmd !== "review") {
-    process.stderr.write(`jr-architect: unknown command "${cmd}"\n\n${USAGE}`);
+    process.stderr.write(`monarch: unknown command "${cmd}"\n\n${USAGE}`);
     return 2;
   }
 
   const opts = parseArgs(argv.slice(1));
   if (opts.help) { process.stdout.write(USAGE); return 0; }
-  if (opts.error) { process.stderr.write(`jr-architect: ${opts.error}\n`); return 2; }
+  if (opts.error) { process.stderr.write(`monarch: ${opts.error}\n`); return 2; }
 
   let res;
   try {
@@ -119,7 +119,7 @@ async function main() {
       onStep: opts.json ? null : (name, detail) => process.stderr.write(`  ${name}: ${detail}\n`),
     });
   } catch (e) {
-    process.stderr.write(`jr-architect: ${e.message}\n`);
+    process.stderr.write(`monarch: ${e.message}\n`);
     return 2;
   }
 

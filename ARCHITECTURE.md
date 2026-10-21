@@ -1,8 +1,8 @@
-# Jr Architect: architecture and decisions
+# Monarch: architecture and decisions
 
-Jr Architect is an AI app builder for two kinds of people.
+Monarch is an AI app builder for two kinds of people.
 
-- **Someone who doesn't code** describes an idea. Jr Architect asks a few questions and agrees a plan with them, then builds the app, its AI agents and its workflows. It runs the app on a live URL and pushes the code to their GitHub.
+- **Someone who doesn't code** describes an idea. Monarch asks a few questions and agrees a plan with them, then builds the app, its AI agents and its workflows. It runs the app on a live URL and pushes the code to their GitHub.
 - **A developer** opens any GitHub repository in a sandboxed IDE. A team of coding agents works on it under rules the developer sets, and every change goes back to GitHub.
 
 This document covers how it works today, why each part is built the way it is, and how the same design would be deployed and scaled for thousands of users.
@@ -47,7 +47,7 @@ This is what happens, request by request, when someone types an idea on the home
    - the container starts from the stack's image.
 6. **Healing.** If a page fails to compile or render, the heal loop reads the error, asks the model for a targeted fix, and tries again within a time budget. Fixes that would remove exports are refused, and the fallback file is kept.
 7. **Live preview.** The app's port is published on `127.0.0.1` only and reached through the preview proxy. With a preview domain, the host is `p-<token>.<domain>`; in the public deployment it is a Cloudflare quick tunnel per app. The preview runs on a different origin from the IDE, so the app never sees the IDE's cookie. The page polls the build status and shows the app in an iframe as soon as it answers.
-8. **GitHub.** If the user connected GitHub and left auto-push on, the server creates a repository, writes a README and safe examples of any secret files, commits, and pushes. The push goes through the git credential container (section 4.6). It then invites the `jr-architect` collaborator.
+8. **GitHub.** If the user connected GitHub and left auto-push on, the server creates a repository, writes a README and safe examples of any secret files, commits, and pushes. The push goes through the git credential container (section 4.6). It then invites the `monarch` collaborator.
 9. **Using it.** The app calls its own workflows over webhooks with its per-workflow token. The workflows run the agents with the user's chosen models, and each run is stored with its steps.
 
 A developer's path is the same from step 5 onwards, except the source is a repository rather than generated code.
@@ -165,7 +165,7 @@ The proxy sits inside the Go server, in front of everything, in this order: prev
 **Today:**
 - every app runs live in its sandbox with a public preview URL;
 - its code is in the user's GitHub repository, ready for any host that deploys from GitHub (Vercel, Netlify, Render);
-- its agents and workflows keep running in Jr Architect behind per-workflow tokens.
+- its agents and workflows keep running in Monarch behind per-workflow tokens.
 
 **Proposed:**
 - a one-click deploy builds an image in the sandbox and pushes it to a registry;
@@ -173,7 +173,7 @@ The proxy sits inside the Go server, in front of everything, in this order: prev
 - environment variables come from the secrets store;
 - the app reaches its agents through the same API with per-app tokens.
 
-### 4.8 Deploying Jr Architect itself
+### 4.8 Deploying Monarch itself
 
 **Today:** one Windows laptop running a hardened WSL distro.
 - The Go binary and the Node service run as a systemd user service.

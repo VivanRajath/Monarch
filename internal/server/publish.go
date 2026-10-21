@@ -50,7 +50,7 @@ func repoSlug(name string) string {
 		s = strings.Trim(s[:80], "-.")
 	}
 	if s == "" {
-		s = "jr-architect-app"
+		s = "monarch-app"
 	}
 	return s
 }
@@ -98,9 +98,9 @@ func publishWorkspace(ctx context.Context, sb core.Sandbox, gh core.GitHubLink, 
 		if _, err := runGit(sb, env, append([]string{"add", "-A"}, addPathspec(st)...)...); err != nil {
 			return res, fmt.Errorf("the repository was created but staging failed: %w", err)
 		}
-		msg := "Initial commit from Jr Architect"
+		msg := "Initial commit from Monarch"
 		if opts.Build != nil && opts.Build.PRD != nil {
-			msg = fmt.Sprintf("%s: generated with Jr Architect", opts.Build.PRD.Name)
+			msg = fmt.Sprintf("%s: generated with Monarch", opts.Build.PRD.Name)
 		}
 		if _, err := runGit(sb, env, "commit", "-m", msg); err != nil {
 			return res, fmt.Errorf("the repository was created but the commit failed: %w", err)
@@ -119,7 +119,7 @@ func publishWorkspace(ctx context.Context, sb core.Sandbox, gh core.GitHubLink, 
 	}
 	runGit(sb, env, "branch", "--set-upstream-to=origin/"+branch)
 
-	topics := []string{"jr-architect", "built-with-jr-architect"}
+	topics := []string{"monarch", "built-with-monarch"}
 	if opts.Build != nil && opts.Build.PRD != nil && opts.Build.PRD.Stack != "" {
 		topics = append(topics, repoSlug(opts.Build.PRD.Stack))
 	}
@@ -393,7 +393,7 @@ func renderReadme(in readmeInput) string {
 	if in.Tagline != "" {
 		w("> %s\n\n", strings.TrimSpace(in.Tagline))
 	}
-	badges := []string{"![Built with Jr Architect](https://img.shields.io/badge/built%20with-Jr%20Architect-18181B?style=flat-square)"}
+	badges := []string{"![Built with Monarch](https://img.shields.io/badge/built%20with-Monarch-18181B?style=flat-square)"}
 	if in.StackLabel != "" {
 		badges = append(badges, fmt.Sprintf("![Stack](https://img.shields.io/badge/stack-%s-3B82F6?style=flat-square)", shieldText(in.StackLabel)))
 	}
@@ -468,7 +468,7 @@ func renderReadme(in readmeInput) string {
 
 	if len(in.Flows) > 0 {
 		w("## AI agents and workflows\n\n")
-		w("The AI features run as workflows in [Jr Architect's Agent Hub](https://github.com/VivanRajath/Jr-Architect). The app calls each one through a server-side route, so tokens never reach the browser.\n\n")
+		w("The AI features run as workflows in [Monarch's Agent Hub](https://github.com/VivanRajath/Monarch). The app calls each one through a server-side route, so tokens never reach the browser.\n\n")
 		w("| Workflow | What it does | Input | Output |\n| --- | --- | --- | --- |\n")
 		for _, f := range in.Flows {
 			w("| **%s** | %s | %s | %s |\n", mdEscape(f.Name), mdEscape(f.Description), codeList(sortedKeys(f.Input)), codeList(sortedKeys(f.Output)))
@@ -500,9 +500,9 @@ func renderReadme(in readmeInput) string {
 	}
 	switch in.EnvFile {
 	case ".env.local":
-		w("### Environment\n\nCopy `.env.example` to `.env.local` and fill in `JR_API_BASE` and one token per workflow. Create or rotate the tokens in Jr Architect under **Agent Hub › Workflows › Webhook**. `.env.local` is git-ignored.\n\n")
+		w("### Environment\n\nCopy `.env.example` to `.env.local` and fill in `JR_API_BASE` and one token per workflow. Create or rotate the tokens in Monarch under **Agent Hub › Workflows › Webhook**. `.env.local` is git-ignored.\n\n")
 	case "jr-workflows.json":
-		w("### Environment\n\nCopy `jr-workflows.example.json` to `jr-workflows.json` and fill in `base` and one token per workflow. Create or rotate the tokens in Jr Architect under **Agent Hub › Workflows › Webhook**. `jr-workflows.json` is git-ignored.\n\n")
+		w("### Environment\n\nCopy `jr-workflows.example.json` to `jr-workflows.json` and fill in `base` and one token per workflow. Create or rotate the tokens in Monarch under **Agent Hub › Workflows › Webhook**. `jr-workflows.json` is git-ignored.\n\n")
 	}
 
 	if in.StackLabel != "" {
@@ -515,7 +515,7 @@ func renderReadme(in readmeInput) string {
 			w("- **Design:** %s\n", strings.TrimSpace(p.Design.Concept))
 		}
 		if len(in.Flows) > 0 {
-			w("- **AI:** Jr Architect Agent Hub workflows, model-agnostic (Groq, OpenAI, Anthropic, Gemini)\n")
+			w("- **AI:** Monarch Agent Hub workflows, model-agnostic (Groq, OpenAI, Anthropic, Gemini)\n")
 		}
 		w("\n")
 	}
@@ -531,7 +531,7 @@ func renderReadme(in readmeInput) string {
 		w("```\n\n")
 	}
 
-	w("---\n\nBuilt with [Jr Architect](https://github.com/VivanRajath/Jr-Architect): describe an app, get the app, its agents and the workflows that wire them.\n")
+	w("---\n\nBuilt with [Monarch](https://github.com/VivanRajath/Monarch): describe an app, get the app, its agents and the workflows that wire them.\n")
 	return b.String()
 }
 

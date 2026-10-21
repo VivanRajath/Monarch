@@ -29,7 +29,7 @@ function jrWorkflows() {
           send(r.ok ? 200 : r.status, { status: run.status || 'failed', output: run.output, error: run.error });
         } catch (e) {
           console.log(`[workflow] ${req.url}: could not reach ${cfg.base} (${e.message})`);
-          send(502, { status: 'failed', error: `Could not reach Jr Architect at ${cfg.base}` });
+          send(502, { status: 'failed', error: `Could not reach Monarch at ${cfg.base}` });
         }
       });
     },

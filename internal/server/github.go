@@ -419,7 +419,7 @@ func githubPushHandler(w http.ResponseWriter, r *http.Request) {
 	if len(st.Changes) > 0 {
 		msg := strings.TrimSpace(req.Message)
 		if msg == "" {
-			msg = "Update from Jr Architect"
+			msg = "Update from Monarch"
 		}
 		if _, err := runGit(sb, env, append([]string{"add", "-A"}, addPathspec(st)...)...); err != nil {
 			fail("could not stage the changes", err)
@@ -463,7 +463,7 @@ func githubPushHandler(w http.ResponseWriter, r *http.Request) {
 			title = strings.TrimSpace(req.Message)
 		}
 		if title == "" {
-			title = "Changes from Jr Architect"
+			title = "Changes from Monarch"
 		}
 		base := req.PR.Base
 		if base == "" {

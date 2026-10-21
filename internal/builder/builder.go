@@ -1129,7 +1129,7 @@ func updateAppMetadata(workdir string, prd *PRD) {
 		return
 	}
 	updated := strings.ReplaceAll(string(data), `title: "App"`, fmt.Sprintf(`title: "%s"`, prd.Name))
-	updated = strings.ReplaceAll(updated, `description: "Built with Jr Architect"`,
+	updated = strings.ReplaceAll(updated, `description: "Built with Monarch"`,
 		fmt.Sprintf(`description: "%s"`, prd.Tagline))
 	os.WriteFile(layoutPath, []byte(updated), 0644)
 }

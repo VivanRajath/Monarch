@@ -202,7 +202,7 @@ export function toollessAgentHome() {
   _toollessHome = mkdtempSync(join(tmpdir(), "jr-agent-home-"));
   writeFileSync(join(_toollessHome, "agent.yaml"), [
     'spec_version: "0.1.0"',
-    "name: jr-architect-toolless",
+    "name: monarch-toolless",
     "version: 1.0.0",
     "description: Ephemeral agent home for a toolless turn. Holds no rules and no memory.",
     "tools: []",

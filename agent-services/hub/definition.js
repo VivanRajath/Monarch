@@ -1,4 +1,4 @@
-// The structured Jr-Architect agent definition: the source of truth; the system prompt and gitagent files are derived from it.
+// The structured Monarch agent definition: the source of truth; the system prompt and gitagent files are derived from it.
 import yaml from "js-yaml";
 import { providerHasKey, PROVIDER_MODELS, AGENT_MAX_OUTPUT_TOKENS, modelFor } from "../llm.js";
 
@@ -253,13 +253,13 @@ export function renderGitagentFiles(input) {
     jr: d,
   };
   const soul = [
-    `# ${d.identity.name}`, "", "<!-- Generated from agent.yaml by Jr-Architect. Edit the agent in Agent Studio. -->", "",
+    `# ${d.identity.name}`, "", "<!-- Generated from agent.yaml by Monarch. Edit the agent in Agent Studio. -->", "",
     d.identity.description, "", "## Purpose", d.purpose || "_Not set._", "",
     ...(d.responsibilities.length ? ["## Responsibilities", ...d.responsibilities.map((r) => `- ${r}`), ""] : []),
     ...(d.instructions ? ["## Instructions", d.instructions, ""] : []),
   ].join("\n");
   const rules = [
-    "# Rules", "", "<!-- Generated from agent.yaml by Jr-Architect. -->", "",
+    "# Rules", "", "<!-- Generated from agent.yaml by Monarch. -->", "",
     ...(d.guardrails.rules.length ? d.guardrails.rules.map((r) => `- ${r}`) : ["- No custom rules."]),
     ...(d.guardrails.blockedTerms.length ? ["", "## Blocked terms", ...d.guardrails.blockedTerms.map((t) => `- ${t}`)] : []),
     ...(d.humanInTheLoop.approveOutput || d.humanInTheLoop.approveTools.length

@@ -118,7 +118,7 @@ async function guardedGet(url, isAllowed, headers = {}) {
   for (let hop = 0; hop < 4; hop++) {
     const u = await checkPublicUrl(current);
     if (!isAllowed(u)) throw new Error(`${u.hostname} is not an allowed domain for this agent`);
-    const res = await fetchImpl(u.toString(), { redirect: "manual", headers: { "User-Agent": "Jr-Architect-Agent", ...headers }, signal: AbortSignal.timeout(15000) });
+    const res = await fetchImpl(u.toString(), { redirect: "manual", headers: { "User-Agent": "Monarch-Agent", ...headers }, signal: AbortSignal.timeout(15000) });
     if (res.status >= 300 && res.status < 400 && res.headers.get("location")) {
       current = new URL(res.headers.get("location"), u).toString();
       continue;

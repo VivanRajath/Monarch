@@ -12,7 +12,7 @@ import (
 
 func TestSweeperAcceptsOnlyReposThisServerPublished(t *testing.T) {
 	withOAuthConfig(t)
-	core.Cfg.GitHubCollaborator, core.Cfg.GitHubCollaboratorToken = "jr-architect", "collab-token"
+	core.Cfg.GitHubCollaborator, core.Cfg.GitHubCollaboratorToken = "monarch", "collab-token"
 	accepted := []string{}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/user/repository_invitations", func(w http.ResponseWriter, r *http.Request) {

@@ -1,8 +1,8 @@
-# Jr Architect
+# Monarch
 
 A self-hosted, AI-guided cloud IDE that runs any GitHub repository inside an isolated Docker sandbox and lets you edit it with a built-in coding agent.
 
-Prompt-to-app builders are good at producing a first version. The moment a developer needs a real change, they clone the repo and leave for VS Code, Cursor, or Claude Code, and the builder loses them right when the work gets interesting. Jr Architect closes that gap. It takes a generated repository (or any repository) and opens it in a full cloud IDE, running live, with an AI agent that edits the code in place, so iteration stays in one environment instead of scattering across local tools.
+Prompt-to-app builders are good at producing a first version. The moment a developer needs a real change, they clone the repo and leave for VS Code, Cursor, or Claude Code, and the builder loses them right when the work gets interesting. Monarch closes that gap. It takes a generated repository (or any repository) and opens it in a full cloud IDE, running live, with an AI agent that edits the code in place, so iteration stays in one environment instead of scattering across local tools.
 
 
 
@@ -69,11 +69,11 @@ For the reasoning behind each of these decisions, and the trade-offs against fro
 
 ## GitAgent integration
 
-Jr Architect is inspired by Lyzr's **Architect** and is built on the **GitAgent standard**, the open, git-native agent specification from Lyzr Research Labs (registry at [registry.gitagent.sh](https://registry.gitagent.sh)). The premise of GitAgent is simple and powerful: an agent's identity, rules, skills, and memory are plain files committed to a repository, so the agent is versioned and travels with the code. Jr Architect is a runtime for that standard, a GitAgent adapter, so it runs agents defined this way, including agents published to the registry, against a live repository inside the sandbox.
+Monarch is inspired by Lyzr's **Architect** and is built on the **GitAgent standard**, the open, git-native agent specification from Lyzr Research Labs (registry at [registry.gitagent.sh](https://registry.gitagent.sh)). The premise of GitAgent is simple and powerful: an agent's identity, rules, skills, and memory are plain files committed to a repository, so the agent is versioned and travels with the code. Monarch is a runtime for that standard, a GitAgent adapter, so it runs agents defined this way, including agents published to the registry, against a live repository inside the sandbox.
 
 It shows up in three ways.
 
-**Every repository becomes its own agent.** When a repo is cloned, Jr Architect scaffolds a full GitAgent spec grouped under `.gitagent/`, following the standard layout:
+**Every repository becomes its own agent.** When a repo is cloned, Monarch scaffolds a full GitAgent spec grouped under `.gitagent/`, following the standard layout:
 
 ```
 .gitagent/
@@ -100,7 +100,7 @@ Before the agent changes anything, the edit pipeline reads this spec, so edits o
 
 *Skills* lists the personas under `.gitagent/skills` with their descriptions. Edit a built-in one, write a new one from a form, or delete one you authored.
 
-*Registry* browses the community index. Expand an agent to preview its real `SOUL.md` and `RULES.md`, read from its repository before anything is cloned, then **Pull** it. Pulling is one click and the agent goes to work: Jr Architect reads the registry entry and assigns the slot itself, so a `developer-tools` agent becomes the **Developer** that rewrites your code, and a `compliance`, `security`, or `governance` agent becomes a **Guardrail** that can block an edit. The card shows where it will land (`→ Developer` / `→ Guardrail`) before you click, with one button beside it to force the other slot. Pulling live-clones the agent into the sandbox and writes `.gitagent/pipeline.json`, so the very next edit runs through it, including Lyzr's own published agents such as `shreyas-lyzr/architect`.
+*Registry* browses the community index. Expand an agent to preview its real `SOUL.md` and `RULES.md`, read from its repository before anything is cloned, then **Pull** it. Pulling is one click and the agent goes to work: Monarch reads the registry entry and assigns the slot itself, so a `developer-tools` agent becomes the **Developer** that rewrites your code, and a `compliance`, `security`, or `governance` agent becomes a **Guardrail** that can block an edit. The card shows where it will land (`→ Developer` / `→ Guardrail`) before you click, with one button beside it to force the other slot. Pulling live-clones the agent into the sandbox and writes `.gitagent/pipeline.json`, so the very next edit runs through it, including Lyzr's own published agents such as `shreyas-lyzr/architect`.
 
 **Pulling an agent changes the folder, not just a config value.** `.gitagent/` is not a static scaffold that a pulled agent runs behind: the agent is written *into* it. A Developer agent's identity, rules, and skill land in `.gitagent/skills/<author>__<name>/SKILL.md`; a guardrail's rules land in `.gitagent/compliance/<author>__<name>.md`; either way a note in `.gitagent/workflows/` records which stage it runs at and what it may do there, and `RULES.md` gains a short managed index of what is live. The file explorer refreshes and flashes the new file the moment you pull.
 
@@ -110,7 +110,7 @@ A pulled guardrail is enforced, not merely suggested. After the Developer produc
 
 Everything the panel writes is a plain file in the repository, so every change to the agent is a git diff you can review, revert, and commit alongside the code it governs.
 
-These layers compose. The repo's own spec is the base identity that always applies; installed skills and registry agents layer on top; guardrails and compliance combine so that a deny always wins, with the hard secret and lockfile checks enforced in code regardless of any file. Jr Architect honors the standard's universal `system-prompt` adapter, which is why any registry agent can drive a slot without new engine code: the agent's persona and rules become the system prompt of the same reliable, toolless edit engine.
+These layers compose. The repo's own spec is the base identity that always applies; installed skills and registry agents layer on top; guardrails and compliance combine so that a deny always wins, with the hard secret and lockfile checks enforced in code regardless of any file. Monarch honors the standard's universal `system-prompt` adapter, which is why any registry agent can drive a slot without new engine code: the agent's persona and rules become the system prompt of the same reliable, toolless edit engine.
 
 An honest note on scope: the `system-prompt` adapter runs an agent's identity, rules, and skills on whatever model you have configured. It makes the agent run and comply, but it does not upgrade the underlying model, so on the free tier the reasoning ceiling is the free model's. Point a stronger provider key at it and it benefits fully.
 
@@ -119,12 +119,12 @@ An honest note on scope: the `system-prompt` adapter runs an agent's identity, r
 A short tour of the harder problems this project solves, and how.
 
 - **Reliable editing on a free-tier model.** `openai/gpt-oss-120b` is a strong text generator but only an adequate tool-caller under a tight token budget, so the Ask and Edit paths keep the model out of the function-calling loop entirely. The backend retrieves and applies; the model only writes text. Whole-file rewrites replace fragile patch syntax, so a reply truncated by the token cap fails to parse instead of corrupting a file.
-- **The repo's agent runs without the IDE.** `.gitagent/` only meant something while Jr Architect had the workspace open, which made a pulled compliance pack a suggestion: it blocked the agent and waved through the human typing the same line. `node agent-services/cli.js review --base main` now runs the *identical* pipeline against a git range — same manifest, same pulled packs, same code-level floor, same deny-wins semantics — with no IDE, no server and no Docker. Exit code 1 when a pack denies, which is all a merge gate needs; a GitHub Action is included. Every decision appends to `.gitagent/audit/<date>.jsonl`, so "which pack, which rule, which file, which commit" is answerable later and the answer is a git diff. A file that passed only because the review could not run is logged as `unreviewed`, never `allow` — an audit trail that overstates a check is worse than none.
+- **The repo's agent runs without the IDE.** `.gitagent/` only meant something while Monarch had the workspace open, which made a pulled compliance pack a suggestion: it blocked the agent and waved through the human typing the same line. `node agent-services/cli.js review --base main` now runs the *identical* pipeline against a git range — same manifest, same pulled packs, same code-level floor, same deny-wins semantics — with no IDE, no server and no Docker. Exit code 1 when a pack denies, which is all a merge gate needs; a GitHub Action is included. Every decision appends to `.gitagent/audit/<date>.jsonl`, so "which pack, which rule, which file, which commit" is answerable later and the answer is a git diff. A file that passed only because the review could not run is logged as `unreviewed`, never `allow` — an audit trail that overstates a check is worse than none.
 - **A knowledge agent with its own budget.** A file list is not knowledge: it says where things are and nothing about what they do, so an agent asked to summarise a repo could only paraphrase a directory listing. The Knowledge slot fixes that with an agent that runs once when a workspace opens, on a **dedicated API key** taken out of the chat pool, and reads roughly four times what a chat turn can afford — then writes `knowledge/overview.md`, which every later turn is grounded in. Its prompt is `.gitagent/skills/knowledge-builder/SKILL.md`: a real file you can open, edit and commit, not a hidden system prompt. Any registry agent can replace it. Every path the document cites is checked against the repo, and anything unverifiable is recorded in the file's own frontmatter rather than quietly presented as fact.
 - **Agentic retrieval instead of vector RAG.** A repo map (stack, layout, entry point, exported symbols) is generated at clone time and injected into every turn, with a ripgrep-style `search_code` tool for `file:line` snippets. Chosen deliberately: the free tier has no embeddings API, and for code, structure locates things more precisely than semantic similarity.
 - **A layered edit pipeline modeled as agent squads.** Orchestrator, Complexity Classifier, Guardrails, Developer. Each layer's decision streams into the chat as a step, and the Complexity Classifier selects the Junior or Senior developer skill for the change. The pipeline decides how to code, not just what to answer.
 - **A self-diagnosing IDE.** The build doctor reads the container logs, distinguishes a real failure from noise (deprecation warnings, a slow but successful install), and proposes a single safe fix: a command to run, or an edit routed through the guardrailed pipeline. One click applies it.
-- **A live preview that survives the Docker boundary.** A dev server inside the container does not reliably see host-side file writes, because a bind mount serves the container a cached view. Jr Architect re-writes each changed file through the container itself, refreshing the exact filesystem layer the dev server reads from and forcing a correct recompile, so an edit shows up in the preview instead of silently going stale.
+- **A live preview that survives the Docker boundary.** A dev server inside the container does not reliably see host-side file writes, because a bind mount serves the container a cached view. Monarch re-writes each changed file through the container itself, refreshing the exact filesystem layer the dev server reads from and forcing a correct recompile, so an edit shows up in the preview instead of silently going stale.
 - **Faster cold starts.** Dependency installs skip npm's audit and funding network round-trips and prefer the mounted package cache, which is what dominated a cold install.
 - **Isolation and safety by default.** Every repo runs in a resource-limited container with a short TTL, sensitive paths and secret injection are blocked before any write, and all agent traffic is reverse-proxied through a single Go process.
 - **A drawn trust boundary around untrusted input.** Registry entries and cloned repo filenames are attacker-controlled, so they are escaped for the position they land in — attribute-safe escaping including both quote characters, an `http(s):` allowlist on any URL that reaches an `href`, and event handlers bound as properties rather than interpolated into markup. Cross-origin reads are refused: the REST surface echoes only a loopback `Origin`, matching the check the terminal WebSocket already made.
@@ -132,7 +132,7 @@ A short tour of the harder problems this project solves, and how.
 
 ## Modes
 
-Jr Architect has four entry points, chosen on the home screen.
+Monarch has four entry points, chosen on the home screen.
 
 - **Run a repo.** Paste a URL and get the app running fast, with no IDE. For when you only want to see a repository run.
 - **Open in IDE.** The full cloud IDE described above: editor, terminal, live preview, and the agent. Open a saved project, clone from GitHub, or upload a local folder.
@@ -147,8 +147,8 @@ Requires Docker Desktop (running), Go 1.22+, and Node.js.
 
 1. Clone and enter the repository:
    ```bash
-   git clone https://github.com/VivanRajath/Jr-Architect.git
-   cd Jr-Architect
+   git clone https://github.com/VivanRajath/Monarch.git
+   cd Monarch
    ```
 2. Copy `.env.example` to `.env` and add a key. A single free `GROQ_API_KEY` (from https://console.groq.com) powers both the agent and Build Mode.
 3. Install the agent service dependencies:
@@ -177,7 +177,7 @@ The agent auto-selects the first provider that has a key, preferring Groq, so a 
 | `JR_DATA_DIR` | Where saved projects and Settings keys live (default `~/.jr-architect`). |
 | `JR_GOOGLE_CLIENT_ID` / `JR_GOOGLE_CLIENT_SECRET` | Google sign-in. Callback: `<origin>/auth/oauth/google/callback`. |
 | `JR_GITHUB_CLIENT_ID` / `JR_GITHUB_CLIENT_SECRET` | GitHub sign-in and repo access (scopes `repo read:user user:email`). Callback: `<origin>/auth/oauth/github/callback`. |
-| `JR_GITHUB_COLLABORATOR` | A GitHub account you own, invited with push access to repos Jr Architect publishes (each user can turn it off). |
+| `JR_GITHUB_COLLABORATOR` | A GitHub account you own, invited with push access to repos Monarch publishes (each user can turn it off). |
 | `JR_GITHUB_COLLABORATOR_TOKEN` | That account's token (scope `repo`); it accepts invitations to repos this server published, right away and every 5 minutes. |
 | `JR_OAUTH_ALLOW` | Optional allow-list for OAuth sign-in: emails, `@domain`s or `gh:<login>`. |
 | `JR_KEYS_EDITABLE` | Set to `true` to allow editing keys from Settings on a public server (it is always allowed locally). |
@@ -204,7 +204,7 @@ stylesheet means adding a file — no Go source needs to know about it.
 
 ## Note
 
-Jr Architect is an independent prototype and is not affiliated with any company.
+Monarch is an independent prototype and is not affiliated with any company.
 
 ## Author
 

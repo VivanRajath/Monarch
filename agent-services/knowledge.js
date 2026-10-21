@@ -291,7 +291,7 @@ function writeDocument(dir, body, meta) {
     `sources: ${meta.sources || 0}`,
     ...(meta.invented && meta.invented.length
       ? [`unverified_paths: ${meta.invented.join(", ")}`] : []),
-    "generator: jr-architect-knowledge-builder",
+    "generator: monarch-knowledge-builder",
     "---",
     "",
   ].join("\n");

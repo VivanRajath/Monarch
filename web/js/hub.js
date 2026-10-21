@@ -307,7 +307,7 @@ function openImport() {
         <h2 id="imp-title">Import an agent</h2>
         <span class="h-label">From a file</span>
         <input type="file" id="imp-file" accept=".json,application/json" class="h-input">
-        <div class="h-help">A .jr-agent.json exported from any Jr Architect.</div>
+        <div class="h-help">A .jr-agent.json exported from any Monarch.</div>
         <span class="h-label">From GitHub (gitagent)</span>
         <input type="text" id="imp-repo" class="h-input mono" placeholder="owner/repo or https://github.com/owner/repo/tree/main/path">
         <div class="h-help">Reads agent.yaml, SOUL.md and RULES.md. Nothing from the repository is executed.</div>

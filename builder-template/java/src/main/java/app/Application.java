@@ -68,7 +68,7 @@ public class Application {
             return ResponseEntity.status(code).body(result(run.path("status").asText("failed"), run.get("output"), run.path("error").asText(null)));
         } catch (Exception e) {
             System.out.println("[workflow] " + key + ": could not reach " + base + " (" + e.getMessage() + ")");
-            return ResponseEntity.status(502).body(result("failed", null, "Could not reach Jr Architect at " + base));
+            return ResponseEntity.status(502).body(result("failed", null, "Could not reach Monarch at " + base));
         }
     }
 }

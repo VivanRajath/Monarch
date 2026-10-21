@@ -43,7 +43,7 @@ fn run_workflow(mut req: Request, key: &str) {
         Err(ureq::Error::Status(code, res)) => (code, res.into_json().unwrap_or(json!({}))),
         Err(e) => {
             println!("[workflow] {key}: could not reach {base} ({e})");
-            return json_response(req, 502, json!({"status": "failed", "error": format!("Could not reach Jr Architect at {base}")}));
+            return json_response(req, 502, json!({"status": "failed", "error": format!("Could not reach Monarch at {base}")}));
         }
     };
     let status = run["status"].as_str().unwrap_or("failed").to_string();

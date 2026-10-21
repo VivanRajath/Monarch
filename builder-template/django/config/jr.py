@@ -54,6 +54,6 @@ def run_workflow(request, key):
         run, code = json.loads(e.read() or b"{}"), e.code
     except OSError as e:
         print(f"[workflow] {key}: could not reach {cfg.get('base')} ({e})", flush=True)
-        return JsonResponse({"status": "failed", "error": f"Could not reach Jr Architect at {cfg.get('base')}"}, status=502)
+        return JsonResponse({"status": "failed", "error": f"Could not reach Monarch at {cfg.get('base')}"}, status=502)
     print(f"[workflow] {key} -> {run.get('status', code)} in {int((time.monotonic() - started) * 1000)}ms" + (f": {run.get('error')}" if run.get("error") else ""), flush=True)
     return JsonResponse({"status": run.get("status", "failed"), "output": run.get("output"), "error": run.get("error")}, status=code)

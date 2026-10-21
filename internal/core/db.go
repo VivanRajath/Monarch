@@ -37,7 +37,7 @@ func dbctx() (context.Context, context.CancelFunc) {
 func OpenDB(uri, name string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
-	client, err := mongo.Connect(options.Client().ApplyURI(uri).SetAppName("jr-architect").SetServerSelectionTimeout(15 * time.Second))
+	client, err := mongo.Connect(options.Client().ApplyURI(uri).SetAppName("monarch").SetServerSelectionTimeout(15 * time.Second))
 	if err != nil {
 		return fmt.Errorf("mongodb: %w", err)
 	}

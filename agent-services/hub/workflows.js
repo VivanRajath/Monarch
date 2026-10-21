@@ -396,7 +396,7 @@ export function _setWorkflowFetchForTests(fn) { httpFetch = fn || ((...a) => fet
 async function callHttp(cfg, ctx) {
   const url = String(resolveTemplate(cfg.url, ctx) || "");
   const u = await checkPublicUrl(url, { allowHttp: privateNetAllowed() });
-  const headers = { "User-Agent": "Jr-Architect-Workflow" };
+  const headers = { "User-Agent": "Monarch-Workflow" };
   for (const [k, v] of Object.entries(resolveTemplate(cfg.headers, ctx) || {})) {
     if (/^[A-Za-z0-9-]{1,60}$/.test(k) && !/^(host|cookie|x-jr.*)$/i.test(k)) headers[k] = String(v).slice(0, 2000);
   }

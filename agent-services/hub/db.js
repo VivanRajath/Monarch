@@ -21,7 +21,7 @@ const INDEXES = {
 
 export async function connectDb(uri = process.env.MONGODB_URI, name = process.env.MONGODB_DB || "jr_architect") {
   if (!uri) return false;
-  const c = new MongoClient(uri, { appName: "jr-architect-agents", serverSelectionTimeoutMS: 15000 });
+  const c = new MongoClient(uri, { appName: "monarch-agents", serverSelectionTimeoutMS: 15000 });
   await c.connect();
   await c.db(name).command({ ping: 1 });
   client = c;

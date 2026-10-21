@@ -41,7 +41,7 @@ function ghConnectHTML(status, { compact = false } = {}) {
         <input type="password" placeholder="ghp_… or github_pat_…" autocomplete="off" spellcheck="false" aria-label="GitHub token" />
         <button class="gh-btn" type="submit">Save</button>
       </form>
-      <p class="gh-hint">Create one at <a href="https://github.com/settings/tokens/new?scopes=repo,read:user,user:email&description=Jr%20Architect" target="_blank" rel="noopener">github.com/settings/tokens</a> with the <code>repo</code> scope. It is stored encrypted on this server and never sent back to the browser.</p>
+      <p class="gh-hint">Create one at <a href="https://github.com/settings/tokens/new?scopes=repo,read:user,user:email&description=Monarch" target="_blank" rel="noopener">github.com/settings/tokens</a> with the <code>repo</code> scope. It is stored encrypted on this server and never sent back to the browser.</p>
     </details>
     ${compact ? '' : '<p class="gh-hint">Public repositories open without connecting. Connect to open private ones and to pull, commit and push from the IDE.</p>'}
     <p class="gh-error" role="alert"></p>
@@ -232,7 +232,7 @@ async function ghMountPrefs(box) {
   box.innerHTML = `<div class="gh-prefs-title">When Build mode finishes an app</div>
     ${row('autoPush', 'Push it to my GitHub', 'Creates a repository with the full code, a README written from the spec, and a blank <code>.env.example</code>. Tokens are never pushed.')}
     ${row('privateRepos', 'Make new repositories private', 'You can change visibility on GitHub any time.')}
-    ${d.collaborator ? row('addCollaborator', `Invite @${ghEsc(d.collaborator)} as a collaborator`, `Gives the Jr Architect account push access to repositories it creates for you, so it can help maintain them.`) : ''}
+    ${d.collaborator ? row('addCollaborator', `Invite @${ghEsc(d.collaborator)} as a collaborator`, `Gives the Monarch account push access to repositories it creates for you, so it can help maintain them.`) : ''}
     <p class="gh-hint gh-prefs-saved" aria-live="polite"></p>`;
   box.querySelectorAll('[data-pref]').forEach((cb) => cb.addEventListener('change', async () => {
     const next = { ...p };

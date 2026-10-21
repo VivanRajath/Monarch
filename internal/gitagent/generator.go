@@ -331,7 +331,7 @@ code, not just what to answer.
 var memoryMDTemplate = `# Memory — {{.ProjectName}} ({{.Stack}})
 
 Durable facts about this repository. The coding agent reads this file before it
-changes anything, so keep it short and true. Jr Architect generated the basics at
+changes anything, so keep it short and true. Monarch generated the basics at
 clone time; append what you learn under Notes.
 
 ## Stack

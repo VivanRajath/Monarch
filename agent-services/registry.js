@@ -580,7 +580,7 @@ function readSpecFrom(base) {
 
 export const OVERLAY_SOURCE = "gitagent-registry-agent";
 const OVERLAY_CAP = 3200; // an overlay carries several sections; cap above PERSONA_CAP
-const BLOCK_START = `<!-- gitagent:pulled-agents:start — managed by Jr Architect, edited on pull/remove -->`;
+const BLOCK_START = `<!-- gitagent:pulled-agents:start — managed by Monarch, edited on pull/remove -->`;
 const BLOCK_END = `<!-- gitagent:pulled-agents:end -->`;
 
 function refSlug(ref) {
@@ -775,7 +775,8 @@ export function upsertManagedBlock(dir, rel, body) {
   const had = existsSync(abs);
   const current = had ? readFileSync(abs, "utf8") : "";
   const block = body ? `${BLOCK_START}\n${body.trim()}\n${BLOCK_END}` : "";
-  const re = new RegExp(`\\n*${escapeRe(BLOCK_START)}[\\s\\S]*?${escapeRe(BLOCK_END)}\\n*`, "g");
+  // Matches any start marker so blocks written before the rename to Monarch are still replaced.
+  const re = new RegExp(`\\n*<!-- gitagent:pulled-agents:start[^>]*-->[\\s\\S]*?${escapeRe(BLOCK_END)}\\n*`, "g");
   const stripped = current.replace(re, "\n\n").replace(/\n{3,}$/, "\n");
   let next;
   if (!block) next = stripped.trimEnd() + (stripped.trim() ? "\n" : "");

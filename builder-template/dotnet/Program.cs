@@ -45,7 +45,7 @@ app.MapPost("/api/workflows/{key}", async (string key, HttpRequest request) =>
     catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException)
     {
         Console.WriteLine($"[workflow] {key}: could not reach {baseUrl} ({ex.Message})");
-        return Results.Json(new { status = "failed", error = $"Could not reach Jr Architect at {baseUrl}" }, statusCode: 502);
+        return Results.Json(new { status = "failed", error = $"Could not reach Monarch at {baseUrl}" }, statusCode: 502);
     }
 });
 

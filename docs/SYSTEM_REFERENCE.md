@@ -1,6 +1,6 @@
-# Jr Architect: End-to-End Architecture & Specification
+# Monarch: End-to-End Architecture & Specification
 
-> **Jr Architect** is a self-hosted, AI-augmented cloud IDE that spins up isolated Docker sandbox environments for any Git repository. It auto-detects the runtime stack, launches the app in a container, and gives you a full in-browser IDE, with a file explorer, Monaco code editor, live preview, WebSocket terminal, and an AI coding agent, all from a single binary.
+> **Monarch** is a self-hosted, AI-augmented cloud IDE that spins up isolated Docker sandbox environments for any Git repository. It auto-detects the runtime stack, launches the app in a container, and gives you a full in-browser IDE, with a file explorer, Monaco code editor, live preview, WebSocket terminal, and an AI coding agent, all from a single binary.
 
 ---
 
@@ -70,7 +70,7 @@ User Browser
 
 ## Product Modes: Prompt, Dev, and Build
 
-Jr Architect is an agent-guided cloud IDE. The landing screen offers three top-level modes (selected via `setMode()` in `index.html`), and the AI agent inside Dev Mode further routes each message into one of three prompt modes.
+Monarch is an agent-guided cloud IDE. The landing screen offers three top-level modes (selected via `setMode()` in `index.html`), and the AI agent inside Dev Mode further routes each message into one of three prompt modes.
 
 ### Top-level modes
 
@@ -169,7 +169,7 @@ The Orchestrator routes with free heuristics for the obvious cases (an edit verb
 
 ### 3.1 Go Core Server (`main.go` + `internal/`)
 
-The single entry point and orchestrator of the entire system. Compiled to a **single static binary** (`jr-architect.exe` / `sandbox-runner.exe`).
+The single entry point and orchestrator of the entire system. Compiled to a **single static binary** (`monarch.exe` / `sandbox-runner.exe`).
 
 | Responsibility | Details |
 |---|---|
@@ -413,7 +413,7 @@ Each subdirectory contains a `Dockerfile` that builds a pre-configured, isolated
 
 ### 3.9 GitAgent Registry Integration (`agent-services/registry.js`)
 
-Jr Architect is inspired by Lyzr's **Architect** and builds on the **GitAgent standard** (the open, git-native agent spec from Lyzr Research Labs; registry at [registry.gitagent.sh](https://registry.gitagent.sh), source `open-gitagent/registry`). The premise: an agent's identity, rules, skills, and memory are plain files committed to a repo, so the agent is versioned and travels with the code. Jr Architect is a runtime for that standard, acting as a **GitAgent adapter** via the standard's universal `system-prompt` adapter. This module has two halves.
+Monarch is inspired by Lyzr's **Architect** and builds on the **GitAgent standard** (the open, git-native agent spec from Lyzr Research Labs; registry at [registry.gitagent.sh](https://registry.gitagent.sh), source `open-gitagent/registry`). The premise: an agent's identity, rules, skills, and memory are plain files committed to a repo, so the agent is versioned and travels with the code. Monarch is a runtime for that standard, acting as a **GitAgent adapter** via the standard's universal `system-prompt` adapter. This module has two halves.
 
 **Half 1, the repository's own agent (root spec + skills as source of truth).** `loadRepoRootSpec(dir)` reads the `SOUL.md` / `RULES.md` / `skills/*/SKILL.md` / `memory/MEMORY.md` scaffolded under `.gitagent/` by `internal/gitagent/generator.go` (section 3.3), falling back to the repo root for a standard-pure repo (and, for memory, to a legacy root `MEMORY.md`), each capped for the token budget. `resolvePipelineAgents()` loads this on **every** edit, manifest or not, and `personaPreamble()` composes it as the base layer of the Developer prompt, in order: repo **memory** (what the project is), **identity**, **skill** (how to change things here), then **rules** (with the "Never" section as hard limits).
 
@@ -601,7 +601,7 @@ detectRuntimeConfig(workdir)
 
 ## 6. GitAgent Spec Generation
 
-When a sandbox is created, Jr Architect writes an agent specification into the cloned workspace. This enables the AI agent to understand:
+When a sandbox is created, Monarch writes an agent specification into the cloned workspace. This enables the AI agent to understand:
 
 - **Who it is**: personality, identity, communication style (SOUL.md)
 - **What it can do**: tools (`shell`, `read`, `write`, `memory`)
@@ -805,7 +805,7 @@ Lyzr Apps are recognized by `detectLyzrRepo()` and run as **Next.js** projects (
 
 ---
 
-*Jr Architect. Built with Go, Docker, Monaco Editor, xterm.js, and gitclaw.*
+*Monarch. Built with Go, Docker, Monaco Editor, xterm.js, and gitclaw.*
 
 ---
 

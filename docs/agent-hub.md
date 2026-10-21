@@ -69,7 +69,7 @@ Every function call goes through the Jr runtime, so the definition is enforced w
 
 ## n8n
 
-Jr Architect runs the agent; n8n runs the workflow. Here is how to connect one:
+Monarch runs the agent; n8n runs the workflow. Here is how to connect one:
 
 1. In the Hub, open an agent, go to **n8n**, and click **Connect**. The token is shown once; only its hash is stored.
 2. Download the ready-made n8n workflow (Manual Trigger, HTTP Request, If), or add your own HTTP Request node.

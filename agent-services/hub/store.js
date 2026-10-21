@@ -35,7 +35,7 @@ function assertId(id) {
 // Our own repos only, so hooks never run; identity is fixed so commits work on a fresh machine.
 export function git(dir, args) {
   return new Promise((resolve, reject) => {
-    execFile("git", ["-c", "user.name=Jr-Architect", "-c", "user.email=agents@jr-architect.local",
+    execFile("git", ["-c", "user.name=Monarch", "-c", "user.email=agents@monarch.local",
       "-c", "core.hooksPath=/dev/null", "-c", "commit.gpgsign=false", ...args],
     { cwd: dir, timeout: 15000, maxBuffer: 4 * 1024 * 1024, windowsHide: true },
     (err, stdout, stderr) => (err ? reject(new Error((stderr || err.message).trim().slice(0, 300))) : resolve(stdout)));
@@ -152,7 +152,7 @@ export async function createAgent(user, input, message = "Create agent") {
     try {
       await git(dir, ["init", "-q", "-b", "main"]);
       writeFiles(dir, def);
-      fs.writeFileSync(join(dir, "README.md"), `# ${def.identity.name}\n\nA Jr-Architect agent in gitagent layout. agent.yaml is the source of truth.\n`);
+      fs.writeFileSync(join(dir, "README.md"), `# ${def.identity.name}\n\nA Monarch agent in gitagent layout. agent.yaml is the source of truth.\n`);
       await git(dir, ["add", "-A"]);
       await git(dir, ["commit", "-q", "-m", `${message} (v${def.version})`]);
     } catch (e) {
@@ -255,7 +255,7 @@ export function definitionFromImport(body) {
   if (body.kind === "jr-agent" && body.definition) return normalizeDefinition(body.definition);
   if (body.files && body.files["agent.yaml"]) return definitionFromGitagent(body.files);
   if (body.identity || body.purpose || body.instructions) return normalizeDefinition(body);
-  throw Object.assign(new Error("not a Jr-Architect agent export"), { status: 400 });
+  throw Object.assign(new Error("not a Monarch agent export"), { status: 400 });
 }
 
 // --- n8n keys: the token names owner and agent; only its hash is stored ---

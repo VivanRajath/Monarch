@@ -23,7 +23,7 @@ const gitFallbackImage = "docker.io/alpine/git:latest"
 
 const gitTimeout = 5 * time.Minute
 
-// Paths Jr Architect writes into a workspace; while the repo does not track them they are never committed.
+// Paths Monarch writes into a workspace; while the repo does not track them they are never committed.
 var generatedPaths = []string{".gitagent", "agent.yaml", "knowledge", "INSTRUCTIONS.md", ".env.local", "jr-workflows.json", "node_modules", ".next"}
 
 // The parts of .gitagent/ an OpenGAP team lives in, which belong in the user's repository.
@@ -226,7 +226,7 @@ type gitState struct {
 var aheadRe = regexp.MustCompile(`ahead (\d+)`)
 var behindRe = regexp.MustCompile(`behind (\d+)`)
 
-// Parses `git status --porcelain=v1 -b`, leaving out untracked paths Jr Architect generated.
+// Parses `git status --porcelain=v1 -b`, leaving out untracked paths Monarch generated.
 func parseStatus(out string) gitState {
 	st := gitState{Repo: true, Changes: []gitChange{}}
 	for _, line := range strings.Split(strings.ReplaceAll(out, "\r", ""), "\n") {
@@ -268,10 +268,10 @@ func parseStatus(out string) gitState {
 	return st
 }
 
-// The generated path that path is, or sits under; "" when Jr Architect did not write it.
+// The generated path that path is, or sits under; "" when Monarch did not write it.
 func generatedRoot(path string) string {
 	path = strings.TrimSuffix(path, "/")
-	// An OpenGAP team is the user's to commit; only Jr Architect's own spec files and run transcripts stay out.
+	// An OpenGAP team is the user's to commit; only Monarch's own spec files and run transcripts stay out.
 	if rest, ok := strings.CutPrefix(path, ".gitagent/"); ok {
 		for _, shared := range openGapShared {
 			if rest == shared || strings.HasPrefix(rest, shared+"/") {

@@ -23,7 +23,7 @@ async function runWorkflow(key: string, req: Request) {
     return json(r.ok ? 200 : r.status, { status: run.status || 'failed', output: run.output, error: run.error });
   } catch (e) {
     console.log(`[workflow] ${key}: could not reach ${cfg.base} (${(e as Error).message})`);
-    return json(502, { status: 'failed', error: `Could not reach Jr Architect at ${cfg.base}` });
+    return json(502, { status: 'failed', error: `Could not reach Monarch at ${cfg.base}` });
   }
 }
 

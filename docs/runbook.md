@@ -1,6 +1,6 @@
-# Runbook: Running Jr Architect
+# Runbook: Running Monarch
 
-This runbook provides step-by-step instructions on how to set up, build, and run the **Jr Architect** sandbox runner environment. It also addresses common command errors and explains how to configure the agent services.
+This runbook provides step-by-step instructions on how to set up, build, and run the **Monarch** sandbox runner environment. It also addresses common command errors and explains how to configure the agent services.
 
 ---
 

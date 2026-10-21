@@ -71,7 +71,7 @@ func TestParseStatusHidesGeneratedFiles(t *testing.T) {
 		}
 	}
 	if strings.Count(spec, ":(exclude).gitagent/SOUL.md") != 1 {
-		t.Errorf("Jr Architect's own spec files should each be excluded once: %s", spec)
+		t.Errorf("Monarch's own spec files should each be excluded once: %s", spec)
 	}
 	team := parseStatus("## main\n?? .gitagent/agents/reviewer/SOUL.md\n?? .gitagent/hooks/hooks.yaml\n?? .gitagent/DUTIES.md\n?? .gitagent/.session/run.json\n")
 	if len(team.Changes) != 3 || len(team.Ignored) != 1 || team.Ignored[0] != ".gitagent/.session" {

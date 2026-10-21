@@ -38,7 +38,7 @@ class App < Sinatra::Base
       end
     rescue StandardError => e
       $stdout.puts "[workflow] #{params[:key]}: could not reach #{cfg['base']} (#{e.message})"
-      halt 502, { status: 'failed', error: "Could not reach Jr Architect at #{cfg['base']}" }.to_json
+      halt 502, { status: 'failed', error: "Could not reach Monarch at #{cfg['base']}" }.to_json
     end
     run = JSON.parse(res.body) rescue {}
     $stdout.puts "[workflow] #{params[:key]} -> #{run['status'] || res.code} in #{((Time.now - started) * 1000).round}ms#{run['error'] ? ": #{run['error']}" : ''}"

@@ -121,7 +121,7 @@ async function renderApiPanel(el, kind, id, { onChange } = {}, fresh = null) {
     <span class="h-label">What comes back</span>
     <ul class="h-list">
       <li><code>status</code>: completed, awaiting_approval, failed, rejected or blocked. <code>output</code>: the result${kind === 'agent' ? ", checked against the agent's output schema" : ''}.</li>
-      <li>If a person must approve, the response is <code>202</code> with a <code>decisionUrl</code>. Approve in Jr Architect, or POST <code>{"approved": true}</code> to it.</li>
+      <li>If a person must approve, the response is <code>202</code> with a <code>decisionUrl</code>. Approve in Monarch, or POST <code>{"approved": true}</code> to it.</li>
       <li>Add <code>"wait": false</code> to get a run id back at once and poll <code>${esc(info.pollUrl)}</code>, or <code>"callbackUrl"</code> to be called when a paused run ends.</li>
     </ul>
     ${kind === 'agent' ? '<span class="h-label">Using n8n?</span><button class="h-btn h-btn-ghost h-btn-sm" data-api="n8n">Download a ready n8n workflow</button>' : ''}

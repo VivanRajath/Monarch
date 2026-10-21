@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/brand/monarch-logo.png" alt="Monarch" width="180">
+</p>
+
 # Monarch
 
 A self-hosted, AI-guided cloud IDE that runs any GitHub repository inside an isolated Docker sandbox and lets you edit it with a built-in coding agent.

@@ -73,16 +73,11 @@ body.rail-pinned .jr-rail {
 }
 
 .jr-rail-logo {
-  display: grid;
-  place-items: center;
+  display: block;
   flex-shrink: 0;
   width: 28px;
   height: 28px;
   border-radius: var(--r-md);
-  background: var(--accent);
-  color: var(--on-accent);
-  font-weight: var(--fw-semibold);
-  font-size: var(--fs-xs);
 }
 
 .jr-rail-name,

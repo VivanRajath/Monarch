@@ -23,6 +23,7 @@ body.h-page {
 .h-brand { display: flex; flex-direction: column; min-width: 0; }
 .h-brand a { color: var(--text3); font-size: var(--fs-xs); text-decoration: none; }
 .h-brand a:hover { color: var(--text); }
+.h-brand-mark { width: 14px; height: 14px; border-radius: var(--r-sm); margin-right: 6px; vertical-align: -2px; }
 .h-title { font-size: var(--fs-md); font-weight: var(--fw-semibold); color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .h-spacer { flex: 1; }
 .h-motto { color: var(--text3); font-size: var(--fs-xs); letter-spacing: var(--tracking-label); text-transform: uppercase; }

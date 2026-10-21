@@ -54,15 +54,10 @@ body.ide-mode {
 }
 
 .ide-topbar .logo {
-  display: grid;
-  place-items: center;
+  display: block;
   width: 22px;
   height: 22px;
   border-radius: var(--r-md);
-  background: var(--accent);
-  color: var(--on-accent);
-  font-weight: var(--fw-bold);
-  font-size: var(--fs-2xs);
 }
 
 .ide-topbar .top-home {

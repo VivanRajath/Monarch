@@ -165,8 +165,8 @@ d.text(lx + 18, ly + 282, 'router -> files -> sandbox -> preview proxy -> iframe
 d.raw('</g>')
 open(os.path.join(OUT, 'architecture.svg'), 'w', encoding='utf-8').write(d.svg())
 
-# ---------- Diagram 2: deploying and scaling Architect 2.0 in the cloud (proposal) ----------
-s = D(1760, 1000, 'Architect 2.0 in the cloud: deployment and scaling (proposed)',
+# ---------- Diagram 2: deploying and scaling Monarch in the cloud (proposal) ----------
+s = D(1760, 1000, 'Monarch in the cloud: deployment and scaling (proposed)',
       'How the same design scales to thousands of concurrent builders. Today Monarch runs on one host; this is the target, not the current deployment.')
 s.zone(30, 110, 230, 860, 'Users', '', 'untrusted')
 s.box(45, 200, 200, 70, 'Browser', 'builders and developers')

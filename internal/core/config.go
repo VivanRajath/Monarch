@@ -15,7 +15,7 @@ import (
 // Every field defaults to what local development has always done, so an empty env changes nothing.
 type Config struct {
 	ListenAddr    string
-	PublicOrigin  string // e.g. https://jrarch.duckdns.org; empty means local mode
+	PublicOrigin  string // e.g. https://monarch.example.com; empty means local mode
 	PreviewDomain string // previews live at p-<token>.<PreviewDomain>; empty keeps 127.0.0.1:<port>
 	PreviewScheme string
 	WorkDir       string

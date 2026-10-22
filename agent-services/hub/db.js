@@ -19,7 +19,7 @@ const INDEXES = {
   playground_threads: [[{ owner: 1, workflow: 1 }, { unique: true }]],
 };
 
-export async function connectDb(uri = process.env.MONGODB_URI, name = process.env.MONGODB_DB || "jr_architect") {
+export async function connectDb(uri = process.env.MONGODB_URI, name = process.env.MONGODB_DB || "monarch") {
   if (!uri) return false;
   const c = new MongoClient(uri, { appName: "monarch-agents", serverSelectionTimeoutMS: 15000 });
   await c.connect();

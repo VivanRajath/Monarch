@@ -2,11 +2,13 @@ package server
 
 import (
 	"fmt"
+	"net"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"path"
 	"strings"
+	"time"
 
 	"sandbox/internal/core"
 )
@@ -22,7 +24,14 @@ func agentProxyHandler() http.Handler {
 func newAgentProxy(targetURL string) http.Handler {
 	target, _ := url.Parse(targetURL)
 	proxy := httputil.NewSingleHostReverseProxy(target)
+	// Idle connections close before Node's 5s keep-alive does, so a request never lands on a socket Node just closed.
+	proxy.Transport = &http.Transport{
+		DialContext:         (&net.Dialer{Timeout: 5 * time.Second}).DialContext,
+		IdleConnTimeout:     4 * time.Second,
+		MaxIdleConnsPerHost: 16,
+	}
 	proxy.ErrorHandler = func(w http.ResponseWriter, r *http.Request, err error) {
+		core.Logf("agent", "proxy %s %s failed: %v", r.Method, r.URL.Path, err)
 		core.CORS(w, r)
 		core.JSONError(w, "Agent service unavailable: "+err.Error(), 502)
 	}

@@ -21,7 +21,7 @@ An agent is a structured definition, not a prompt:
 
 The system prompt is derived from the definition on every run (Studio's Prompt tab shows it), so the two cannot drift apart.
 
-Each agent is its own git repository in gitagent layout, stored under `JR_HUB_DIR` (default `~/.jr-architect/agent-hub/<user hash>/agents/<id>`):
+Each agent is its own git repository in gitagent layout, stored under `JR_HUB_DIR` (default `~/.monarch/agent-hub/<user hash>/agents/<id>`):
 
 | File | Role |
 | --- | --- |

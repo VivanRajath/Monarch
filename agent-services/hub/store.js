@@ -16,7 +16,7 @@ const ID_RE = /^[a-z0-9][a-z0-9-]{0,47}$/;
 const RUN_RE = /^r-[a-f0-9]{16}$/;
 
 export function hubRoot() {
-  return process.env.JR_HUB_DIR || join(homedir(), ".jr-architect", "agent-hub");
+  return process.env.JR_HUB_DIR || join(homedir(), ".monarch", "agent-hub");
 }
 
 // A hash, so a user id never becomes a path and a token can name its owner without revealing them.

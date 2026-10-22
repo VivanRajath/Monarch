@@ -94,7 +94,7 @@ func LoadConfig() (Config, error) {
 	c.WorkDir = envStr("JR_WORK_DIR", c.WorkDir)
 	c.DataDir = envStr("JR_DATA_DIR", c.DataDir)
 	c.MongoURI = envStr("MONGODB_URI", "")
-	c.MongoDB = envStr("MONGODB_DB", "jr_architect")
+	c.MongoDB = envStr("MONGODB_DB", "monarch")
 	c.BetaCode = envStr("JR_BETA_CODE", "")
 	c.SessionSecret = []byte(envStr("JR_SESSION_SECRET", ""))
 	c.GoogleClientID = envStr("JR_GOOGLE_CLIENT_ID", "")
@@ -253,10 +253,10 @@ func envStr(name, def string) string {
 	return def
 }
 
-// Shares ~/.jr-architect with the agent hub so one folder holds everything a user keeps.
+// Shares ~/.monarch with the agent hub so one folder holds everything a user keeps.
 func defaultDataDir() string {
 	if home, err := os.UserHomeDir(); err == nil {
-		return filepath.Join(home, ".jr-architect")
+		return filepath.Join(home, ".monarch")
 	}
-	return filepath.Join(os.TempDir(), "jr-architect")
+	return filepath.Join(os.TempDir(), "monarch")
 }

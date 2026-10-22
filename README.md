@@ -178,7 +178,7 @@ The agent auto-selects the first provider that has a key, preferring Groq, so a 
 | `AGENT_MAX_OUTPUT_TOKENS` | Caps reserved output so a turn stays under the Groq free-tier limit (default 3000). |
 | `AGENT_EDIT_STRATEGY` | Set to `agentic` to route edits through the tool-driven Agent loop instead of the default Edit engine. |
 | `AGENT_MODEL_GROQ` / `_ANTHROPIC` / `_OPENAI` / `_GEMINI` | Override the model used per provider. |
-| `JR_DATA_DIR` | Where saved projects and Settings keys live (default `~/.jr-architect`). |
+| `JR_DATA_DIR` | Where saved projects and Settings keys live (default `~/.monarch`). |
 | `JR_GOOGLE_CLIENT_ID` / `JR_GOOGLE_CLIENT_SECRET` | Google sign-in. Callback: `<origin>/auth/oauth/google/callback`. |
 | `JR_GITHUB_CLIENT_ID` / `JR_GITHUB_CLIENT_SECRET` | GitHub sign-in and repo access (scopes `repo read:user user:email`). Callback: `<origin>/auth/oauth/github/callback`. |
 | `JR_GITHUB_COLLABORATOR` | A GitHub account you own, invited with push access to repos Monarch publishes (each user can turn it off). |

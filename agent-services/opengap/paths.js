@@ -1,4 +1,4 @@
-// Shim for the vendored jr-arch modules: every caller here passes the workspace's .gitagent folder explicitly.
+// Shim for the vendored CLI engine modules: every caller here passes the workspace's .gitagent folder explicitly.
 import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 

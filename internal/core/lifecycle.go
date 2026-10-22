@@ -13,10 +13,10 @@ import (
 )
 
 // Every container we start carries this label, so a restart can find what it orphaned.
-const SandboxLabel = "jrarch.sandbox"
+const SandboxLabel = "monarch.sandbox"
 
 // Which server started a container, so a second Monarch on the same machine never removes the first one's sandboxes.
-const InstanceLabel = "jrarch.instance"
+const InstanceLabel = "monarch.instance"
 
 // Stable per data folder and port: a restart of the same server recognises its own containers.
 func InstanceID() string {

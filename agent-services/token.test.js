@@ -3,13 +3,13 @@ import assert from "node:assert/strict";
 import WebSocket from "ws";
 
 process.env.AGENT_NO_LISTEN = "1";
-const { fromJrArch, server } = await import("./server.js");
+const { fromMonarch, server } = await import("./server.js");
 
-test("fromJrArch accepts only Go's exact token", () => {
-  assert.equal(fromJrArch({ "x-jr-internal": "s3cret-token" }, "s3cret-token"), true);
-  assert.equal(fromJrArch({ "x-jr-internal": "s3cret-tokeX" }, "s3cret-token"), false);
-  assert.equal(fromJrArch({}, "s3cret-token"), false);
-  assert.equal(fromJrArch({}, ""), true);
+test("fromMonarch accepts only Go's exact token", () => {
+  assert.equal(fromMonarch({ "x-jr-internal": "s3cret-token" }, "s3cret-token"), true);
+  assert.equal(fromMonarch({ "x-jr-internal": "s3cret-tokeX" }, "s3cret-token"), false);
+  assert.equal(fromMonarch({}, "s3cret-token"), false);
+  assert.equal(fromMonarch({}, ""), true);
 });
 
 test("without Go's token the agent refuses HTTP and WebSocket callers (host.docker.internal reaches loopback)", async () => {

@@ -30,7 +30,7 @@ flowchart LR
 | Boundary | Enforced by | Notes |
 |---|---|---|
 | Browser to Go | `RequireAuth` (session cookie), `OriginGuard`, `X-Jr` header on writes (`internal/server/auth.go`, `routes.go`) | Real boundary. |
-| Go to Node | `X-Jr-Internal` token, loopback bind (`server.js` `fromJrArch`) | Real when the token is set; `fromJrArch` returns true when the token is empty. Go always generates one when it spawns Node (`config.go`). |
+| Go to Node | `X-Jr-Internal` token, loopback bind (`server.js` `fromMonarch`) | Real when the token is set; `fromMonarch` returns true when the token is empty. Go always generates one when it spawns Node (`config.go`). |
 | Node to Go callbacks | Same token, loopback and no `X-Forwarded-For` (`auth.go` `isInternalCall`) | Node calls Go as `InternalUser`, which `CanUse` treats as owning every sandbox. |
 | Sandbox to host | Container isolation, `no-new-privileges`, 5 dropped caps, pids/mem/cpu limits (`core/docker.go`) | Strong on the WSL deployment (rootless Podman + nftables egress, `deploy/wsl/harden.sh`). Weak under Docker Desktop: root in the container, host loopback and LAN reachable. |
 | Model to system | Edit guard (`guardEditBlocks`), OpenGAP hooks, Planning-mode command approval | Partial: the agentic `shell` tool is not behind either (see W-04). |

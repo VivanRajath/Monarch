@@ -118,7 +118,7 @@ func TestReapOrphansAtStartup(t *testing.T) {
 		}
 	}
 	// Its own container and an unlabelled one from an older version go; another server's container and its workspace stay.
-	want := []string{`ps -a --filter label=jrarch.sandbox --format {{.ID}} {{.Label "jrarch.instance"}}`, "rm -f -v abc123", "rm -f -v def456",
+	want := []string{`ps -a --filter label=monarch.sandbox --format {{.ID}} {{.Label "monarch.instance"}}`, "rm -f -v abc123", "rm -f -v def456",
 		`inspect --format {{range .Mounts}}{{if eq .Destination "/workspace"}}{{.Source}}{{end}}{{end}} ghi789`}
 	if strings.Join(*calls, "|") != strings.Join(want, "|") {
 		t.Errorf("docker calls = %v, want %v", *calls, want)
@@ -137,7 +137,7 @@ func TestTouchBumpsLastActive(t *testing.T) {
 
 func TestRunArgsLabelsTheContainer(t *testing.T) {
 	args := strings.Join(RunArgs("sandbox-9", "1g", "1", 100, nil, "/w", nil, nil, "img", "true"), " ")
-	if !strings.Contains(args, "--label jrarch.sandbox=sandbox-9") {
+	if !strings.Contains(args, "--label monarch.sandbox=sandbox-9") {
 		t.Fatalf("container is not labelled: %s", args)
 	}
 }

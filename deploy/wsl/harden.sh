@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Locks the jrarch WSL distro down for public use. Run as root after setup-podman.sh: bash harden.sh [user]
+# Locks the monarch WSL distro down for public use. Run as root after setup-podman.sh: bash harden.sh [user]
 set -euo pipefail
 
-JR_USER="${1:-jrarch}"
+JR_USER="${1:-monarch}"
 die() { printf '\nERROR: %s\n' "$*" >&2; exit 1; }
 say() { printf '\n==> %s\n' "$*"; }
 
@@ -42,20 +42,20 @@ CONF
 chown -R "$JR_USER:$JR_USER" "/home/$JR_USER/.config"
 
 say "Egress firewall for everything $JR_USER runs, sandboxes included"
-mkdir -p /usr/local/lib/jrarch
-cat > /usr/local/lib/jrarch/egress.sh <<'SCRIPT'
+mkdir -p /usr/local/lib/monarch
+cat > /usr/local/lib/monarch/egress.sh <<'SCRIPT'
 #!/bin/sh
 # Rootless sandbox traffic leaves through slirp4netns as the service user, so an owner match covers every container.
 set -eu
-JR_UID=$(id -u "${1:-jrarch}")
+JR_UID=$(id -u "${1:-monarch}")
 DNS=$(awk '/^nameserver/ && $2 ~ /^[0-9.]+$/ {print $2}' /etc/resolv.conf | paste -sd, -)
 [ -n "$DNS" ] || { echo "no IPv4 nameserver in /etc/resolv.conf" >&2; exit 1; }
 # The WSL kernel has no nft fib module, so the host's own addresses are listed explicitly.
 LOCAL=$(ip -4 -o addr show | awk '{split($4, a, "/"); if (a[1] !~ /^127\./) print a[1]}' | paste -sd, -)
 nft -f - <<RULES
-table inet jrarch_egress
-delete table inet jrarch_egress
-table inet jrarch_egress {
+table inet monarch_egress
+delete table inet monarch_egress
+table inet monarch_egress {
   set private4 {
     type ipv4_addr; flags interval
     elements = { 0.0.0.0/8, 10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8, 169.254.0.0/16, 172.16.0.0/12,
@@ -78,14 +78,14 @@ table inet jrarch_egress {
   }
 }
 RULES
-mkdir -p /run/jrarch
-nft list table inet jrarch_egress >/dev/null && touch /run/jrarch/egress.ok
+mkdir -p /run/monarch
+nft list table inet monarch_egress >/dev/null && touch /run/monarch/egress.ok
 SCRIPT
-chmod 755 /usr/local/lib/jrarch/egress.sh
+chmod 755 /usr/local/lib/monarch/egress.sh
 
-cat > /etc/systemd/system/jrarch-harden.service <<UNIT
+cat > /etc/systemd/system/monarch-harden.service <<UNIT
 [Unit]
-Description=Jr-Arch egress firewall and interop lockout
+Description=Monarch egress firewall and interop lockout
 After=systemd-binfmt.service network.target
 Before=systemd-user-sessions.service
 
@@ -93,22 +93,22 @@ Before=systemd-user-sessions.service
 Type=oneshot
 RemainAfterExit=yes
 ExecStart=/bin/sh -c 'for f in /proc/sys/fs/binfmt_misc/WSLInterop*; do [ -e "\$f" ] && echo -1 > "\$f"; done; true'
-ExecStart=/usr/local/lib/jrarch/egress.sh $JR_USER
+ExecStart=/usr/local/lib/monarch/egress.sh $JR_USER
 
 [Install]
 WantedBy=multi-user.target
 UNIT
 systemctl daemon-reload
-systemctl enable jrarch-harden.service >/dev/null 2>&1
-systemctl restart jrarch-harden.service || { journalctl -u jrarch-harden.service --no-pager | tail -8; die "the egress firewall did not load"; }
+systemctl enable monarch-harden.service >/dev/null 2>&1
+systemctl restart monarch-harden.service || { journalctl -u monarch-harden.service --no-pager | tail -8; die "the egress firewall did not load"; }
 
 say "Preflight that the runtime runs before every start"
-install -m 755 "$(dirname "$0")/preflight.sh" /usr/local/lib/jrarch/preflight.sh
+install -m 755 "$(dirname "$0")/preflight.sh" /usr/local/lib/monarch/preflight.sh
 
 cat <<DONE
 
 Hardening written. It only fully applies after the distro restarts. From Windows run:
   wsl --terminate <this distro's name>
 then check it as $JR_USER:
-  /usr/local/lib/jrarch/preflight.sh
+  /usr/local/lib/monarch/preflight.sh
 DONE

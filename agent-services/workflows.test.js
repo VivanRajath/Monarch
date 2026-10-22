@@ -6,14 +6,14 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 process.env.AGENT_NO_LISTEN = "1";
-process.env.JR_HUB_DIR = mkdtempSync(join(tmpdir(), "jr-wf-test-"));
+process.env.MONARCH_HUB_DIR = mkdtempSync(join(tmpdir(), "monarch-wf-test-"));
 process.env.GROQ_API_KEY = process.env.GROQ_API_KEY || "test-groq-test_placeholder_not_real";
 process.env.GITAGENT_REGISTRY_INDEX = "http://127.0.0.1:1/index.json";
 
 // With MONGODB_TEST_URI set, the same tests run against MongoDB in a throwaway database.
 const testDb = process.env.MONGODB_TEST_URI ? await import("./hub/db.js") : null;
 if (testDb) {
-  await testDb.connectDb(process.env.MONGODB_TEST_URI, `jr_test_${process.pid}`);
+  await testDb.connectDb(process.env.MONGODB_TEST_URI, `monarch_test_${process.pid}`);
   after(() => testDb.dropDb());
 }
 
@@ -155,14 +155,14 @@ test("HTTP nodes send the resolved body, and a loop is cut off", async () => {
 });
 
 test("on a public server an HTTP node cannot reach private addresses", async () => {
-  process.env.JR_PUBLIC_ORIGIN = "https://jr.example";
+  process.env.MONARCH_PUBLIC_ORIGIN = "https://monarch.example";
   try {
     const flow = { nodes: [node("t", "trigger"), node("h", "http", { url: "https://127.0.0.1/admin" })], edges: [{ from: "t", port: "main", to: "h" }] };
     const run = await wf.startWorkflowRun(flow, {}, { user: USER });
     assert.strictEqual(run.status, "failed");
     assert.match(run.error, /private address/);
   } finally {
-    delete process.env.JR_PUBLIC_ORIGIN;
+    delete process.env.MONARCH_PUBLIC_ORIGIN;
   }
 });
 
@@ -173,7 +173,7 @@ test("saves are git versions, and the webhook needs a workflow token", async () 
     method, headers: { "Content-Type": "application/json", ...headers }, body: body === undefined ? undefined : JSON.stringify(body),
   }).then(async (r) => ({ status: r.status, body: await r.json() }));
   try {
-    const me = { "X-Jr-User": USER };
+    const me = { "X-Monarch-User": USER };
     const made = await call("POST", "/agent/hub/workflows", { workflow: triageFlow() }, me);
     assert.strictEqual(made.status, 201);
     const id = made.body.workflow.id;
@@ -184,14 +184,14 @@ test("saves are git versions, and the webhook needs a workflow token", async () 
     assert.strictEqual(saved.body.workflow.version, "0.1.1");
     const versions = await call("GET", `/agent/hub/workflows/${id}/versions`, undefined, me);
     assert.deepStrictEqual(versions.body.versions.map((v) => v.version), ["0.1.1", "0.1.0"]);
-    assert.strictEqual((await call("GET", `/agent/hub/workflows/${id}`, undefined, { "X-Jr-User": "u-other" })).status, 404);
+    assert.strictEqual((await call("GET", `/agent/hub/workflows/${id}`, undefined, { "X-Monarch-User": "u-other" })).status, 404);
 
     const agentToken = (await call("POST", `/agent/hub/agents/${triage.id}/connect`, undefined, me)).body.token;
     const refused = await call("POST", `/agent/hub/hook-wf/${id}/run`, { input: { email: "x" } }, { Authorization: `Bearer ${agentToken}` });
     assert.strictEqual(refused.status, 401, "an agent token cannot start a workflow");
 
     const { token } = (await call("POST", `/agent/hub/workflows/${id}/connect`, undefined, me)).body;
-    assert.match(token, /^jrw_/);
+    assert.match(token, /^mnw_/);
     agentAnswers([{ category: "bug", reply: "Fixing." }]);
     const ran = await call("POST", `/agent/hub/hook-wf/${id}/run`, { input: { email: "crash" } }, { Authorization: `Bearer ${token}` });
     assert.strictEqual(ran.status, 200);

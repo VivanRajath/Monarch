@@ -60,9 +60,9 @@ func secureCookies() bool {
 // __Host- makes browsers refuse any copy set with a Domain, so a preview subdomain cannot plant one.
 func sessionCookieName() string {
 	if secureCookies() {
-		return "__Host-jr_session"
+		return "__Host-monarch_session"
 	}
-	return "jr_session"
+	return "monarch_session"
 }
 
 func sessionUser(r *http.Request) (string, bool) {
@@ -202,7 +202,7 @@ func isPublicPath(p string) bool {
 
 // Only honoured from loopback: the agent service is the one caller that holds the token.
 func isInternalCall(r *http.Request) bool {
-	tok := r.Header.Get("X-Jr-Internal")
+	tok := r.Header.Get("X-Monarch-Internal")
 	if tok == "" || core.Cfg.InternalToken == "" {
 		return false
 	}
@@ -225,14 +225,14 @@ func isSafeMethod(m string) bool {
 	return m == http.MethodGet || m == http.MethodHead || m == http.MethodOptions
 }
 
-// Wraps every route: attaches the user, gates on the session, and demands the X-Jr header on writes.
+// Wraps every route: attaches the user, gates on the session, and demands the X-Monarch header on writes.
 func RequireAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if isInternalCall(r) {
 			next.ServeHTTP(w, core.WithUser(r, core.InternalUser))
 			return
 		}
-		// Agent tokens authenticate these, and a bearer header is no CSRF risk, so they skip the session and X-Jr checks.
+		// Agent tokens authenticate these, and a bearer header is no CSRF risk, so they skip the session and X-Monarch checks.
 		if isHookPath(r.URL.Path) {
 			next.ServeHTTP(w, core.WithUser(r, hookUser))
 			return
@@ -242,8 +242,8 @@ func RequireAuth(next http.Handler) http.Handler {
 			return
 		}
 		// A cross-site form or text/plain POST cannot set a custom header without a preflight we never grant.
-		if !isSafeMethod(r.Method) && r.Header.Get("X-Jr") == "" {
-			core.JSONError(w, "missing X-Jr header", 403)
+		if !isSafeMethod(r.Method) && r.Header.Get("X-Monarch") == "" {
+			core.JSONError(w, "missing X-Monarch header", 403)
 			return
 		}
 		if isPublicPath(r.URL.Path) {

@@ -6,14 +6,14 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 process.env.AGENT_NO_LISTEN = "1";
-process.env.JR_HUB_DIR = mkdtempSync(join(tmpdir(), "jr-hub-test-"));
+process.env.MONARCH_HUB_DIR = mkdtempSync(join(tmpdir(), "monarch-hub-test-"));
 process.env.GROQ_API_KEY = process.env.GROQ_API_KEY || "test-groq-test_placeholder_not_real";
 process.env.GITAGENT_REGISTRY_INDEX = "http://127.0.0.1:1/index.json";
 
 // With MONGODB_TEST_URI set, the same tests run against MongoDB in a throwaway database.
 const testDb = process.env.MONGODB_TEST_URI ? await import("./hub/db.js") : null;
 if (testDb) {
-  await testDb.connectDb(process.env.MONGODB_TEST_URI, `jr_test_${process.pid}`);
+  await testDb.connectDb(process.env.MONGODB_TEST_URI, `monarch_test_${process.pid}`);
   after(() => testDb.dropDb());
 }
 
@@ -253,23 +253,23 @@ async function withServer(fn) {
 
 test("the hub API is per user, and the hook needs the agent's token", async () => {
   await withServer(async (call) => {
-    const alice = { "X-Jr-User": "u-alice" };
+    const alice = { "X-Monarch-User": "u-alice" };
     assert.strictEqual((await call("GET", "/agent/hub/agents")).status, 401, "no user, no hub");
-    assert.strictEqual((await call("GET", "/agent/hub/agents", undefined, { "X-Jr-User": "hook" })).status, 401);
+    assert.strictEqual((await call("GET", "/agent/hub/agents", undefined, { "X-Monarch-User": "hook" })).status, 401);
     const made = await call("POST", "/agent/hub/agents", { definition: sample() }, alice);
     assert.strictEqual(made.status, 201);
     const id = made.body.definition.id;
-    assert.strictEqual((await call("GET", `/agent/hub/agents/${id}`, undefined, { "X-Jr-User": "u-bob" })).status, 404);
+    assert.strictEqual((await call("GET", `/agent/hub/agents/${id}`, undefined, { "X-Monarch-User": "u-bob" })).status, 404);
     assert.strictEqual((await call("GET", "/agent/hub/agents/..%2F..%2Fetc", undefined, alice)).status, 400);
 
-    const noToken = await call("POST", `/agent/hub/hook/${id}/run`, { input: { email: "x" } }, { "X-Jr-User": "hook" });
+    const noToken = await call("POST", `/agent/hub/hook/${id}/run`, { input: { email: "x" } }, { "X-Monarch-User": "hook" });
     assert.strictEqual(noToken.status, 401);
     const conn = await call("POST", `/agent/hub/agents/${id}/connect`, undefined, alice);
-    assert.match(conn.body.token, /^jrk_/);
+    assert.match(conn.body.token, /^mnk_/);
     assert.strictEqual(conn.body.workflow.nodes[1].type, "n8n-nodes-base.httpRequest");
 
     scriptSegments([[answer({ category: "bug", reply: "On it." })]]);
-    const ran = await call("POST", `/agent/hub/hook/${id}/run`, { input: { email: "it broke" } }, { "X-Jr-User": "hook", Authorization: `Bearer ${conn.body.token}` });
+    const ran = await call("POST", `/agent/hub/hook/${id}/run`, { input: { email: "it broke" } }, { "X-Monarch-User": "hook", Authorization: `Bearer ${conn.body.token}` });
     assert.strictEqual(ran.status, 200);
     assert.strictEqual(ran.body.status, "completed");
     assert.ok(!("transcript" in ran.body), "the transcript never leaves the server");
@@ -304,7 +304,7 @@ test("provider errors are explained in plain words", async () => {
 
 test("a Build mode blueprint creates agents, a wired workflow and a token that runs it", async () => {
   await withServer(async (call) => {
-    const carol = { "X-Jr-User": "u-carol" };
+    const carol = { "X-Monarch-User": "u-carol" };
     const plan = {
       app: "Note Helper",
       agents: [
@@ -330,7 +330,7 @@ test("a Build mode blueprint creates agents, a wired workflow and a token that r
     assert.deepStrictEqual(tagger.config.input, { summary: "{{ $json.summary }}", note: '{{ $node["Start"].json.note }}', style: '{{ $node["Start"].json.style }}' });
 
     scriptSegments([[answer({ summary: "Buy milk" })], [answer({ tags: "errands" })]]);
-    const ran = await call("POST", `/agent/hub/hook-wf/${flow.id}/run`, { input: { note: "remember to buy milk", style: "short" } }, { "X-Jr-User": "hook", Authorization: `Bearer ${flow.token}` });
+    const ran = await call("POST", `/agent/hub/hook-wf/${flow.id}/run`, { input: { note: "remember to buy milk", style: "short" } }, { "X-Monarch-User": "hook", Authorization: `Bearer ${flow.token}` });
     assert.strictEqual(ran.status, 200, JSON.stringify(ran.body));
     assert.strictEqual(ran.body.status, "completed");
     assert.strictEqual(ran.body.output.tags, "errands");
@@ -342,7 +342,7 @@ test("a Build mode blueprint creates agents, a wired workflow and a token that r
 
 test("a blueprint workflow can branch on a field an agent produced", async () => {
   await withServer(async (call) => {
-    const erin = { "X-Jr-User": "u-erin" };
+    const erin = { "X-Monarch-User": "u-erin" };
     const plan = {
       app: "Tutor",
       agents: [
@@ -365,7 +365,7 @@ test("a blueprint workflow can branch on a field an agent produced", async () =>
     assert.strictEqual(hinter.config.input.task, '{{ $node["Start"].json.task }}');
 
     scriptSegments([[answer({ passed: false, feedback: "Off by one" })], [answer({ hint: "Check the loop bound" })]]);
-    const ran = await call("POST", `/agent/hub/hook-wf/${flow.id}/run`, { input: { code: "for i in range(10)", task: "Print 1 to 10" } }, { "X-Jr-User": "hook", Authorization: `Bearer ${flow.token}` });
+    const ran = await call("POST", `/agent/hub/hook-wf/${flow.id}/run`, { input: { code: "for i in range(10)", task: "Print 1 to 10" } }, { "X-Monarch-User": "hook", Authorization: `Bearer ${flow.token}` });
     assert.strictEqual(ran.body.status, "completed", JSON.stringify(ran.body));
     assert.strictEqual(ran.body.output.hint, "Check the loop bound");
     assert.strictEqual(ran.body.output.feedback, "Off by one");
@@ -375,7 +375,7 @@ test("a blueprint workflow can branch on a field an agent produced", async () =>
 
 test("blueprint keeps list fields as arrays, so a recipe's ingredients come back as a list", async () => {
   await withServer(async (call) => {
-    const dana = { "X-Jr-User": "u-dana" };
+    const dana = { "X-Monarch-User": "u-dana" };
     const plan = {
       app: "Cookbook",
       agents: [{ key: "chef", name: "Recipe Writer", purpose: "Write a recipe.", input: { dish: "Dish name" },
@@ -391,7 +391,7 @@ test("blueprint keeps list fields as arrays, so a recipe's ingredients come back
     assert.strictEqual(agent.outputSchema.properties.minutes.type, "number");
 
     scriptSegments([[answer({ title: "Sambar", ingredients: ["toor dal", "tamarind"], steps: ["Cook dal", "Add tamarind"], minutes: 40 })]]);
-    const ran = await call("POST", `/agent/hub/hook-wf/${flow.id}/run`, { input: { dish: "sambar" } }, { "X-Jr-User": "hook", Authorization: `Bearer ${flow.token}` });
+    const ran = await call("POST", `/agent/hub/hook-wf/${flow.id}/run`, { input: { dish: "sambar" } }, { "X-Monarch-User": "hook", Authorization: `Bearer ${flow.token}` });
     assert.strictEqual(ran.body.status, "completed", JSON.stringify(ran.body));
     assert.deepStrictEqual(ran.body.output.ingredients, ["toor dal", "tamarind"]);
   });
@@ -399,7 +399,7 @@ test("blueprint keeps list fields as arrays, so a recipe's ingredients come back
 
 test("the workflow playground explains itself, answers greetings and keeps its chat", async () => {
   await withServer(async (call) => {
-    const fay = { "X-Jr-User": "u-fay" };
+    const fay = { "X-Monarch-User": "u-fay" };
     const node = (id, type, name, config) => ({ id, type, name, position: { x: 0, y: 0 }, config });
     const echo = await call("POST", "/agent/hub/workflows", { workflow: { name: "Echo planner", description: "Plans a dinner", nodes: [
       node("trigger", "trigger", "Start", { mode: "webhook", sample: { message: "Plan a dinner", servings: "4" } }),
@@ -429,7 +429,7 @@ test("the workflow playground explains itself, answers greetings and keeps its c
 
     const again = await call("GET", `/agent/hub/workflows/${id}/playground`, undefined, fay);
     assert.strictEqual(again.body.messages.length, 4, "the chat is kept on the server");
-    assert.strictEqual((await call("GET", `/agent/hub/workflows/${id}/playground`, undefined, { "X-Jr-User": "u-other" })).status, 404, "another user cannot open it");
+    assert.strictEqual((await call("GET", `/agent/hub/workflows/${id}/playground`, undefined, { "X-Monarch-User": "u-other" })).status, 404, "another user cannot open it");
 
     const gate = await call("POST", "/agent/hub/workflows", { workflow: { name: "Publish", nodes: [
       node("trigger", "trigger", "Start", { mode: "webhook", sample: { text: "Hello" } }),
@@ -480,7 +480,7 @@ test("values from an earlier agent are converted to what the next agent declares
   assert.deepStrictEqual(coerceToSchema({ servings: "lots", ok: "maybe" }, schema), { servings: "lots", ok: "maybe" }, "an ambiguous value is left for the check to reject");
 
   await withServer(async (call) => {
-    const gus = { "X-Jr-User": "u-gus" };
+    const gus = { "X-Monarch-User": "u-gus" };
     const plan = {
       app: "Kitchen",
       agents: [
@@ -499,7 +499,7 @@ test("values from an earlier agent are converted to what the next agent declares
     assert.strictEqual((await call("PUT", `/agent/hub/agents/${explainer.id}`, { definition: explainer }, gus)).status, 200);
     scriptSegments([[answer({ can_adapt: true, reason: "No dairy" })], [answer({ explanation: "Use oat milk" })]]);
     const flow = out.body.workflows[0];
-    const ran = await call("POST", `/agent/hub/hook-wf/${flow.id}/run`, { input: { issue: "Lactose" } }, { "X-Jr-User": "hook", Authorization: `Bearer ${flow.token}` });
+    const ran = await call("POST", `/agent/hub/hook-wf/${flow.id}/run`, { input: { issue: "Lactose" } }, { "X-Monarch-User": "hook", Authorization: `Bearer ${flow.token}` });
     assert.strictEqual(ran.body.status, "completed", JSON.stringify(ran.body));
     assert.strictEqual(ran.body.output.explanation, "Use oat milk");
   });
@@ -514,11 +514,11 @@ test("Build mode's placeholder samples are not offered as examples", async () =>
 test("API snippets keep the body exact in curl, JavaScript and Python", async () => {
   const { snippets } = await import("./hub/routes.js");
   const body = { input: { note: "it's true", ok: true, none: null } };
-  const blank = snippets("https://x.test/hooks/agents/a/run", body, "", "JR_AGENT_TOKEN");
+  const blank = snippets("https://x.test/hooks/agents/a/run", body, "", "MONARCH_AGENT_TOKEN");
   const q = "'" + String.fromCharCode(92) + "''";
   assert.ok(blank.curl.includes(`-d '{"input":{"note":"it${q}s true","ok":true,"none":null}}'`));
-  assert.ok(blank.javascript.includes("process.env.JR_AGENT_TOKEN"));
+  assert.ok(blank.javascript.includes("process.env.MONARCH_AGENT_TOKEN"));
   assert.ok(blank.python.includes(`"note": "it's true"`) && blank.python.includes(`"ok": True`) && blank.python.includes(`"none": None`));
-  const filled = snippets("https://x.test/run", body, "jrk_secret", "JR_AGENT_TOKEN");
-  for (const s of Object.values(filled)) assert.ok(s.includes("Bearer jrk_secret"));
+  const filled = snippets("https://x.test/run", body, "mnk_secret", "MONARCH_AGENT_TOKEN");
+  for (const s of Object.values(filled)) assert.ok(s.includes("Bearer mnk_secret"));
 });

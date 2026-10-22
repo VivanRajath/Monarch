@@ -140,10 +140,10 @@ Monarch has four entry points, chosen on the home screen.
 
 - **Run a repo.** Paste a URL and get the app running fast, with no IDE. For when you only want to see a repository run.
 - **Open in IDE.** The full cloud IDE described above: editor, terminal, live preview, and the agent. Open a saved project, clone from GitHub, or upload a local folder.
-- **Build an app (experimental).** Describe an app in plain language. Build mode asks two or three questions about that idea (and which tech stack, unless the prompt names one), writes a spec that says which AI agents and workflows the app needs, creates them in Agent Hub with a webhook token each, and generates the app. Stacks: Next.js, React + Vite, Express, Bun, Deno, Django, FastAPI, Flask, Go, Rust, Java (Spring Boot), .NET, PHP, Ruby (Sinatra) and static HTML. Each stack starts from a small working server in `builder-template/` that serves the UI and exposes `/api/workflows/<name>`, reading tokens from `jr-workflows.json` (Next.js uses `.env.local`) so they never reach the browser; the model writes only the UI, from a shared design system: shadcn/ui components and theme tokens for Next.js and React + Vite, and a shadcn-style CSS kit (`builder-template/_kit`) for the plain-HTML stacks, with light and dark modes, an accent picked from the spec's style note, and responsive layouts. Generated code is checked for syntax slips, broken imports and components used without an import, and sent back to the model for repair before the app starts. Apps run through the same scan-and-launch pipeline as a cloned repo, so the agents, the workflows and the app are then edited in Agent Hub, the workflow editor and the IDE.
+- **Build an app (experimental).** Describe an app in plain language. Build mode asks two or three questions about that idea (and which tech stack, unless the prompt names one), writes a spec that says which AI agents and workflows the app needs, creates them in Agent Hub with a webhook token each, and generates the app. Stacks: Next.js, React + Vite, Express, Bun, Deno, Django, FastAPI, Flask, Go, Rust, Java (Spring Boot), .NET, PHP, Ruby (Sinatra) and static HTML. Each stack starts from a small working server in `builder-template/` that serves the UI and exposes `/api/workflows/<name>`, reading tokens from `monarch-workflows.json` (Next.js uses `.env.local`) so they never reach the browser; the model writes only the UI, from a shared design system: shadcn/ui components and theme tokens for Next.js and React + Vite, and a shadcn-style CSS kit (`builder-template/_kit`) for the plain-HTML stacks, with light and dark modes, an accent picked from the spec's style note, and responsive layouts. Generated code is checked for syntax slips, broken imports and components used without an import, and sent back to the model for repair before the app starts. Apps run through the same scan-and-launch pipeline as a cloned repo, so the agents, the workflows and the app are then edited in Agent Hub, the workflow editor and the IDE.
 - **Agent Hub.** Build agents, chain them into workflows, and call them from n8n or any app over a webhook.
 
-Generated apps reach their workflows at `host.docker.internal` (Docker Desktop and Podman) or `JR_PUBLIC_ORIGIN` on a public server. On native Linux Docker the server must listen on an address the container can reach, not only 127.0.0.1.
+Generated apps reach their workflows at `host.docker.internal` (Docker Desktop and Podman) or `MONARCH_PUBLIC_ORIGIN` on a public server. On native Linux Docker the server must listen on an address the container can reach, not only 127.0.0.1.
 
 ## Getting started
 
@@ -178,13 +178,13 @@ The agent auto-selects the first provider that has a key, preferring Groq, so a 
 | `AGENT_MAX_OUTPUT_TOKENS` | Caps reserved output so a turn stays under the Groq free-tier limit (default 3000). |
 | `AGENT_EDIT_STRATEGY` | Set to `agentic` to route edits through the tool-driven Agent loop instead of the default Edit engine. |
 | `AGENT_MODEL_GROQ` / `_ANTHROPIC` / `_OPENAI` / `_GEMINI` | Override the model used per provider. |
-| `JR_DATA_DIR` | Where saved projects and Settings keys live (default `~/.monarch`). |
-| `JR_GOOGLE_CLIENT_ID` / `JR_GOOGLE_CLIENT_SECRET` | Google sign-in. Callback: `<origin>/auth/oauth/google/callback`. |
-| `JR_GITHUB_CLIENT_ID` / `JR_GITHUB_CLIENT_SECRET` | GitHub sign-in and repo access (scopes `repo read:user user:email`). Callback: `<origin>/auth/oauth/github/callback`. |
-| `JR_GITHUB_COLLABORATOR` | A GitHub account you own, invited with push access to repos Monarch publishes (each user can turn it off). |
-| `JR_GITHUB_COLLABORATOR_TOKEN` | That account's token (scope `repo`); it accepts invitations to repos this server published, right away and every 5 minutes. |
-| `JR_OAUTH_ALLOW` | Optional allow-list for OAuth sign-in: emails, `@domain`s or `gh:<login>`. |
-| `JR_KEYS_EDITABLE` | Set to `true` to allow editing keys from Settings on a public server (it is always allowed locally). |
+| `MONARCH_DATA_DIR` | Where saved projects and Settings keys live (default `~/.monarch`). |
+| `MONARCH_GOOGLE_CLIENT_ID` / `MONARCH_GOOGLE_CLIENT_SECRET` | Google sign-in. Callback: `<origin>/auth/oauth/google/callback`. |
+| `MONARCH_GITHUB_CLIENT_ID` / `MONARCH_GITHUB_CLIENT_SECRET` | GitHub sign-in and repo access (scopes `repo read:user user:email`). Callback: `<origin>/auth/oauth/github/callback`. |
+| `MONARCH_GITHUB_COLLABORATOR` | A GitHub account you own, invited with push access to repos Monarch publishes (each user can turn it off). |
+| `MONARCH_GITHUB_COLLABORATOR_TOKEN` | That account's token (scope `repo`); it accepts invitations to repos this server published, right away and every 5 minutes. |
+| `MONARCH_OAUTH_ALLOW` | Optional allow-list for OAuth sign-in: emails, `@domain`s or `gh:<login>`. |
+| `MONARCH_KEYS_EDITABLE` | Set to `true` to allow editing keys from Settings on a public server (it is always allowed locally). |
 
 ### The front end lives in `web/`
 

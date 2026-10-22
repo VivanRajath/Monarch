@@ -18,7 +18,7 @@ import (
 )
 
 // What a new repo ignores, written only when the project has no .gitignore of its own.
-const defaultGitignore = "node_modules/\n.next/\ndist/\nbuild/\n.env\n.env*.local\njr-workflows.json\n__pycache__/\n.venv/\n.DS_Store\n.gitagent/\nknowledge/\nagent.yaml\nINSTRUCTIONS.md\n"
+const defaultGitignore = "node_modules/\n.next/\ndist/\nbuild/\n.env\n.env*.local\nmonarch-workflows.json\n__pycache__/\n.venv/\n.DS_Store\n.gitagent/\nknowledge/\nagent.yaml\nINSTRUCTIONS.md\n"
 
 type publishOpts struct {
 	Name         string
@@ -247,7 +247,7 @@ func writeSecretExamples(workdir string) {
 		}
 		writeIfMissing(workdir, ".env.example", out.String())
 	}
-	if raw, ok := readRooted(workdir, "jr-workflows.json"); ok {
+	if raw, ok := readRooted(workdir, "monarch-workflows.json"); ok {
 		var cfg map[string]any
 		if json.Unmarshal([]byte(raw), &cfg) == nil {
 			cfg["base"] = ""
@@ -259,7 +259,7 @@ func writeSecretExamples(workdir string) {
 				}
 			}
 			b, _ := json.MarshalIndent(cfg, "", "  ")
-			writeIfMissing(workdir, "jr-workflows.example.json", string(b)+"\n")
+			writeIfMissing(workdir, "monarch-workflows.example.json", string(b)+"\n")
 		}
 	}
 }
@@ -304,8 +304,8 @@ func readmeInputFor(sb core.Sandbox, opts publishOpts, fullName string) readmeIn
 	}
 	if containsEntry(in.Entries, ".env.local") {
 		in.EnvFile = ".env.local"
-	} else if containsEntry(in.Entries, "jr-workflows.json") {
-		in.EnvFile = "jr-workflows.json"
+	} else if containsEntry(in.Entries, "monarch-workflows.json") {
+		in.EnvFile = "monarch-workflows.json"
 	}
 	return in
 }
@@ -319,7 +319,7 @@ func topEntries(workdir string) []string {
 	out := []string{}
 	for _, e := range ents {
 		n := e.Name()
-		if n == ".git" || generatedRoot(n) != "" && n != ".env.local" && n != "jr-workflows.json" {
+		if n == ".git" || generatedRoot(n) != "" && n != ".env.local" && n != "monarch-workflows.json" {
 			continue
 		}
 		if e.IsDir() {
@@ -500,9 +500,9 @@ func renderReadme(in readmeInput) string {
 	}
 	switch in.EnvFile {
 	case ".env.local":
-		w("### Environment\n\nCopy `.env.example` to `.env.local` and fill in `JR_API_BASE` and one token per workflow. Create or rotate the tokens in Monarch under **Agent Hub › Workflows › Webhook**. `.env.local` is git-ignored.\n\n")
-	case "jr-workflows.json":
-		w("### Environment\n\nCopy `jr-workflows.example.json` to `jr-workflows.json` and fill in `base` and one token per workflow. Create or rotate the tokens in Monarch under **Agent Hub › Workflows › Webhook**. `jr-workflows.json` is git-ignored.\n\n")
+		w("### Environment\n\nCopy `.env.example` to `.env.local` and fill in `MONARCH_API_BASE` and one token per workflow. Create or rotate the tokens in Monarch under **Agent Hub › Workflows › Webhook**. `.env.local` is git-ignored.\n\n")
+	case "monarch-workflows.json":
+		w("### Environment\n\nCopy `monarch-workflows.example.json` to `monarch-workflows.json` and fill in `base` and one token per workflow. Create or rotate the tokens in Monarch under **Agent Hub › Workflows › Webhook**. `monarch-workflows.json` is git-ignored.\n\n")
 	}
 
 	if in.StackLabel != "" {
@@ -523,7 +523,7 @@ func renderReadme(in readmeInput) string {
 	if len(in.Entries) > 0 {
 		w("## Project structure\n\n```\n")
 		for _, e := range in.Entries {
-			if e == ".env.local" || e == "jr-workflows.json" {
+			if e == ".env.local" || e == "monarch-workflows.json" {
 				continue
 			}
 			w("%s\n", e)

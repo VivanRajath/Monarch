@@ -1,4 +1,4 @@
-// Serves the UI from public/ and runs Agent Hub workflows for it; the tokens in jr-workflows.json never reach the browser.
+// Serves the UI from public/ and runs Agent Hub workflows for it; the tokens in monarch-workflows.json never reach the browser.
 use serde_json::{json, Value};
 use std::fs;
 use std::io::Read;
@@ -23,10 +23,10 @@ fn content_type(path: &str) -> &'static str {
 }
 
 fn run_workflow(mut req: Request, key: &str) {
-    let cfg: Value = fs::read_to_string("jr-workflows.json").ok().and_then(|s| serde_json::from_str(&s).ok()).unwrap_or(json!({}));
+    let cfg: Value = fs::read_to_string("monarch-workflows.json").ok().and_then(|s| serde_json::from_str(&s).ok()).unwrap_or(json!({}));
     let flow = &cfg["workflows"][key];
     let (Some(id), Some(token)) = (flow["id"].as_str(), flow["token"].as_str()) else {
-        println!("[workflow] {key}: unknown workflow (check jr-workflows.json)");
+        println!("[workflow] {key}: unknown workflow (check monarch-workflows.json)");
         return json_response(req, 404, json!({"status": "failed", "error": "Unknown workflow"}));
     };
     let mut raw = String::new();

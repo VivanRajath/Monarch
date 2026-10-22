@@ -83,7 +83,7 @@ func TestParseStatusHidesGeneratedFiles(t *testing.T) {
 }
 
 func TestValidBranch(t *testing.T) {
-	for _, b := range []string{"main", "feature/login", "jr/fix-1.2"} {
+	for _, b := range []string{"main", "feature/login", "monarch/fix-1.2"} {
 		if !validBranch(b) {
 			t.Errorf("%q should be valid", b)
 		}

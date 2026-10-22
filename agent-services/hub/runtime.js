@@ -22,8 +22,8 @@ const FETCH_BYTES = 200 * 1024;
 let _home = null;
 function hubAgentHome() {
   if (_home) return _home;
-  _home = mkdtempSync(join(tmpdir(), "jr-hub-home-"));
-  writeFileSync(join(_home, "agent.yaml"), 'spec_version: "0.1.0"\nname: jr-hub-runtime\nversion: 1.0.0\ndescription: Runs Agent Hub agents.\ntools: []\nruntime:\n  max_turns: 12\n');
+  _home = mkdtempSync(join(tmpdir(), "monarch-hub-home-"));
+  writeFileSync(join(_home, "agent.yaml"), 'spec_version: "0.1.0"\nname: monarch-hub-runtime\nversion: 1.0.0\ndescription: Runs Agent Hub agents.\ntools: []\nruntime:\n  max_turns: 12\n');
   return _home;
 }
 
@@ -65,7 +65,7 @@ export function modelIdFor(def) {
 
 // Private networks are only reachable when this is a local, single-user install.
 export function privateNetAllowed() {
-  return !process.env.JR_PUBLIC_ORIGIN || process.env.JR_HUB_ALLOW_PRIVATE_NET === "1";
+  return !process.env.MONARCH_PUBLIC_ORIGIN || process.env.MONARCH_HUB_ALLOW_PRIVATE_NET === "1";
 }
 
 export function isPrivateAddress(ip) {

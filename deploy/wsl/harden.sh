@@ -2,14 +2,14 @@
 # Locks the monarch WSL distro down for public use. Run as root after setup-podman.sh: bash harden.sh [user]
 set -euo pipefail
 
-JR_USER="${1:-monarch}"
+MONARCH_USER="${1:-monarch}"
 die() { printf '\nERROR: %s\n' "$*" >&2; exit 1; }
 say() { printf '\n==> %s\n' "$*"; }
 
 [ "$(id -u)" = 0 ] || die "run as root"
-id "$JR_USER" >/dev/null 2>&1 || die "user $JR_USER does not exist; run setup-podman.sh first"
-JR_UID=$(id -u "$JR_USER")
-if id -nG "$JR_USER" | grep -qwE 'sudo|admin|wheel'; then die "$JR_USER must not be a sudoer"; fi
+id "$MONARCH_USER" >/dev/null 2>&1 || die "user $MONARCH_USER does not exist; run setup-podman.sh first"
+MONARCH_UID=$(id -u "$MONARCH_USER")
+if id -nG "$MONARCH_USER" | grep -qwE 'sudo|admin|wheel'; then die "$MONARCH_USER must not be a sudoer"; fi
 
 say "WSL: no Windows interop, no Windows PATH, C: mounted root-only"
 # umask 077 with uid 0 makes every /mnt/<drive> path root-only; statfs on the mount point still works for the disk floor.
@@ -26,11 +26,11 @@ enabled=true
 options="metadata,uid=0,gid=0,umask=077"
 
 [user]
-default=$JR_USER
+default=$MONARCH_USER
 CONF
 
 say "Podman: slirp4netns without a route to the host's loopback"
-cfg="/home/$JR_USER/.config/containers"
+cfg="/home/$MONARCH_USER/.config/containers"
 mkdir -p "$cfg"
 cat > "$cfg/containers.conf" <<CONF
 [network]
@@ -39,15 +39,15 @@ default_rootless_network_cmd = "slirp4netns"
 [engine]
 network_cmd_options = ["allow_host_loopback=false", "enable_ipv6=false"]
 CONF
-chown -R "$JR_USER:$JR_USER" "/home/$JR_USER/.config"
+chown -R "$MONARCH_USER:$MONARCH_USER" "/home/$MONARCH_USER/.config"
 
-say "Egress firewall for everything $JR_USER runs, sandboxes included"
+say "Egress firewall for everything $MONARCH_USER runs, sandboxes included"
 mkdir -p /usr/local/lib/monarch
 cat > /usr/local/lib/monarch/egress.sh <<'SCRIPT'
 #!/bin/sh
 # Rootless sandbox traffic leaves through slirp4netns as the service user, so an owner match covers every container.
 set -eu
-JR_UID=$(id -u "${1:-monarch}")
+MONARCH_UID=$(id -u "${1:-monarch}")
 DNS=$(awk '/^nameserver/ && $2 ~ /^[0-9.]+$/ {print $2}' /etc/resolv.conf | paste -sd, -)
 [ -n "$DNS" ] || { echo "no IPv4 nameserver in /etc/resolv.conf" >&2; exit 1; }
 # The WSL kernel has no nft fib module, so the host's own addresses are listed explicitly.
@@ -68,7 +68,7 @@ table inet monarch_egress {
   }
   chain out {
     type filter hook output priority 0; policy accept;
-    meta skuid != $JR_UID accept
+    meta skuid != $MONARCH_UID accept
     oif "lo" ip daddr 127.0.0.0/8 accept
     oif "lo" ip6 daddr ::1 accept
     ip daddr { $DNS } meta l4proto { udp, tcp } th dport 53 accept
@@ -93,7 +93,7 @@ Before=systemd-user-sessions.service
 Type=oneshot
 RemainAfterExit=yes
 ExecStart=/bin/sh -c 'for f in /proc/sys/fs/binfmt_misc/WSLInterop*; do [ -e "\$f" ] && echo -1 > "\$f"; done; true'
-ExecStart=/usr/local/lib/monarch/egress.sh $JR_USER
+ExecStart=/usr/local/lib/monarch/egress.sh $MONARCH_USER
 
 [Install]
 WantedBy=multi-user.target
@@ -109,6 +109,6 @@ cat <<DONE
 
 Hardening written. It only fully applies after the distro restarts. From Windows run:
   wsl --terminate <this distro's name>
-then check it as $JR_USER:
+then check it as $MONARCH_USER:
   /usr/local/lib/monarch/preflight.sh
 DONE

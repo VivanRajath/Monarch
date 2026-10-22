@@ -67,7 +67,7 @@ var (
 // Swapped in tests; -1 means the platform cannot say.
 var DiskFreeMB = diskFreeMB
 
-// The tightest of the workdir and JR_DISK_CHECK_PATHS; -1 when none of them can be measured.
+// The tightest of the workdir and MONARCH_DISK_CHECK_PATHS; -1 when none of them can be measured.
 func LowestFreeDiskMB() int64 {
 	lowest := int64(-1)
 	for _, p := range append([]string{Cfg.WorkDir}, Cfg.DiskCheckPaths...) {

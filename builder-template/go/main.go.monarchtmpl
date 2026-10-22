@@ -1,4 +1,4 @@
-// Serves the UI from public/ and runs Agent Hub workflows for it; the tokens in jr-workflows.json never reach the browser.
+// Serves the UI from public/ and runs Agent Hub workflows for it; the tokens in monarch-workflows.json never reach the browser.
 package main
 
 import (
@@ -24,7 +24,7 @@ type config struct {
 
 func loadConfig() config {
 	var cfg config
-	if data, err := os.ReadFile("jr-workflows.json"); err == nil {
+	if data, err := os.ReadFile("monarch-workflows.json"); err == nil {
 		json.Unmarshal(data, &cfg)
 	}
 	return cfg
@@ -45,7 +45,7 @@ func runWorkflow(w http.ResponseWriter, r *http.Request) {
 	key := strings.TrimPrefix(r.URL.Path, "/api/workflows/")
 	flow, ok := cfg.Workflows[key]
 	if !ok {
-		log.Printf("[workflow] %s: unknown workflow (check jr-workflows.json)", key)
+		log.Printf("[workflow] %s: unknown workflow (check monarch-workflows.json)", key)
 		writeJSON(w, 404, map[string]string{"status": "failed", "error": "Unknown workflow"})
 		return
 	}

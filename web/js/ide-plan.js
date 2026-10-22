@@ -2,10 +2,10 @@
 
 const AgentPolicy = {
   get() {
-    try { return { review: 'request', terminal: 'request', ...JSON.parse(localStorage.getItem('jr-agent-policy') || '{}') }; } catch { return { review: 'request', terminal: 'request' }; }
+    try { return { review: 'request', terminal: 'request', ...JSON.parse(localStorage.getItem('monarch-agent-policy') || '{}') }; } catch { return { review: 'request', terminal: 'request' }; }
   },
   set(p) {
-    try { localStorage.setItem('jr-agent-policy', JSON.stringify(p)); } catch { /* storage blocked */ }
+    try { localStorage.setItem('monarch-agent-policy', JSON.stringify(p)); } catch { /* storage blocked */ }
   },
 };
 
@@ -388,8 +388,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const input = document.getElementById('agent-input');
   const mode = document.getElementById('agent-mode');
   if (mode) {
-    try { const saved = localStorage.getItem('jr-agent-mode'); if (saved && mode.querySelector(`option[value="${saved}"]`)) mode.value = saved; } catch { /* storage blocked */ }
-    mode.addEventListener('change', () => { try { localStorage.setItem('jr-agent-mode', mode.value); } catch { /* storage blocked */ } });
+    try { const saved = localStorage.getItem('monarch-agent-mode'); if (saved && mode.querySelector(`option[value="${saved}"]`)) mode.value = saved; } catch { /* storage blocked */ }
+    mode.addEventListener('change', () => { try { localStorage.setItem('monarch-agent-mode', mode.value); } catch { /* storage blocked */ } });
   }
   if (input) {
     input.addEventListener('keydown', (e) => { if (mentionKeydown(e, input)) e.stopImmediatePropagation(); }, true);

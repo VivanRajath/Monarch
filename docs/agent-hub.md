@@ -21,11 +21,11 @@ An agent is a structured definition, not a prompt:
 
 The system prompt is derived from the definition on every run (Studio's Prompt tab shows it), so the two cannot drift apart.
 
-Each agent is its own git repository in gitagent layout, stored under `JR_HUB_DIR` (default `~/.monarch/agent-hub/<user hash>/agents/<id>`):
+Each agent is its own git repository in gitagent layout, stored under `MONARCH_HUB_DIR` (default `~/.monarch/agent-hub/<user hash>/agents/<id>`):
 
 | File | Role |
 | --- | --- |
-| `agent.yaml` | gitagent manifest; the full definition sits under `jr:` and is the source of truth |
+| `agent.yaml` | gitagent manifest; the full definition sits under `monarch:` and is the source of truth |
 | `SOUL.md`, `RULES.md` | generated views, readable by other gitagent tools |
 
 Every save is a commit with a version bump (0.1.0, 0.1.1, ...). Versions can be compared field by field and restored; a restore is saved as a new version.
@@ -49,13 +49,13 @@ A run gives the model native functions:
 - the agent's own tools (`repo_read`, `web_fetch`, `memory_save`)
 - `submit_answer`
 
-Every function call goes through the Jr runtime, so the definition is enforced whatever the model asks for:
+Every function call goes through the Monarch runtime, so the definition is enforced whatever the model asks for:
 
 - **Tools.** Only the agent's tools are offered.
 - **Permissions.** They are re-checked on every call:
   - `repo.read` reads only the listed public repositories.
   - `web.fetch` is HTTPS-only, limited to the listed domains, and follows redirects hop by hop.
-  - Private addresses are refused whenever `JR_PUBLIC_ORIGIN` is set.
+  - Private addresses are refused whenever `MONARCH_PUBLIC_ORIGIN` is set.
 - **Input.** It is validated against the input schema before the model is called.
 - **Output.** It is validated against the output schema. A wrong answer gets one correction round.
 - **Guardrails.**
@@ -125,7 +125,7 @@ Hub → **Workflows** opens a canvas editor at `/flows.html`, much like n8n. Her
 
 ### Webhook
 
-The Webhook panel issues a `jrw_` token that only runs that workflow. Agent tokens cannot run workflows.
+The Webhook panel issues a `mnw_` token that only runs that workflow. Agent tokens cannot run workflows.
 
 ```
 POST /hooks/workflows/<id>/run

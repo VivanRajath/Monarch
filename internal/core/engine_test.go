@@ -9,9 +9,9 @@ import (
 )
 
 func TestPodmanConfig(t *testing.T) {
-	clearJREnv(t)
-	t.Setenv("JR_CONTAINER_CLI", "podman")
-	t.Setenv("JR_PREHEAT_IMAGES", "node, sandbox-react,builder")
+	clearMonarchEnv(t)
+	t.Setenv("MONARCH_CONTAINER_CLI", "podman")
+	t.Setenv("MONARCH_PREHEAT_IMAGES", "node, sandbox-react,builder")
 	c, err := LoadConfig()
 	if err != nil {
 		t.Fatal(err)
@@ -19,8 +19,8 @@ func TestPodmanConfig(t *testing.T) {
 	if c.ContainerCLI != "podman" || strings.Join(c.PreheatImages, ",") != "node,react,builder" {
 		t.Fatalf("cli=%q preheat=%v", c.ContainerCLI, c.PreheatImages)
 	}
-	for env, v := range map[string]string{"JR_CONTAINER_CLI": "nerdctl", "JR_PREHEAT_IMAGES": "cobol"} {
-		clearJREnv(t)
+	for env, v := range map[string]string{"MONARCH_CONTAINER_CLI": "nerdctl", "MONARCH_PREHEAT_IMAGES": "cobol"} {
+		clearMonarchEnv(t)
 		t.Setenv(env, v)
 		if _, err := LoadConfig(); err == nil {
 			t.Errorf("%s=%s should be refused", env, v)

@@ -60,7 +60,7 @@ This puts sandbox workdirs (10 GB) and Podman storage (20 GB: images, containers
 
 - Mount options are `nosuid,nodev,discard`.
 - The preflight refuses to start Monarch unless both paths are these mounts.
-- `JR_SANDBOX_MAX_DISK_MB` (default 3072 in public mode) reaps a single sandbox whose workdir grows past it, checked every 2 minutes. The pool is the hard limit between checks.
+- `MONARCH_SANDBOX_MAX_DISK_MB` (default 3072 in public mode) reaps a single sandbox whose workdir grows past it, checked every 2 minutes. The pool is the hard limit between checks.
 
 To let the WSL disk give freed space back to Windows, stop the distro and run `wsl --manage monarch --set-sparse true`.
 
@@ -70,8 +70,8 @@ Build on Windows, then run the installer as root:
 
 ```powershell
 # in Git Bash:
-#   GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o jr-linux .
-wsl -d monarch -u root -- bash /mnt/c/<repo>/deploy/wsl/install-runtime.sh /mnt/c/<repo> /mnt/c/<repo>/jr-linux monarch
+#   GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o monarch-linux .
+wsl -d monarch -u root -- bash /mnt/c/<repo>/deploy/wsl/install-runtime.sh /mnt/c/<repo> /mnt/c/<repo>/monarch-linux monarch
 ```
 
 This writes `~monarch/.config/monarch/monarch.env` (mode 600) with a fresh beta code and session secret, and enables the `monarch.service` user unit. Rerun it to upgrade. The env file is never overwritten.
@@ -84,7 +84,7 @@ Install Tailscale on Windows, sign in, then run:
 tailscale funnel --bg 9000
 ```
 
-WSL forwards `localhost:9000` to the distro. Put the printed `https://<machine>.<tailnet>.ts.net` into `JR_PUBLIC_ORIGIN` in `monarch.env`, and add your `GROQ_API_KEY`. Then:
+WSL forwards `localhost:9000` to the distro. Put the printed `https://<machine>.<tailnet>.ts.net` into `MONARCH_PUBLIC_ORIGIN` in `monarch.env`, and add your `GROQ_API_KEY`. Then:
 
 ```powershell
 wsl -d monarch --cd ~ -- systemctl --user restart monarch
@@ -120,7 +120,7 @@ Point UptimeRobot (free) at `/health` for liveness, and at `/ready` if you want 
 | Endpoint | Answers 200 when | 503 means |
 |---|---|---|
 | `/health` | the process is up | never returns 503. If there is no answer, the server is down |
-| `/ready` | a new sandbox can be created now | `reasons` lists the problems: container engine or agent unreachable, below `JR_MIN_FREE_DISK_MB`, or at `JR_MAX_SANDBOXES` |
+| `/ready` | a new sandbox can be created now | `reasons` lists the problems: container engine or agent unreachable, below `MONARCH_MIN_FREE_DISK_MB`, or at `MONARCH_MAX_SANDBOXES` |
 
 ## Preview tunnels (Cloudflare quick tunnels)
 
@@ -131,7 +131,7 @@ Quick tunnels are Cloudflare's free, anonymous, **no-SLA** development tunnels. 
 - Preview URLs change whenever a tunnel is replaced or a sandbox restarts. Never share one as a permanent link.
 - A quick-tunnel host that no longer maps to a live sandbox gets a 404 page. It never falls through to the IDE or its API.
 - Destroying or reaping a sandbox closes its tunnels.
-- Cloudflare may rate-limit or change quick tunnels at any time. The long-term fix is a domain with wildcard DNS (`JR_PREVIEW_DOMAIN`), which this server already supports.
+- Cloudflare may rate-limit or change quick tunnels at any time. The long-term fix is a domain with wildcard DNS (`MONARCH_PREVIEW_DOMAIN`), which this server already supports.
 
 ## Checks you can rerun
 
@@ -145,7 +145,7 @@ Run these as `monarch`:
 
 ## Docker Desktop mode: local development only
 
-The default `JR_CONTAINER_CLI=docker` path runs natively on Windows against Docker Desktop. `deploy/windows/validate-docker.sh` validates it end to end:
+The default `MONARCH_CONTAINER_CLI=docker` path runs natively on Windows against Docker Desktop. `deploy/windows/validate-docker.sh` validates it end to end:
 
 ```bash
 CLOUDFLARED=/path/to/cloudflared.exe WORK=/path/to/empty/dir bash deploy/windows/validate-docker.sh

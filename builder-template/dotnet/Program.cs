@@ -1,4 +1,4 @@
-// Serves the UI from public/ and runs Agent Hub workflows for it; the tokens in jr-workflows.json never reach the browser.
+// Serves the UI from public/ and runs Agent Hub workflows for it; the tokens in monarch-workflows.json never reach the browser.
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -15,12 +15,12 @@ app.UseStaticFiles(new StaticFileOptions { FileProvider = publicFiles });
 app.MapPost("/api/workflows/{key}", async (string key, HttpRequest request) =>
 {
     JsonNode cfg;
-    try { cfg = JsonNode.Parse(await File.ReadAllTextAsync("jr-workflows.json")) ?? new JsonObject(); }
+    try { cfg = JsonNode.Parse(await File.ReadAllTextAsync("monarch-workflows.json")) ?? new JsonObject(); }
     catch { cfg = new JsonObject(); }
     var flow = cfg["workflows"]?[key];
     if (flow is null)
     {
-        Console.WriteLine($"[workflow] {key}: unknown workflow (check jr-workflows.json)");
+        Console.WriteLine($"[workflow] {key}: unknown workflow (check monarch-workflows.json)");
         return Results.Json(new { status = "failed", error = "Unknown workflow" }, statusCode: 404);
     }
     var started = DateTime.UtcNow;

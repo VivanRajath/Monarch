@@ -16,7 +16,7 @@ import (
 
 const testToken = "0123456789abcdef0123456789abcdef"
 
-type seen struct{ host, origin, jrUser, cookie string }
+type seen struct{ host, origin, monarchUser, cookie string }
 
 func previewFixture(t *testing.T) (front *httptest.Server, got *seen) {
 	t.Helper()
@@ -24,7 +24,7 @@ func previewFixture(t *testing.T) (front *httptest.Server, got *seen) {
 	got = &seen{}
 	up := websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return r.Header.Get("Origin") == "http://localhost:5173" }}
 	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		*got = seen{r.Host, r.Header.Get("Origin"), r.Header.Get("X-Jr-User"), r.Header.Get("Cookie")}
+		*got = seen{r.Host, r.Header.Get("Origin"), r.Header.Get("X-Monarch-User"), r.Header.Get("Cookie")}
 		switch r.URL.Path {
 		case "/ws":
 			c, err := up.Upgrade(w, r, nil)
@@ -35,7 +35,7 @@ func previewFixture(t *testing.T) (front *httptest.Server, got *seen) {
 			c.WriteMessage(mt, msg)
 			c.Close()
 		case "/go":
-			http.SetCookie(w, &http.Cookie{Name: "app", Value: "1", Domain: "jr.example", Path: "/"})
+			http.SetCookie(w, &http.Cookie{Name: "app", Value: "1", Domain: "monarch.example", Path: "/"})
 			http.Redirect(w, r, "http://localhost:5173/login?next=1", http.StatusFound)
 		default:
 			fmt.Fprint(w, "hello from the app")
@@ -73,8 +73,8 @@ func getWithHost(t *testing.T, base, host, path string, hdr map[string]string) *
 
 func TestPreviewProxiesToTheSandboxAsLocalhost(t *testing.T) {
 	front, got := previewFixture(t)
-	host := "p-" + testToken + ".jr.example"
-	res := getWithHost(t, front.URL, host, "/", map[string]string{"Origin": "https://" + host, "X-Jr-User": "u-spoof", "Cookie": "app=1"})
+	host := "p-" + testToken + ".monarch.example"
+	res := getWithHost(t, front.URL, host, "/", map[string]string{"Origin": "https://" + host, "X-Monarch-User": "u-spoof", "Cookie": "app=1"})
 	body, _ := io.ReadAll(res.Body)
 	res.Body.Close()
 	if res.StatusCode != 200 || string(body) != "hello from the app" {
@@ -83,14 +83,14 @@ func TestPreviewProxiesToTheSandboxAsLocalhost(t *testing.T) {
 	if got.host != "localhost:5173" || got.origin != "http://localhost:5173" {
 		t.Fatalf("app saw host=%q origin=%q, want localhost:5173", got.host, got.origin)
 	}
-	if got.jrUser != "" || got.cookie != "app=1" {
-		t.Fatalf("app saw x-jr-user=%q cookie=%q; Jr headers must be stripped, the app's own cookies kept", got.jrUser, got.cookie)
+	if got.monarchUser != "" || got.cookie != "app=1" {
+		t.Fatalf("app saw x-monarch-user=%q cookie=%q; Monarch headers must be stripped, the app's own cookies kept", got.monarchUser, got.cookie)
 	}
 }
 
 func TestPreviewRewritesRedirectsAndCookieDomains(t *testing.T) {
 	front, _ := previewFixture(t)
-	host := "p-" + testToken + ".jr.example"
+	host := "p-" + testToken + ".monarch.example"
 	res := getWithHost(t, front.URL, host, "/go", nil)
 	res.Body.Close()
 	if loc := res.Header.Get("Location"); loc != "https://"+host+"/login?next=1" {
@@ -105,7 +105,7 @@ func TestPreviewRewritesRedirectsAndCookieDomains(t *testing.T) {
 
 func TestPreviewTunnelsWebSockets(t *testing.T) {
 	front, _ := previewFixture(t)
-	host := "p-" + testToken + ".jr.example"
+	host := "p-" + testToken + ".monarch.example"
 	wsURL := "ws" + strings.TrimPrefix(front.URL, "http") + "/ws"
 	c, _, err := websocket.DefaultDialer.Dial(wsURL, http.Header{"Host": {host}, "Origin": {"https://" + host}})
 	if err != nil {
@@ -121,9 +121,9 @@ func TestPreviewTunnelsWebSockets(t *testing.T) {
 func TestPreviewHostsNeverReachTheIDE(t *testing.T) {
 	front, _ := previewFixture(t)
 	cases := map[string]int{
-		"p-" + strings.Repeat("f", 32) + ".jr.example": 404,
-		"p-" + testToken + "-3.jr.example":             404,
-		"p-" + testToken + ".jr.example":               200,
+		"p-" + strings.Repeat("f", 32) + ".monarch.example": 404,
+		"p-" + testToken + "-3.monarch.example":             404,
+		"p-" + testToken + ".monarch.example":               200,
 	}
 	for host, want := range cases {
 		res := getWithHost(t, front.URL, host, "/sandboxes", nil)
@@ -132,7 +132,7 @@ func TestPreviewHostsNeverReachTheIDE(t *testing.T) {
 			t.Errorf("%s = %d, want %d", host, res.StatusCode, want)
 		}
 	}
-	for _, host := range []string{"jr.example", "p-short.jr.example", "sandbox-prev.jr.example"} {
+	for _, host := range []string{"monarch.example", "p-short.monarch.example", "sandbox-prev.monarch.example"} {
 		res := getWithHost(t, front.URL, host, "/sandboxes", nil)
 		res.Body.Close()
 		if res.StatusCode != 401 {
@@ -152,8 +152,8 @@ func TestPreviewURLs(t *testing.T) {
 	if got := core.PreviewURL(testToken, 2, 5000); got != "http://p-"+testToken+"-2.localhost:9000/" {
 		t.Errorf("local host routing = %q", got)
 	}
-	core.Cfg.PublicOrigin, core.Cfg.PreviewDomain, core.Cfg.PreviewScheme = "https://jr.example", "jr.example", "https"
-	if got := core.PreviewURL(testToken, 0, 5000); got != "https://p-"+testToken+".jr.example/" {
+	core.Cfg.PublicOrigin, core.Cfg.PreviewDomain, core.Cfg.PreviewScheme = "https://monarch.example", "monarch.example", "https"
+	if got := core.PreviewURL(testToken, 0, 5000); got != "https://p-"+testToken+".monarch.example/" {
 		t.Errorf("public = %q", got)
 	}
 	if core.PreviewURL(testToken, 0, 0) != "" {

@@ -238,7 +238,7 @@ export function buildSystemPrompt(input) {
   return parts.join("\n\n");
 }
 
-// Git-native layout: agent.yaml follows the gitagent standard and carries the full definition under `jr`; SOUL.md and RULES.md are generated views.
+// Git-native layout: agent.yaml follows the gitagent standard and carries the full definition under `monarch`; SOUL.md and RULES.md are generated views.
 export function renderGitagentFiles(input) {
   const d = normalizeDefinition(input);
   const manifest = {
@@ -250,7 +250,7 @@ export function renderGitagentFiles(input) {
     tools: d.tools.map((t) => t.id),
     runtime: { max_turns: d.runtime.maxSteps, timeout: d.runtime.timeoutSeconds },
     tags: d.identity.tags,
-    jr: d,
+    monarch: d,
   };
   const soul = [
     `# ${d.identity.name}`, "", "<!-- Generated from agent.yaml by Monarch. Edit the agent in Agent Studio. -->", "",
@@ -273,11 +273,13 @@ export function renderGitagentFiles(input) {
   };
 }
 
-// Reads a Jr agent back from agent.yaml, or maps a plain gitagent (manifest plus SOUL/RULES) onto a definition.
+// Reads a Monarch agent back from agent.yaml, or maps a plain gitagent (manifest plus SOUL/RULES) onto a definition.
 export function definitionFromGitagent(files) {
   let m = {};
   try { m = yaml.load(files["agent.yaml"] || "") || {}; } catch { throw new Error("agent.yaml is not valid YAML"); }
-  if (m.jr && typeof m.jr === "object") return normalizeDefinition(m.jr);
+  // Agents saved before the rename keep the definition under another top-level key; it is recognised by its shape.
+  const embedded = m.monarch || Object.values(m).find((v) => v && typeof v === "object" && v.identity && "purpose" in v);
+  if (embedded && typeof embedded === "object") return normalizeDefinition(embedded);
   const soul = String(files["SOUL.md"] || "").replace(/<!--[\s\S]*?-->/g, "").trim();
   const rules = String(files["RULES.md"] || "").split("\n").filter((l) => /^\s*[-*]\s+/.test(l));
   const preferred = (m.model && (m.model.preferred || m.model.name)) || (typeof m.model === "string" ? m.model : "");

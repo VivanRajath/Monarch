@@ -90,7 +90,7 @@ d.box(345, 300, 120, 120, 'HTTPS + WSS', 'Tailscale Funnel', 'or Caddy', '(TLS e
 
 # Go control plane
 d.zone(510, 110, 560, 760, 'Go control plane (one binary)', 'the security authority: identity, ownership, policy, side effects', 'go')
-d.box(530, 170, 520, 64, 'Transport and auth', 'session cookie (HttpOnly, SameSite), Google and GitHub OAuth, beta code,', 'origin check, X-Jr CSRF header, login and model-call rate limits', kind='sec')
+d.box(530, 170, 520, 64, 'Transport and auth', 'session cookie (HttpOnly, SameSite), Google and GitHub OAuth, beta code,', 'origin check, X-Monarch CSRF header, login and model-call rate limits', kind='sec')
 d.box(530, 250, 520, 50, 'Ownership checks on every resource', 'user comes from the session; sandbox, project, file, run looked up server-side', kind='sec')
 d.box(530, 316, 255, 70, 'Builder', 'questions -> PRD -> design', 'codegen -> heal -> launch')
 d.box(795, 316, 255, 70, 'Stack detector', '20+ stacks, ports,', 'install and start commands')
@@ -100,7 +100,7 @@ d.box(530, 488, 255, 78, 'Git service', 'tokenless git in the sandbox;', 'fetch 
 d.box(795, 488, 255, 78, 'GitHub API', 'repos, branches, PRs, publish,', 'README, collaborator invite')
 d.box(530, 582, 255, 70, 'Key pool and model router', 'your keys first, per-key limits,', 'Groq org caps, fallbacks')
 d.box(795, 582, 255, 70, 'Preview proxy', 'p-<token> host -> sandbox port,', 'or one quick tunnel per app')
-d.box(530, 668, 520, 64, 'Agent proxy  /agent/*', 'sets X-Jr-User from the session, adds the internal token,', 'strips cookies; Node is reachable only through here', kind='key')
+d.box(530, 668, 520, 64, 'Agent proxy  /agent/*', 'sets X-Monarch-User from the session, adds the internal token,', 'strips cookies; Node is reachable only through here', kind='key')
 d.box(530, 748, 520, 100, 'Accounts and secrets', 'users, sign-in identities merged by verified email,', 'GitHub tokens and model keys sealed with AES-GCM,', 'never returned to the browser', kind='data')
 
 # Node agent service
@@ -133,7 +133,7 @@ d.box(530, 1112, 1180, 80, 'Isolation', 'separate bridge with inter-container tr
 d.line([(300, 360), (345, 360)])
 d.line([(465, 360), (490, 360), (490, 202), (530, 202)])
 d.line([(1050, 700), (1088, 700), (1088, 202), (1120, 202)], start=True)
-d.text(1290, 694, 'Go -> Node: /agent/* with X-Jr-User + internal token', 'lbl', 'middle')
+d.text(1290, 694, 'Go -> Node: /agent/* with X-Monarch-User + internal token', 'lbl', 'middle')
 d.text(1290, 712, 'Node -> Go: shell and file sync, as that user', 'lbl', 'middle')
 d.line([(780, 870), (780, 900)], kind='', label=None)
 d.text(800, 888, 'control only: start, exec, files, terminal, preview, git', 'lbl')

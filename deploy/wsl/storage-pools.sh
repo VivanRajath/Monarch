@@ -2,19 +2,19 @@
 # Puts workdirs and Podman storage on fixed-size disk images; run as root with Monarch stopped: bash storage-pools.sh [user] [work GB] [storage GB]
 set -euo pipefail
 
-JR_USER="${1:-monarch}"
+MONARCH_USER="${1:-monarch}"
 WORK_GB="${2:-10}"
 STORE_GB="${3:-20}"
 die() { printf '\nERROR: %s\n' "$*" >&2; exit 1; }
 say() { printf '\n==> %s\n' "$*"; }
 
 [ "$(id -u)" = 0 ] || die "run as root"
-JR_UID=$(id -u "$JR_USER")
-HOME_DIR=$(getent passwd "$JR_USER" | cut -d: -f6)
+MONARCH_UID=$(id -u "$MONARCH_USER")
+HOME_DIR=$(getent passwd "$MONARCH_USER" | cut -d: -f6)
 WORK="$HOME_DIR/monarch/work"
 STORE="$HOME_DIR/.local/share/containers"
 POOLS=/var/lib/monarch
-as_user() { sudo -u "$JR_USER" XDG_RUNTIME_DIR="/run/user/$JR_UID" DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$JR_UID/bus" "$@"; }
+as_user() { sudo -u "$MONARCH_USER" XDG_RUNTIME_DIR="/run/user/$MONARCH_UID" DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$MONARCH_UID/bus" "$@"; }
 
 free_gb=$(df -BG --output=avail /mnt/c 2>/dev/null | tail -1 | tr -dc 0-9)
 need=$((WORK_GB + STORE_GB))
@@ -24,11 +24,11 @@ need=$((WORK_GB + STORE_GB))
 pool() { # name, mountpoint, size GB
   local img="$POOLS/$1.img" mnt="$2" size="$3"
   if findmnt -rn "$mnt" >/dev/null; then echo "$mnt already a mounted pool"; return; fi
-  [ -e "$img" ] || { truncate -s "${size}G" "$img"; mkfs.ext4 -q -F -m 0 -L "jr-$1" "$img"; }
+  [ -e "$img" ] || { truncate -s "${size}G" "$img"; mkfs.ext4 -q -F -m 0 -L "monarch-$1" "$img"; }
   mkdir -p "$mnt"
   grep -q " $mnt " /etc/fstab || echo "$img $mnt ext4 loop,nosuid,nodev,noatime,discard 0 2" >> /etc/fstab
   mount "$mnt"
-  chown "$JR_USER:$JR_USER" "$mnt"
+  chown "$MONARCH_USER:$MONARCH_USER" "$mnt"
   chmod 700 "$mnt"
 }
 
@@ -54,10 +54,10 @@ fi
 ENV="$HOME_DIR/.config/monarch/monarch.env"
 if [ -f "$ENV" ]; then
   # The floor has to watch the pools too: sandbox creation should stop before a pool fills, not after.
-  sed -i "s#^JR_DISK_CHECK_PATHS=.*#JR_DISK_CHECK_PATHS=/mnt/c,$WORK,$STORE#" "$ENV"
-  grep -q '^JR_DISK_CHECK_PATHS=' "$ENV" || echo "JR_DISK_CHECK_PATHS=/mnt/c,$WORK,$STORE" >> "$ENV"
+  sed -i "s#^MONARCH_DISK_CHECK_PATHS=.*#MONARCH_DISK_CHECK_PATHS=/mnt/c,$WORK,$STORE#" "$ENV"
+  grep -q '^MONARCH_DISK_CHECK_PATHS=' "$ENV" || echo "MONARCH_DISK_CHECK_PATHS=/mnt/c,$WORK,$STORE" >> "$ENV"
 fi
 
 as_user systemctl --user start podman.socket
 df -h "$WORK" "$STORE" | sed 1d
-echo "Pools ready. Start Monarch: systemctl --user start monarch (as $JR_USER); images rebuild on first start."
+echo "Pools ready. Start Monarch: systemctl --user start monarch (as $MONARCH_USER); images rebuild on first start."

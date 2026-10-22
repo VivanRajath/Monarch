@@ -10,13 +10,13 @@ import {
 import { hasDb, col, objectId, trimRuns, saveRunDoc, readRunDoc, listRunDocs } from "./db.js";
 
 // A public server shares one machine among many people; a local install belongs to one person who builds many apps.
-export const MAX_AGENTS_PER_USER = Number(process.env.JR_HUB_MAX_AGENTS) || (process.env.JR_PUBLIC_ORIGIN ? 25 : 500);
+export const MAX_AGENTS_PER_USER = Number(process.env.MONARCH_HUB_MAX_AGENTS) || (process.env.MONARCH_PUBLIC_ORIGIN ? 25 : 500);
 const MAX_RUNS_KEPT = 40;
 const ID_RE = /^[a-z0-9][a-z0-9-]{0,47}$/;
 const RUN_RE = /^r-[a-f0-9]{16}$/;
 
 export function hubRoot() {
-  return process.env.JR_HUB_DIR || join(homedir(), ".monarch", "agent-hub");
+  return process.env.MONARCH_HUB_DIR || join(homedir(), ".monarch", "agent-hub");
 }
 
 // A hash, so a user id never becomes a path and a token can name its owner without revealing them.
@@ -246,13 +246,13 @@ export async function restoreVersion(user, id, sha) {
 }
 
 export function exportBundle(def) {
-  return { kind: "jr-agent", apiVersion: 1, exportedAt: new Date().toISOString(), definition: def, files: renderGitagentFiles(def) };
+  return { kind: "monarch-agent", apiVersion: 1, exportedAt: new Date().toISOString(), definition: def, files: renderGitagentFiles(def) };
 }
 
 // A bundle, a bare definition, or gitagent files all import to a normalized definition.
 export function definitionFromImport(body) {
   if (!body || typeof body !== "object") throw Object.assign(new Error("nothing to import"), { status: 400 });
-  if (body.kind === "jr-agent" && body.definition) return normalizeDefinition(body.definition);
+  if (body.definition && typeof body.definition === "object") return normalizeDefinition(body.definition);
   if (body.files && body.files["agent.yaml"]) return definitionFromGitagent(body.files);
   if (body.identity || body.purpose || body.instructions) return normalizeDefinition(body);
   throw Object.assign(new Error("not a Monarch agent export"), { status: 400 });
@@ -264,7 +264,7 @@ const keysPath = (user) => join(userDir(user), "keys.json");
 const sha256 = (s) => createHash("sha256").update(s).digest("hex");
 
 // Agents and workflows each get their own token namespace, so an agent token can never run a workflow of the same name.
-const KEY_KINDS = { agent: { prefix: "jrk", slot: (id) => id }, workflow: { prefix: "jrw", slot: (id) => `wf:${id}` } };
+const KEY_KINDS = { agent: { prefix: "mnk", slot: (id) => id }, workflow: { prefix: "mnw", slot: (id) => `wf:${id}` } };
 
 export async function keyInfo(user, id, kind = "agent") {
   if (hasDb()) return keyPublic(await col("api_keys").findOne({ owner: user, kind, target: id }));
@@ -305,7 +305,7 @@ export async function revokeKey(user, id, kind = "agent") {
 // Returns { user, id } for a valid token bound to that agent, else null.
 export async function resolveKey(token, id, kind = "agent") {
   const k = KEY_KINDS[kind];
-  const m = /^(jr[kw])_([a-f0-9]{24})_([a-z0-9][a-z0-9-]{0,47})_([a-f0-9]{48})$/.exec(String(token || ""));
+  const m = /^(mn[kw])_([a-f0-9]{24})_([a-z0-9][a-z0-9-]{0,47})_([a-f0-9]{48})$/.exec(String(token || ""));
   if (!m || m[1] !== k.prefix || m[3] !== id) return null;
   if (hasDb()) {
     const entry = await col("api_keys").findOne({ hash: sha256(token), kind, target: id });

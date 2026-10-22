@@ -16,7 +16,7 @@ func NewPreviewToken() string {
 	return randomHex(16)
 }
 
-// Without JR_PREVIEW_DOMAIN previews stay on the loopback port, which only the server's own machine can open.
+// Without MONARCH_PREVIEW_DOMAIN previews stay on the loopback port, which only the server's own machine can open.
 func PreviewURL(token string, n, hostPort int) string {
 	if hostPort == 0 {
 		return ""

@@ -157,7 +157,7 @@ func EnsureComposite(container string, stacks []string) (string, error) {
 		return image, nil
 	}
 
-	dir, err := os.MkdirTemp("", "jr-compose-*")
+	dir, err := os.MkdirTemp("", "monarch-compose-*")
 	if err != nil {
 		return "", err
 	}

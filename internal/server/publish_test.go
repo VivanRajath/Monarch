@@ -42,18 +42,18 @@ func TestReadmeFromABuild(t *testing.T) {
 
 func TestSecretFilesGetBlankExamples(t *testing.T) {
 	dir := t.TempDir()
-	os.WriteFile(filepath.Join(dir, ".env.local"), []byte("# note\nJR_API_BASE=http://host:9000\nJR_WF_HINT_TOKEN=wt_abc\n"), 0644)
-	os.WriteFile(filepath.Join(dir, "jr-workflows.json"), []byte(`{"base":"http://h","workflows":{"hint":{"id":"x","token":"wt_def","name":"Hint"}}}`), 0644)
+	os.WriteFile(filepath.Join(dir, ".env.local"), []byte("# note\nMONARCH_API_BASE=http://host:9000\nMONARCH_WF_HINT_TOKEN=wt_abc\n"), 0644)
+	os.WriteFile(filepath.Join(dir, "monarch-workflows.json"), []byte(`{"base":"http://h","workflows":{"hint":{"id":"x","token":"wt_def","name":"Hint"}}}`), 0644)
 	writeSecretExamples(dir)
 	env, _ := os.ReadFile(filepath.Join(dir, ".env.example"))
-	if string(env) != "# note\nJR_API_BASE=\nJR_WF_HINT_TOKEN=\n" {
+	if string(env) != "# note\nMONARCH_API_BASE=\nMONARCH_WF_HINT_TOKEN=\n" {
 		t.Fatalf(".env.example: %q", env)
 	}
-	js, _ := os.ReadFile(filepath.Join(dir, "jr-workflows.example.json"))
+	js, _ := os.ReadFile(filepath.Join(dir, "monarch-workflows.example.json"))
 	if strings.Contains(string(js), "wt_def") || strings.Contains(string(js), "http://h") || !strings.Contains(string(js), `"name": "Hint"`) {
 		t.Fatalf("example json: %s", js)
 	}
-	if generatedRoot("jr-workflows.json") == "" || generatedRoot(".env.local") == "" {
+	if generatedRoot("monarch-workflows.json") == "" || generatedRoot(".env.local") == "" {
 		t.Fatal("secret files must stay out of commits")
 	}
 }

@@ -21,7 +21,7 @@ const SWEEP_EVERY_MS = 10 * 60 * 1000;
 let lastSweep = 0;
 
 export function homesDir() {
-  return join(process.env.JR_WORK_DIR || tmpdir(), "jr-agent-homes");
+  return join(process.env.MONARCH_WORK_DIR || tmpdir(), "monarch-agent-homes");
 }
 
 // Copies regular files only; a symlink is skipped whatever it points at.

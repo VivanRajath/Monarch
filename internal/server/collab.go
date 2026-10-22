@@ -66,7 +66,7 @@ func StartCollaboratorSweeper() {
 		_, err := githubCall(ctx, http.MethodGet, "/user", core.Cfg.GitHubCollaboratorToken, nil, &me)
 		cancel()
 		if err != nil || !strings.EqualFold(me.Login, core.Cfg.GitHubCollaborator) {
-			core.Logf("github", "JR_GITHUB_COLLABORATOR_TOKEN is not a token for @%s (got %q, %v); invitations will not be accepted automatically", core.Cfg.GitHubCollaborator, me.Login, err)
+			core.Logf("github", "MONARCH_GITHUB_COLLABORATOR_TOKEN is not a token for @%s (got %q, %v); invitations will not be accepted automatically", core.Cfg.GitHubCollaborator, me.Login, err)
 			return
 		}
 		collabReady = true

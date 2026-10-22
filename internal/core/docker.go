@@ -23,7 +23,7 @@ func CLI() string { return Cfg.ContainerCLI }
 func IsPodman() bool { return Cfg.ContainerCLI == "podman" }
 
 // Sandboxes share this bridge with inter-container traffic off, so one tester's app cannot reach another's.
-const SandboxNetwork = "jr-sandbox"
+const SandboxNetwork = "monarch-sandbox"
 
 // Empty until EnsureSandboxNetwork succeeds; RunArgs then leaves containers on Docker's default bridge.
 var sandboxNetwork = ""
@@ -134,7 +134,7 @@ func ImageExists(image string) bool {
 	return err == nil && strings.TrimSpace(out) != ""
 }
 
-// Nil means every image; JR_PREHEAT_IMAGES narrows it, and the rest build the first time a repo needs them.
+// Nil means every image; MONARCH_PREHEAT_IMAGES narrows it, and the rest build the first time a repo needs them.
 func PreheatImages() {
 	if !EngineUp() {
 		fmt.Println("Skipping sandbox image builds: " + EngineDownMessage() + " Images build on first use once it is up; Agent Hub and Workflows work without it.")

@@ -112,7 +112,7 @@ func TestUIPathKeepsGeneratedFilesInTheUIFolder(t *testing.T) {
 		{flask, "public/index.html", "public/index.html", true},
 		{flask, "public/app.js", "public/app.js", true},
 		{flask, "app.py", "", false},
-		{flask, "public/jr-workflows.js", "", false},
+		{flask, "public/monarch-workflows.js", "", false},
 		{flask, "public/../app.py", "", false},
 		{flask, "public/js/app.js", "", false},
 		{php, "public/index.html", "index.html", true},
@@ -149,11 +149,11 @@ func TestStackWorkflowClient(t *testing.T) {
 			Base      string
 			Workflows map[string]struct{ ID, Token string }
 		}
-		data, _ := os.ReadFile(filepath.Join(dir, "jr-workflows.json"))
+		data, _ := os.ReadFile(filepath.Join(dir, "monarch-workflows.json"))
 		if err := json.Unmarshal(data, &cfg); err != nil || cfg.Workflows[f.Key].Token != f.Token || cfg.Base == "" {
-			t.Fatalf("%s: jr-workflows.json wrong: %s", id, data)
+			t.Fatalf("%s: monarch-workflows.json wrong: %s", id, data)
 		}
-		client := map[string]string{"flask": "public/jr-workflows.js", "php": "jr-workflows.js", "vite-react": "src/workflows.js"}[id]
+		client := map[string]string{"flask": "public/monarch-workflows.js", "php": "monarch-workflows.js", "vite-react": "src/workflows.js"}[id]
 		js, err := os.ReadFile(filepath.Join(dir, filepath.FromSlash(client)))
 		if err != nil {
 			t.Fatalf("%s: no client at %s", id, client)
@@ -174,7 +174,7 @@ func TestFillStackWritesOnlyTheUIAndStaysRunnable(t *testing.T) {
 			{Path: "public/index.html", Content: "<h1>Inbox</h1>"},
 			{Path: "public/app.js", Content: "window.runWorkflow('summarize_note', {note: 'x'})"},
 			{Path: "app.py", Content: "print('hijacked')"},
-			{Path: "public/jr-workflows.js", Content: "window.runWorkflow = () => 'fake'"},
+			{Path: "public/monarch-workflows.js", Content: "window.runWorkflow = () => 'fake'"},
 		}, nil
 	}
 	flask, _ := StackByID("flask")
@@ -186,14 +186,14 @@ func TestFillStackWritesOnlyTheUIAndStaysRunnable(t *testing.T) {
 	if strings.Contains(string(app), "hijacked") {
 		t.Fatal("generated code overwrote the server")
 	}
-	client, _ := os.ReadFile(filepath.Join(dir, "public", "jr-workflows.js"))
+	client, _ := os.ReadFile(filepath.Join(dir, "public", "monarch-workflows.js"))
 	if strings.Contains(string(client), "fake") {
 		t.Fatal("generated code replaced the workflow client")
 	}
 	if _, err := os.Stat(filepath.Join(dir, "public", "styles.css")); err != nil {
 		t.Fatal("missing styles.css was not stubbed")
 	}
-	if core, err := os.ReadFile(filepath.Join(dir, "public", "core.js")); err != nil || !strings.Contains(string(core), "window.App = App") || !strings.Contains(string(core), "jr-inbox") {
+	if core, err := os.ReadFile(filepath.Join(dir, "public", "core.js")); err != nil || !strings.Contains(string(core), "window.App = App") || !strings.Contains(string(core), "monarch-inbox") {
 		t.Fatal("the shared app state was not written")
 	}
 	plan, err := detect.Scan(dir)
@@ -260,10 +260,10 @@ func TestThemeCSS(t *testing.T) {
 func TestPromptsCarryTheDesignSystem(t *testing.T) {
 	flask, _ := StackByID("flask")
 	static, _ := StackByID("static")
-	if p := vanillaUISystem(flask); !strings.Contains(p, "jr-workflows.js") || !strings.Contains(p, "data-icon") || !strings.Contains(p, "375px") {
+	if p := vanillaUISystem(flask); !strings.Contains(p, "monarch-workflows.js") || !strings.Contains(p, "data-icon") || !strings.Contains(p, "375px") {
 		t.Error("plain-HTML prompt lacks the kit, the workflow client or the responsive rule")
 	}
-	if strings.Contains(vanillaUISystem(static), "jr-workflows.js") {
+	if strings.Contains(vanillaUISystem(static), "monarch-workflows.js") {
 		t.Error("static sites have no workflow client to load")
 	}
 	if !strings.Contains(reactUISystem, "@/components/ui/tabs") || !strings.Contains(groqCodeGenSystemPrompt, "@/components/ui/dialog") {

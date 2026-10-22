@@ -12,7 +12,7 @@ import { guardEditBlocks, applyGuardrailVerdicts } from "./guardrails.js";
 
 // A real git repository, because the whole point of this module is that it reads a diff.
 function repo() {
-  const dir = mkdtempSync(join(tmpdir(), "jr-review-"));
+  const dir = mkdtempSync(join(tmpdir(), "monarch-review-"));
   const git = (...args) => execFileSync("git", args, { cwd: dir, encoding: "utf8" });
   const put = (rel, body) => {
     const abs = join(dir, ...rel.split("/"));
@@ -141,7 +141,7 @@ test("writeAudit appends JSONL and never rewrites history", () => {
 });
 
 test("reviewRange refuses a directory that is not a git repository", async () => {
-  const dir = mkdtempSync(join(tmpdir(), "jr-not-git-"));
+  const dir = mkdtempSync(join(tmpdir(), "monarch-not-git-"));
   await assert.rejects(() => reviewRange({ dir, base: "main" }), /not a git repository/);
 });
 

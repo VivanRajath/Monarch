@@ -1,5 +1,5 @@
 <?php
-// Runs Agent Hub workflows for the UI (called as /api.php?workflow=<key>); the tokens in jr-workflows.json never reach the browser.
+// Runs Agent Hub workflows for the UI (called as /api.php?workflow=<key>); the tokens in monarch-workflows.json never reach the browser.
 header('Content-Type: application/json');
 
 function reply(int $code, array $body): void {
@@ -9,9 +9,9 @@ function reply(int $code, array $body): void {
 }
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') reply(405, ['status' => 'failed', 'error' => 'POST only']);
-$cfg = json_decode(@file_get_contents(__DIR__ . '/jr-workflows.json') ?: '{}', true) ?: [];
+$cfg = json_decode(@file_get_contents(__DIR__ . '/monarch-workflows.json') ?: '{}', true) ?: [];
 $flow = $cfg['workflows'][$_GET['workflow'] ?? ''] ?? null;
-if (!$flow) { error_log('[workflow] ' . ($_GET['workflow'] ?? '') . ': unknown workflow (check jr-workflows.json)'); reply(404, ['status' => 'failed', 'error' => 'Unknown workflow']); }
+if (!$flow) { error_log('[workflow] ' . ($_GET['workflow'] ?? '') . ': unknown workflow (check monarch-workflows.json)'); reply(404, ['status' => 'failed', 'error' => 'Unknown workflow']); }
 $started = microtime(true);
 
 $input = json_decode(file_get_contents('php://input') ?: '{}', true) ?: new stdClass();

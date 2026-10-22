@@ -1,20 +1,20 @@
 // GitHub connection shared by Home, Settings and the IDE: connect (OAuth or token), the repo picker, and the account card.
-const JRGH = { status: null, repos: [], loading: false };
+const MonarchGH = { status: null, repos: [], loading: false };
 
 const ghEsc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const GH_MARK = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.53-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.71 1.26 3.37.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.69 5.38-5.26 5.67.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z"/></svg>';
 
 async function ghJSON(url, opts = {}) {
-  const res = await fetch(url, opts.body ? { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Jr': '1' }, ...opts, body: JSON.stringify(opts.body) } : opts);
+  const res = await fetch(url, opts.body ? { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Monarch': '1' }, ...opts, body: JSON.stringify(opts.body) } : opts);
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || `request failed (${res.status})`);
   return data;
 }
 
 async function ghStatus(force = false) {
-  if (JRGH.status && !force) return JRGH.status;
-  try { JRGH.status = await ghJSON('/github/status'); } catch { JRGH.status = { connected: false, oauth: false }; }
-  return JRGH.status;
+  if (MonarchGH.status && !force) return MonarchGH.status;
+  try { MonarchGH.status = await ghJSON('/github/status'); } catch { MonarchGH.status = { connected: false, oauth: false }; }
+  return MonarchGH.status;
 }
 
 // OAuth comes back to next with ?github=connected or ?github_error=...
@@ -24,7 +24,7 @@ function ghConnect(next) {
 
 async function ghDisconnect() {
   await ghJSON('/github/disconnect', { body: {} });
-  JRGH.status = null;
+  MonarchGH.status = null;
   return ghStatus(true);
 }
 
@@ -102,17 +102,17 @@ async function mountRepoPicker(box, onPick) {
   const search = box.querySelector('.gh-search');
   const render = () => {
     const term = search.value.trim().toLowerCase();
-    const rows = JRGH.repos.filter((r) => !term || (r.fullName + ' ' + (r.description || '')).toLowerCase().includes(term)).slice(0, 60);
+    const rows = MonarchGH.repos.filter((r) => !term || (r.fullName + ' ' + (r.description || '')).toLowerCase().includes(term)).slice(0, 60);
     list.innerHTML = rows.length ? rows.map((r) => `
       <button class="gh-repo" type="button" role="listitem" data-url="${ghEsc(r.url)}" data-branch="${ghEsc(r.defaultBranch)}" title="Open ${ghEsc(r.fullName)} in the IDE">
         <span class="gh-repo-name">${ghEsc(r.fullName)}${r.private ? '<span class="gh-tag">Private</span>' : ''}</span>
         <span class="gh-repo-meta">${ghEsc(r.language || '')}${r.language ? ' · ' : ''}${ghEsc(r.defaultBranch)} · ${ghTimeAgo(r.pushedAt)}</span>
-      </button>`).join('') : `<div class="gh-empty">${JRGH.repos.length ? 'No repository matches.' : 'No repositories on this account yet.'}</div>`;
+      </button>`).join('') : `<div class="gh-empty">${MonarchGH.repos.length ? 'No repository matches.' : 'No repositories on this account yet.'}</div>`;
     list.querySelectorAll('.gh-repo').forEach((b) => b.addEventListener('click', () => onPick(b.dataset.url, b.dataset.branch)));
   };
   search.addEventListener('input', render);
   try {
-    if (!JRGH.repos.length) JRGH.repos = (await ghJSON('/github/repos')).repos;
+    if (!MonarchGH.repos.length) MonarchGH.repos = (await ghJSON('/github/repos')).repos;
     render();
   } catch (e) {
     list.innerHTML = `<div class="gh-empty gh-error">${ghEsc(e.message)}</div>`;
@@ -155,10 +155,10 @@ async function mountAccountCard(box) {
   box.querySelector('[data-gh-disconnect]')?.addEventListener('click', async (e) => {
     e.target.disabled = true;
     await ghDisconnect().catch(() => {});
-    JRGH.repos = [];
+    MonarchGH.repos = [];
     mountAccountCard(box);
   });
-  box.querySelector('[data-signout]')?.addEventListener('click', jrSignOut);
+  box.querySelector('[data-signout]')?.addEventListener('click', monarchSignOut);
   if (status.connected) ghMountPrefs(box.querySelector('#gh-prefs'));
   if (status.connected && (q.get('github') === 'connected' || q.has('sync'))) ghSyncRepos(box, true);
   if (q.has('github') || q.has('github_error') || q.has('sync')) history.replaceState(null, '', location.pathname + location.hash);
@@ -174,19 +174,19 @@ async function ghSyncRepos(box, force = false) {
   try {
     const status = await ghStatus(true);
     if (!status.connected) throw new Error('GitHub is no longer connected');
-    if (force || !JRGH.repos.length) {
+    if (force || !MonarchGH.repos.length) {
       const all = [];
       for (let page = 1; page <= 5; page++) {
         const d = await ghJSON(`/github/repos?page=${page}`);
         all.push(...d.repos);
         if (!d.more) break;
       }
-      JRGH.repos = all;
-      JRGH.syncedAt = Date.now();
+      MonarchGH.repos = all;
+      MonarchGH.syncedAt = Date.now();
     }
-    const priv = JRGH.repos.filter((r) => r.private).length;
+    const priv = MonarchGH.repos.filter((r) => r.private).length;
     out.innerHTML = `<div class="gh-synced-head">
-        <span class="gh-ok">Synced ${JRGH.repos.length} repositor${JRGH.repos.length === 1 ? 'y' : 'ies'}${priv ? ` (${priv} private)` : ''} · just now</span>
+        <span class="gh-ok">Synced ${MonarchGH.repos.length} repositor${MonarchGH.repos.length === 1 ? 'y' : 'ies'}${priv ? ` (${priv} private)` : ''} · just now</span>
         <input class="gh-search" type="search" placeholder="Search repositories" aria-label="Search repositories">
       </div>
       <div class="gh-repos gh-repos-tall" role="list"></div>`;
@@ -194,7 +194,7 @@ async function ghSyncRepos(box, force = false) {
     const search = out.querySelector('.gh-search');
     const render = () => {
       const term = search.value.trim().toLowerCase();
-      const rows = JRGH.repos.filter((r) => !term || (r.fullName + ' ' + (r.description || '')).toLowerCase().includes(term)).slice(0, 100);
+      const rows = MonarchGH.repos.filter((r) => !term || (r.fullName + ' ' + (r.description || '')).toLowerCase().includes(term)).slice(0, 100);
       list.innerHTML = rows.length ? rows.map((r) => `
         <div class="gh-repo-row" role="listitem">
           <div class="gh-repo-info">
@@ -208,7 +208,7 @@ async function ghSyncRepos(box, force = false) {
     search.addEventListener('input', render);
     render();
   } catch (e) {
-    const st = JRGH.status || {};
+    const st = MonarchGH.status || {};
     const fix = /reconnect/i.test(e.message)
       ? (st.oauth ? '<button class="gh-btn" type="button" data-gh-reconnect>Reconnect GitHub</button>' : '<span class="gh-muted">Disconnect, then save a new token.</span>')
       : '';
@@ -250,11 +250,11 @@ async function ghMountPrefs(box) {
 
 // Hands the repo to Home through sessionStorage, so only this site (never a link from elsewhere) can start a clone.
 function ghOpenInIDE(url, branch) {
-  try { sessionStorage.setItem('jr-open-repo', JSON.stringify({ url, branch })); } catch { /* storage blocked */ }
+  try { sessionStorage.setItem('monarch-open-repo', JSON.stringify({ url, branch })); } catch { /* storage blocked */ }
   location.href = '/?open=repo';
 }
 
-async function jrSignOut() {
-  try { await fetch('/auth/logout', { method: 'POST', headers: { 'X-Jr': '1' } }); } catch { /* go to login anyway */ }
+async function monarchSignOut() {
+  try { await fetch('/auth/logout', { method: 'POST', headers: { 'X-Monarch': '1' } }); } catch { /* go to login anyway */ }
   location.href = '/login';
 }

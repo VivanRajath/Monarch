@@ -1,4 +1,4 @@
-# Serves the UI from public/ and runs Agent Hub workflows for it; the tokens in jr-workflows.json never reach the browser.
+# Serves the UI from public/ and runs Agent Hub workflows for it; the tokens in monarch-workflows.json never reach the browser.
 require 'json'
 require 'net/http'
 require 'sinatra/base'
@@ -9,7 +9,7 @@ class App < Sinatra::Base
 
   helpers do
     def workflow_config
-      JSON.parse(File.read(File.join(__dir__, 'jr-workflows.json')))
+      JSON.parse(File.read(File.join(__dir__, 'monarch-workflows.json')))
     rescue StandardError
       { 'workflows' => {} }
     end
@@ -24,7 +24,7 @@ class App < Sinatra::Base
     cfg = workflow_config
     flow = (cfg['workflows'] || {})[params[:key]]
     unless flow
-      $stdout.puts "[workflow] #{params[:key]}: unknown workflow (check jr-workflows.json)"
+      $stdout.puts "[workflow] #{params[:key]}: unknown workflow (check monarch-workflows.json)"
       halt 404, { status: 'failed', error: 'Unknown workflow' }.to_json
     end
     started = Time.now

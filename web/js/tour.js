@@ -8,9 +8,9 @@
     { el: '#panel-prompt', before: mode('prompt'), title: 'Run a repo', text: 'Paste any GitHub URL to get it running on a live URL. The stack and ports are detected and shown to you before anything runs.' },
     { el: '#source-saved', before: mode('build'), title: 'Your projects', text: 'Projects you save from the IDE stay here after the sandbox stops, so you can pick up where you left off.' },
     { el: '#hubCard', title: 'Agent Hub', text: 'The agents and workflows your apps use. Open the Hub to test an agent, or wire agents together into a workflow.' },
-    { el: () => document.querySelector('.jr-rail [data-nav="hub"]')?.closest('.jr-rail-group'), place: 'right', title: 'Agents, Workflows and Settings', text: 'Manage your agents and workflows from here. In Settings you add AI keys and connect GitHub.' },
+    { el: () => document.querySelector('.monarch-rail [data-nav="hub"]')?.closest('.monarch-rail-group'), place: 'right', title: 'Agents, Workflows and Settings', text: 'Manage your agents and workflows from here. In Settings you add AI keys and connect GitHub.' },
   ];
-  const DONE_KEY = 'jr-tour-done';
+  const DONE_KEY = 'monarch-tour-done';
   const PAD = 8;
   let step = -1;
   let ui = null;
@@ -104,7 +104,7 @@
   // First name for the greeting, from whoever is signed in.
   async function userName() {
     try {
-      const p = (await (await fetch('/auth/me', { headers: { 'X-Jr': '1' } })).json()).profile || {};
+      const p = (await (await fetch('/auth/me', { headers: { 'X-Monarch': '1' } })).json()).profile || {};
       return (p.name || '').split(' ')[0] || p.login || (p.email || '').split('@')[0];
     } catch { return ''; }
   }
@@ -135,7 +135,7 @@
     scrollTo({ top: 0 });
   }
 
-  window.jrStartTour = start;
+  window.monarchStartTour = start;
 
   // Read before app.js clears the query; deep links (an OAuth return, ?open=repo) skip the automatic run.
   const q = new URLSearchParams(location.search);

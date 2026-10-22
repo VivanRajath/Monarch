@@ -123,7 +123,7 @@ func hostGatewayArgs() []string {
 	return []string{"--add-host", "host.docker.internal:host-gateway"}
 }
 
-func tokenEnv(key string) string { return "JR_WF_" + strings.ToUpper(key) + "_TOKEN" }
+func tokenEnv(key string) string { return "MONARCH_WF_" + strings.ToUpper(key) + "_TOKEN" }
 
 func sortedKeys(m map[string]string) []string {
 	keys := make([]string, 0, len(m))
@@ -248,9 +248,9 @@ export async function POST(req: Request, { params }: { params: { key: string } }
     return NextResponse.json({ status: 'failed', error: 'Unknown workflow' }, { status: 404 });
   }
   const started = Date.now();
-  const base = process.env.JR_API_BASE;
+  const base = process.env.MONARCH_API_BASE;
   const token = process.env[flow.tokenEnv];
-  if (!base || !token) return NextResponse.json({ status: 'failed', error: 'JR_API_BASE or this workflow\'s token is missing from .env.local' }, { status: 500 });
+  if (!base || !token) return NextResponse.json({ status: 'failed', error: 'MONARCH_API_BASE or this workflow\'s token is missing from .env.local' }, { status: 500 });
   const input = await req.json().catch(() => ({}));
   try {
     const res = await fetch(base + '/hooks/workflows/' + flow.id + '/run', {
@@ -270,7 +270,7 @@ export async function POST(req: Request, { params }: { params: { key: string } }
 `
 	env := []string{
 		"# Monarch Build mode: where this app's workflows run, and one token per workflow (replace or revoke them in Agent Hub > Workflows > Webhook).",
-		"JR_API_BASE=" + apiBaseForContainers(),
+		"MONARCH_API_BASE=" + apiBaseForContainers(),
 	}
 	for _, f := range flows {
 		env = append(env, tokenEnv(f.Key)+"="+f.Token)

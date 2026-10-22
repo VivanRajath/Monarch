@@ -1,4 +1,4 @@
-# Serves the UI from public/ and runs Agent Hub workflows for it; the tokens in jr-workflows.json never reach the browser.
+# Serves the UI from public/ and runs Agent Hub workflows for it; the tokens in monarch-workflows.json never reach the browser.
 import asyncio
 import time
 import json
@@ -16,7 +16,7 @@ app = FastAPI()
 
 def workflow_config():
     try:
-        with open(os.path.join(ROOT, "jr-workflows.json"), encoding="utf-8") as f:
+        with open(os.path.join(ROOT, "monarch-workflows.json"), encoding="utf-8") as f:
             return json.load(f)
     except (OSError, ValueError):
         return {"workflows": {}}
@@ -41,7 +41,7 @@ async def run_workflow(key: str, request: Request):
     cfg = workflow_config()
     flow = cfg.get("workflows", {}).get(key)
     if not flow:
-        print(f"[workflow] {key}: unknown workflow (check jr-workflows.json)", flush=True)
+        print(f"[workflow] {key}: unknown workflow (check monarch-workflows.json)", flush=True)
         return JSONResponse({"status": "failed", "error": "Unknown workflow"}, status_code=404)
     started = time.monotonic()
     try:

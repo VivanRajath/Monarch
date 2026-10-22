@@ -59,7 +59,7 @@ function renderSteps() {
 
 // --- local draft: an unsaved new agent survives a refresh ---
 
-const DRAFT_KEY = 'jr-studio-draft';
+const DRAFT_KEY = 'monarch-studio-draft';
 
 function saveDraft() {
   if (ST.agentId || !ST.def) return;
@@ -111,7 +111,7 @@ function renderStart() {
   $('s-blank').addEventListener('click', startCustom);
   if ($('s-resume')) $('s-resume').addEventListener('click', () => { ST.fromBuilder = draft.fromBuilder; openEditor(draft.def, false, true); });
   if (!ST.meta.providers.some((p) => p.hasKey)) {
-    jrKeyBanner($('s-keybanner'), { onSaved: async () => { ST.meta = await hubApi('GET', '/meta'); } });
+    monarchKeyBanner($('s-keybanner'), { onSaved: async () => { ST.meta = await hubApi('GET', '/meta'); } });
   }
 }
 

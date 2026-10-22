@@ -144,7 +144,7 @@ export function applyKeys(body) {
 }
 
 // Go starts this process with the keys Settings holds, already merged over the .env ones.
-try { if (process.env.JR_PROVIDER_KEYS) applyKeys({ keys: JSON.parse(process.env.JR_PROVIDER_KEYS) }); } catch { console.error("[agent] JR_PROVIDER_KEYS is not valid JSON; using the .env keys"); }
+try { if (process.env.MONARCH_PROVIDER_KEYS) applyKeys({ keys: JSON.parse(process.env.MONARCH_PROVIDER_KEYS) }); } catch { console.error("[agent] MONARCH_PROVIDER_KEYS is not valid JSON; using the .env keys"); }
 
 const cursors = {};
 // Consecutive requests land on different keys, which for Groq means different orgs' TPM buckets.
@@ -199,7 +199,7 @@ export function modelFor(uiProvider, tier = "code") {
 let _toollessHome = null;
 export function toollessAgentHome() {
   if (_toollessHome) return _toollessHome;
-  _toollessHome = mkdtempSync(join(tmpdir(), "jr-agent-home-"));
+  _toollessHome = mkdtempSync(join(tmpdir(), "monarch-agent-home-"));
   writeFileSync(join(_toollessHome, "agent.yaml"), [
     'spec_version: "0.1.0"',
     "name: monarch-toolless",

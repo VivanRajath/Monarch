@@ -24,7 +24,7 @@ type Request struct {
 }
 
 // Per-service logs land here so a crashed service can still be read.
-const logDir = "/tmp/jr"
+const logDir = "/tmp/monarch"
 
 // Clone and scan only. Nothing is built or started until approveSandbox runs.
 func startSandbox(owner, repo, branch, instructions string, autoApprove bool) (core.Sandbox, error) {

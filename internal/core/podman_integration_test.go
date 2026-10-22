@@ -8,11 +8,11 @@ import (
 	"testing"
 )
 
-// Real rootless Podman only: JR_PODMAN_IT=1 inside the WSL/Linux service account, otherwise skipped.
+// Real rootless Podman only: MONARCH_PODMAN_IT=1 inside the WSL/Linux service account, otherwise skipped.
 func requirePodman(t *testing.T) {
 	t.Helper()
-	if os.Getenv("JR_PODMAN_IT") != "1" {
-		t.Skip("set JR_PODMAN_IT=1 to run against real podman")
+	if os.Getenv("MONARCH_PODMAN_IT") != "1" {
+		t.Skip("set MONARCH_PODMAN_IT=1 to run against real podman")
 	}
 	if _, err := exec.LookPath("podman"); err != nil {
 		t.Skip("podman not installed")
@@ -26,7 +26,7 @@ func requirePodman(t *testing.T) {
 
 func TestPodmanAcceptsEveryRunFlag(t *testing.T) {
 	requirePodman(t)
-	name := "jr-it-flags"
+	name := "monarch-it-flags"
 	docker("rm", "-f", "-v", name)
 	dir := filepath.Join(Cfg.WorkDir, "sandbox-424242")
 	os.MkdirAll(dir, 0o755)

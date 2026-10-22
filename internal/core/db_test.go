@@ -22,7 +22,7 @@ func withTestDB(t *testing.T) {
 	old := Cfg
 	Cfg.DataDir = t.TempDir()
 	Cfg.SessionSecret = []byte(strings.Repeat("s", 32))
-	name := "jr_test_" + randomHex(6)
+	name := "monarch_test_" + randomHex(6)
 	if err := OpenDB(uri, name); err != nil {
 		t.Fatal(err)
 	}

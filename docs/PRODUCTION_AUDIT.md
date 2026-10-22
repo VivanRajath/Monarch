@@ -9,7 +9,7 @@ Scope read: `main.go`, `internal/{core,server,builder,detect,gitagent}`, `agent-
 ```mermaid
 flowchart LR
   B[Browser] -->|HTTPS, cookie session| GO[Go server :9000]
-  GO -->|reverse proxy /agent/*, X-Jr-User + internal token| NODE[Node agent service :8001]
+  GO -->|reverse proxy /agent/*, X-Monarch-User + internal token| NODE[Node agent service :8001]
   NODE -->|/terminal/exec, /sandbox/sync as 'internal'| GO
   GO -->|docker / podman CLI and Engine API| C[(Sandbox containers)]
   GO -->|git clone on the host| GH[(GitHub)]
@@ -29,8 +29,8 @@ flowchart LR
 
 | Boundary | Enforced by | Notes |
 |---|---|---|
-| Browser to Go | `RequireAuth` (session cookie), `OriginGuard`, `X-Jr` header on writes (`internal/server/auth.go`, `routes.go`) | Real boundary. |
-| Go to Node | `X-Jr-Internal` token, loopback bind (`server.js` `fromMonarch`) | Real when the token is set; `fromMonarch` returns true when the token is empty. Go always generates one when it spawns Node (`config.go`). |
+| Browser to Go | `RequireAuth` (session cookie), `OriginGuard`, `X-Monarch` header on writes (`internal/server/auth.go`, `routes.go`) | Real boundary. |
+| Go to Node | `X-Monarch-Internal` token, loopback bind (`server.js` `fromMonarch`) | Real when the token is set; `fromMonarch` returns true when the token is empty. Go always generates one when it spawns Node (`config.go`). |
 | Node to Go callbacks | Same token, loopback and no `X-Forwarded-For` (`auth.go` `isInternalCall`) | Node calls Go as `InternalUser`, which `CanUse` treats as owning every sandbox. |
 | Sandbox to host | Container isolation, `no-new-privileges`, 5 dropped caps, pids/mem/cpu limits (`core/docker.go`) | Strong on the WSL deployment (rootless Podman + nftables egress, `deploy/wsl/harden.sh`). Weak under Docker Desktop: root in the container, host loopback and LAN reachable. |
 | Model to system | Edit guard (`guardEditBlocks`), OpenGAP hooks, Planning-mode command approval | Partial: the agentic `shell` tool is not behind either (see W-04). |
@@ -40,7 +40,7 @@ flowchart LR
 
 The browser can: start a sandbox from any http(s) repo URL, read/write/rename/delete any file in its own sandbox, run any command in its own container (`/terminal/exec`, `/terminal/ws`), drive the agent over `/agent/ws`, run Build mode, manage GitHub (pull, push, PR, publish, unshallow), manage Hub agents/workflows and paste provider keys.
 
-What the browser sends that the backend uses for identity: nothing. The user comes from the session cookie; the proxy overwrites any client `X-Jr-User` (`proxy.go`). The browser does choose the **container name** in every sandbox call; Go then checks ownership (`ownedSandbox`), and Node checks `session.owner` (`mayUse`).
+What the browser sends that the backend uses for identity: nothing. The user comes from the session cookie; the proxy overwrites any client `X-Monarch-User` (`proxy.go`). The browser does choose the **container name** in every sandbox call; Go then checks ownership (`ownedSandbox`), and Node checks `session.owner` (`mayUse`).
 
 ## 4. Backend capabilities
 
@@ -52,7 +52,7 @@ Clone (host git), container start, terminal attach/exec, file writes, agent edit
 
 ## 6. Authentication
 
-- Beta code (`JR_BETA_CODE`, constant-time compare, 10 attempts/min/IP) and Google/GitHub OAuth with a state cookie (`oauth.go`).
+- Beta code (`MONARCH_BETA_CODE`, constant-time compare, 10 attempts/min/IP) and Google/GitHub OAuth with a state cookie (`oauth.go`).
 - Accounts merge on verified email (`core/accounts.go` `ResolveUser`).
 - Local mode with no login maps every request to user `local`; config refuses a public origin without a login (`config.go` `Validate`).
 
@@ -60,15 +60,15 @@ Clone (host git), container start, terminal attach/exec, file writes, agent edit
 
 - Ownership is the only model: a sandbox, project, agent, workflow or run belongs to one user ID.
 - Go: `ownedSandbox` per handler; projects keyed by owner; GitHub link per user.
-- Node: `mayUse(user, session)`; Hub routes scope every query by `x-jr-user`.
+- Node: `mayUse(user, session)`; Hub routes scope every query by `x-monarch-user`.
 - There is no central `Authorize()`; each handler calls the check itself. It is applied consistently in the handlers read, but nothing prevents a new handler from forgetting it.
 - `InternalUser` bypasses ownership entirely, so Node is a confused deputy: whatever container Node names, Go acts on.
 
 ## 8. Sessions
 
 - Stateless HMAC cookie: `base64(user|expiry).hmac` (`auth.go`), 7 days, `HttpOnly`, `SameSite=Lax`, `Secure` and `__Host-` prefix when the origin is https.
-- No server-side session record: logout only clears the cookie, so a copied cookie stays valid until it expires. The only global revocation is rotating `JR_SESSION_SECRET`.
-- CSRF: `SameSite=Lax` + required `X-Jr` header on unsafe methods + Origin check. Adequate.
+- No server-side session record: logout only clears the cookie, so a copied cookie stays valid until it expires. The only global revocation is rotating `MONARCH_SESSION_SECRET`.
+- CSRF: `SameSite=Lax` + required `X-Monarch` header on unsafe methods + Origin check. Adequate.
 
 ## 9. Filesystem
 
@@ -156,7 +156,7 @@ Single host. Public deployment = WSL + rootless Podman + nftables egress + stora
 | W-15 | LOW | Unbounded request body on `/run` | `sandbox.go` `runHandler` | `json.NewDecoder(r.Body)` without a limit. |
 | W-16 | LOW | No structured logs, request IDs or audit events | `core.Logf` | Incidents cannot be reconstructed. |
 | W-17 | LOW | CI runs no build, tests, lint or secret scan | `.github/workflows` | Regressions and leaked keys reach `main` unchecked. |
-| W-18 | LOW | A non-loopback listen address without a login is not refused | `config.go` `Validate` | `JR_LISTEN_ADDR=0.0.0.0:9000` with no auth and no public origin exposes everything as user `local`. |
+| W-18 | LOW | A non-loopback listen address without a login is not refused | `config.go` `Validate` | `MONARCH_LISTEN_ADDR=0.0.0.0:9000` with no auth and no public origin exposes everything as user `local`. |
 
 What is already solid and should be kept: `os.Root` file I/O, ownership checks on every sandbox handler read, proxy-overwritten identity headers, origin + custom-header CSRF defence, sealed GitHub tokens with redaction in errors, server-held command approvals, the WSL hardening (rootless Podman, egress firewall, storage pools, preflight).
 

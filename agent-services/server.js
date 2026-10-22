@@ -48,9 +48,9 @@ process.on("uncaughtException", (err) => {
 const app = express();
 
 // Loopback is no boundary under Docker Desktop (host.docker.internal reaches it), so only callers holding Go's token get in.
-export function fromMonarch(headers, token = process.env.JR_INTERNAL_TOKEN || "") {
+export function fromMonarch(headers, token = process.env.MONARCH_INTERNAL_TOKEN || "") {
   if (!token) return true;
-  const got = Buffer.from(String(headers["x-jr-internal"] || ""));
+  const got = Buffer.from(String(headers["x-monarch-internal"] || ""));
   const want = Buffer.from(token);
   return got.length === want.length && timingSafeEqual(got, want);
 }
@@ -61,7 +61,7 @@ const server = createServer(app);
 // Mirrors Go's OriginGuard in case this port is ever reached without going through it.
 export function isAllowedOrigin(origin) {
   if (!origin) return true;
-  const pub = (process.env.JR_PUBLIC_ORIGIN || "").replace(/\/$/, "").toLowerCase();
+  const pub = (process.env.MONARCH_PUBLIC_ORIGIN || "").replace(/\/$/, "").toLowerCase();
   if (pub) return origin.replace(/\/$/, "").toLowerCase() === pub;
   try {
     return ["127.0.0.1", "localhost", "[::1]"].includes(new URL(origin).hostname);
@@ -74,15 +74,15 @@ const wss = new WebSocketServer({ server, verifyClient: ({ origin, req }) => isA
 // Active sessions: container -> { dir, stack, owner, wss clients }
 const sessions = new Map();
 
-// Go's proxy sets X-Jr-User on every call it forwards; only Go's own calls (token-checked above) come without one.
+// Go's proxy sets X-Monarch-User on every call it forwards; only Go's own calls (token-checked above) come without one.
 function mayUse(user, session) {
   return user === undefined || user === "internal" || user === session.owner;
 }
 
-// Per-user model calls per hour, set by Go (JR_LLM_PER_HOUR); 0 or unset means no cap.
+// Per-user model calls per hour, set by Go (MONARCH_LLM_PER_HOUR); 0 or unset means no cap.
 const llmUse = new Map();
 export function allowLLM(user, now = Date.now()) {
-  const max = Number(process.env.JR_LLM_PER_HOUR) || 0;
+  const max = Number(process.env.MONARCH_LLM_PER_HOUR) || 0;
   if (!max || user === undefined || user === "internal") return { ok: true };
   const w = llmUse.get(user);
   if (!w || now - w.start >= 3600_000) {
@@ -98,7 +98,7 @@ const llmLimitMessage = (m) => `hourly AI limit reached, try again in ${m} min`;
 const LLM_ROUTES = new Set(["/agent/chat", "/agent/diagnose", "/agent/knowledge", "/agent/guardrail/fix", "/agent/registry/preview"]);
 app.use((req, res, next) => {
   if (req.method !== "POST" || !LLM_ROUTES.has(req.path)) return next();
-  const r = allowLLM(req.get("x-jr-user"));
+  const r = allowLLM(req.get("x-monarch-user"));
   if (!r.ok) return res.status(429).json({ error: llmLimitMessage(r.minutes) });
   next();
 });
@@ -109,7 +109,7 @@ app.use("/agent/hub", createHubRouter({ allowLLM }));
 app.use((req, res, next) => {
   const container = (req.body && req.body.container) || req.query.container;
   const session = container && sessions.get(container);
-  if (session && !mayUse(req.get("x-jr-user"), session)) {
+  if (session && !mayUse(req.get("x-monarch-user"), session)) {
     return res.status(404).json({ error: "sandbox not registered" });
   }
   next();
@@ -127,7 +127,7 @@ const WRITE_TOOLS = new Set(["write", "edit", "create", "shell"]);
 const HOST_PORT = Number(process.env.HOST_PORT) || 9000;
 const HOST_URL = `http://127.0.0.1:${HOST_PORT}`;
 // Go's login gate lets these callbacks through on the token it handed this process.
-const HOST_HEADERS = { "Content-Type": "application/json", "X-Jr-Internal": process.env.JR_INTERNAL_TOKEN || "" };
+const HOST_HEADERS = { "Content-Type": "application/json", "X-Monarch-Internal": process.env.MONARCH_INTERNAL_TOKEN || "" };
 
 // Run a command inside the sandbox container.
 async function hostExec(container, command, timeoutMs) {
@@ -582,7 +582,7 @@ const EDIT_STYLE_CANDIDATES = [
 // Colour and theme requests are answered by stylesheets first, before markup.
 const EDIT_COLOR_INTENT = /\b(colou?rs?|theme|palette|dark|light|accent|primary|brand|orange|blue|pink|red|green|purple|violet|yellow|teal|cyan|indigo|gr[ae]y|black|white|gradient|background)\b/i;
 // Data, lockfiles, generated specs and examples never answer a UI request, even when a search word matches them.
-const EDIT_NOT_TARGET = /(?:^|\/)(?:package-lock\.json|yarn\.lock|pnpm-lock\.yaml|[^/]*\.example\.[^/]+|\.env[^/]*|jr-workflows[^/]*\.json|agent\.yaml|INSTRUCTIONS\.md|(?:public\/)?ui\.(?:css|js))$|^(?:\.gitagent|knowledge)\//i;
+const EDIT_NOT_TARGET = /(?:^|\/)(?:package-lock\.json|yarn\.lock|pnpm-lock\.yaml|[^/]*\.example\.[^/]+|\.env[^/]*|monarch-workflows[^/]*\.json|agent\.yaml|INSTRUCTIONS\.md|(?:public\/)?ui\.(?:css|js))$|^(?:\.gitagent|knowledge)\//i;
 const EDIT_STYLE_INTENT = /\b(theme|dark|light|colou?r|style|styling|css|font|background|ui|layout|design|spacing|padding|margin)\b/i;
 // Library and generated boilerplate is never a good edit target, even when a keyword search matches it.
 const EDIT_SKIP_PATH = /(?:^|\/)(?:components\/ui|node_modules|\.next|dist|build|out|coverage|vendor|\.git)\//i;
@@ -1269,7 +1269,7 @@ app.post("/agent/chat", async (req, res) => {
         model,
         replaceBuiltinTools: true,
         allowedTools: AGENT_ALLOWED_TOOLS,
-        tools: agentTools(session.dir, container, { user: req.get("x-jr-user") || "" }),
+        tools: agentTools(session.dir, container, { user: req.get("x-monarch-user") || "" }),
         constraints: { maxTokens: outputCap(model) },
       };
   let fullResponse = "";
@@ -1877,7 +1877,7 @@ app.post("/agent/opengap/add", ogRoute(async (s, req) => {
 }));
 app.get("/agent/opengap/runs", ogRoute((s) => ({ runs: opengap.listRuns(s.dir) })));
 app.post("/agent/opengap/smoke", ogRoute(async (s, req) => {
-  const r = allowLLM(req.get("x-jr-user"));
+  const r = allowLLM(req.get("x-monarch-user"));
   if (!r.ok) throw new Error(llmLimitMessage(r.minutes));
   return { steps: await ogRunner.smoke(s.dir, String(req.body.name || ""), modelFor(req.body.provider)) };
 }));
@@ -1893,7 +1893,7 @@ const planner = createPlanner({
 // WebSocket: one connection per sandbox session.
 wss.on("connection", (ws, req) => {
   let boundContainer = null;
-  const user = req.headers["x-jr-user"];
+  const user = req.headers["x-monarch-user"];
   const sessionFor = (c) => {
     const s = sessions.get(c);
     return s && mayUse(user, s) ? s : undefined;

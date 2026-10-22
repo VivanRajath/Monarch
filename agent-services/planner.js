@@ -177,7 +177,7 @@ export function createPlanner(deps) {
   async function execute(ws, entry, policy) {
     entry.status = "running";
     entry.cancelled = false;
-    ws.__jrRunning = entry;
+    ws.__monarchRunning = entry;
     const { plan } = entry;
     const changed = [];
     const updateTasks = () => send(ws, { type: "artifact_update", kind: "tasks", id: entry.id, tasks: plan.tasks });
@@ -240,7 +240,7 @@ export function createPlanner(deps) {
     }
 
     entry.status = entry.cancelled ? "stopped" : "done";
-    ws.__jrRunning = null;
+    ws.__monarchRunning = null;
     send(ws, {
       type: "artifact", kind: "walkthrough", id: entry.id,
       walkthrough: {
@@ -276,7 +276,7 @@ export function createPlanner(deps) {
 
   // Stop: the current task finishes, the rest are skipped, and any command waiting for approval is declined.
   function stop(ws) {
-    if (ws.__jrRunning) ws.__jrRunning.cancelled = true;
+    if (ws.__monarchRunning) ws.__monarchRunning.cancelled = true;
     const map = pending.get(ws);
     if (map) for (const fn of [...map.values()]) fn(false);
   }

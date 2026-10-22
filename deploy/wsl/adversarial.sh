@@ -11,7 +11,7 @@ WIN_GW=$(ip -4 route show default | awk '{print $3}')
 DNS_IP=$(awk '/^nameserver/{print $2; exit}' /etc/resolv.conf)
 IMAGE=${IMAGE:-sandbox-react}
 FLAGS=(--security-opt no-new-privileges --cap-drop NET_RAW --cap-drop MKNOD --cap-drop SYS_CHROOT
-       --cap-drop AUDIT_WRITE --cap-drop SETFCAP --memory 512m --pids-limit 100 --label monarch.sandbox=jr-probe)
+       --cap-drop AUDIT_WRITE --cap-drop SETFCAP --memory 512m --pids-limit 100 --label monarch.sandbox=monarch-probe)
 
 PASSED=0 FAILED=0
 blocked() { # name, command that must fail inside the attacker
@@ -29,17 +29,17 @@ tcp() { local h=${1%:*} p=${1##*:}; echo "node -e \"const s=require('net').conne
 # Canaries make "blocked" mean something: a service is listening there, the sandbox just cannot reach it.
 python3 -m http.server 47999 --bind 0.0.0.0 >/dev/null 2>&1 & CANARY_ALL=$!
 python3 -m http.server 47998 --bind 127.0.0.1 >/dev/null 2>&1 & CANARY_LO=$!
-cleanup() { podman rm -f -v jr-probe-a jr-probe-b >/dev/null 2>&1; kill "$CANARY_ALL" "$CANARY_LO" 2>/dev/null; }
+cleanup() { podman rm -f -v monarch-probe-a monarch-probe-b >/dev/null 2>&1; kill "$CANARY_ALL" "$CANARY_LO" 2>/dev/null; }
 trap cleanup EXIT
-podman rm -f -v jr-probe-a jr-probe-b >/dev/null 2>&1
-podman run -d --name jr-probe-b "${FLAGS[@]}" -p 127.0.0.1:47002:8080 "$IMAGE" \
+podman rm -f -v monarch-probe-a monarch-probe-b >/dev/null 2>&1
+podman run -d --name monarch-probe-b "${FLAGS[@]}" -p 127.0.0.1:47002:8080 "$IMAGE" \
   node -e "require('http').createServer((q,s)=>s.end('B')).listen(8080)" >/dev/null
 if [ -z "$ATTACKER" ]; then
-  ATTACKER=jr-probe-a
-  podman run -d --name jr-probe-a "${FLAGS[@]}" -p 127.0.0.1:47001:8080 "$IMAGE" sleep 900 >/dev/null
+  ATTACKER=monarch-probe-a
+  podman run -d --name monarch-probe-a "${FLAGS[@]}" -p 127.0.0.1:47001:8080 "$IMAGE" sleep 900 >/dev/null
 fi
 sleep 3
-B_IP=$(podman exec jr-probe-b hostname -i | awk '{print $1}')
+B_IP=$(podman exec monarch-probe-b hostname -i | awk '{print $1}')
 echo "attacker=$ATTACKER wsl=$WSL_IP windows-via-wsl=$WIN_GW dns=$DNS_IP lan=${LAN_IP:-?} router=${ROUTER_IP:-?} neighbour=$B_IP"
 
 echo "== normal development must keep working"

@@ -664,7 +664,7 @@ func scaffoldAndRun(workdir, container string, port int, prd *PRD, flows []Built
 	core.AddLog(container, "Starting Docker sandbox (preheated builder image)...")
 	const builderImage = "sandbox-builder"
 	// node_modules lives in one shared volume, filled from the image once per dependency version instead of copying 380 MB on every build.
-	const builderStartCmd = `flock /workspace/node_modules/.jr-lock sh -c '[ "$(cat node_modules/.jr-deps 2>/dev/null)" = "` + builderDepsVersion + `" ] || { find node_modules -mindepth 1 -maxdepth 1 ! -name .jr-lock -exec rm -rf {} + ; cp -r /opt/builder-deps/node_modules/. ./node_modules/ && echo ` + builderDepsVersion + ` > node_modules/.jr-deps; }' && npm run dev -- -H 0.0.0.0`
+	const builderStartCmd = `flock /workspace/node_modules/.monarch-lock sh -c '[ "$(cat node_modules/.monarch-deps 2>/dev/null)" = "` + builderDepsVersion + `" ] || { find node_modules -mindepth 1 -maxdepth 1 ! -name .monarch-lock -exec rm -rf {} + ; cp -r /opt/builder-deps/node_modules/. ./node_modules/ && echo ` + builderDepsVersion + ` > node_modules/.monarch-deps; }' && npm run dev -- -H 0.0.0.0`
 
 	stack := core.ImageToStack(builderImage)
 	if specErr := gitagent.GenerateAgentSpec(workdir, stack); specErr != nil {
@@ -740,7 +740,7 @@ func scaffoldAndRun(workdir, container string, port int, prd *PRD, flows []Built
 
 // The shared node_modules volume for builder containers; bump the version whenever sandbox-images/builder/package.json changes.
 const (
-	builderModulesVolume = "jr-builder-node-modules"
+	builderModulesVolume = "monarch-builder-node-modules"
 	builderDepsVersion   = "next-14.2.3-1"
 )
 
@@ -1057,7 +1057,7 @@ func Materialise(destDir, template string) error {
 		rel := strings.TrimPrefix(path, root)
 		rel = strings.TrimPrefix(rel, "/")
 		// Go sources and go.mod would join this module (or split it) if stored under their real names.
-		rel = strings.TrimSuffix(rel, ".jrtmpl")
+		rel = strings.TrimSuffix(rel, ".monarchtmpl")
 		if rel == "" {
 			return nil // skip root dir itself
 		}

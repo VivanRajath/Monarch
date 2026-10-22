@@ -129,7 +129,7 @@ function renderScm() {
       <textarea id="scm-message" rows="2" placeholder="Commit message (Ctrl+Enter to commit and push)" ${st.changes.length ? '' : 'disabled'}>${ghEsc(SCM.draft || '')}</textarea>
       <label class="scm-check"><input type="checkbox" id="scm-newbranch" ${SCM.newBranch ? 'checked' : ''}> Push to a new branch</label>
       <div class="scm-branch-opts" ${SCM.newBranch ? '' : 'hidden'}>
-        <input id="scm-branch" type="text" spellcheck="false" placeholder="jr/my-change" value="${ghEsc(SCM.branchName || defaultBranchName())}">
+        <input id="scm-branch" type="text" spellcheck="false" placeholder="monarch/my-change" value="${ghEsc(SCM.branchName || defaultBranchName())}">
         <label class="scm-check"><input type="checkbox" id="scm-pr" ${SCM.openPR !== false ? 'checked' : ''}> Open a pull request</label>
       </div>
       <button class="scm-btn scm-primary" type="button" data-act="push" ${SCM.busy || conflicts || !canPush || (!st.changes.length && !st.ahead && !SCM.newBranch) ? 'disabled' : ''}>
@@ -156,7 +156,7 @@ function scmSummaryHTML(st) {
 
 function defaultBranchName() {
   const d = new Date();
-  return `jr/update-${d.getMonth() + 1}-${d.getDate()}-${d.getHours()}${String(d.getMinutes()).padStart(2, '0')}`;
+  return `monarch/update-${d.getMonth() + 1}-${d.getDate()}-${d.getHours()}${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
 function scmPublishHTML(st) {

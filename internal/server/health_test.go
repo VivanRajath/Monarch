@@ -74,7 +74,7 @@ func TestRequestLogKeepsWebSocketsWorking(t *testing.T) {
 		c.Close()
 	})))
 	defer srv.Close()
-	c, _, err := websocket.DefaultDialer.Dial("ws"+strings.TrimPrefix(srv.URL, "http"), http.Header{"Origin": {"https://jr.example"}})
+	c, _, err := websocket.DefaultDialer.Dial("ws"+strings.TrimPrefix(srv.URL, "http"), http.Header{"Origin": {"https://monarch.example"}})
 	if err != nil {
 		t.Fatal(err)
 	}

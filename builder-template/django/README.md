@@ -13,7 +13,7 @@ python manage.py runserver 0.0.0.0:8000
 ```
 
 Monarch runs these for you and additionally generates
-`jr_sandbox_settings.py` beside `manage.py`, which imports `config.settings` and
+`monarch_sandbox_settings.py` beside `manage.py`, which imports `config.settings` and
 overrides `ALLOWED_HOSTS` and `DEBUG` so the containerised preview can reach the
 app. That file is generated — edit `config/settings.py` instead.
 

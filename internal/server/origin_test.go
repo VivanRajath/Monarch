@@ -23,7 +23,7 @@ func TestIsAllowedOriginByMode(t *testing.T) {
 	for o, want := range map[string]bool{
 		"https://monarch.example":          true,
 		"https://MONARCH.example/":         true,
-		"http://127.0.0.1:9000":       false,
+		"http://127.0.0.1:9000":            false,
 		"https://p-abc.monarch.example":    false,
 		"https://monarch.example.evil.com": false,
 		"http://monarch.example":           false,

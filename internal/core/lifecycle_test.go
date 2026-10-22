@@ -107,11 +107,11 @@ func TestRemoveWorkdirRefusesAnythingButAWorkspace(t *testing.T) {
 func TestReapOrphansAtStartup(t *testing.T) {
 	calls := stubDocker(t)
 	work := withWorkDir(t)
-	for _, d := range []string{"sandbox-111", "builder-222", "builder-333", "sandbox-notdigits", "jr-agent-homes"} {
+	for _, d := range []string{"sandbox-111", "builder-222", "builder-333", "sandbox-notdigits", "monarch-agent-homes"} {
 		os.MkdirAll(filepath.Join(work, d), 0o755)
 	}
 	ReapOrphans()
-	for d, gone := range map[string]bool{"sandbox-111": true, "builder-222": true, "builder-333": false, "sandbox-notdigits": false, "jr-agent-homes": false} {
+	for d, gone := range map[string]bool{"sandbox-111": true, "builder-222": true, "builder-333": false, "sandbox-notdigits": false, "monarch-agent-homes": false} {
 		_, err := os.Stat(filepath.Join(work, d))
 		if gone != os.IsNotExist(err) {
 			t.Errorf("%s: removed=%v, want %v", d, os.IsNotExist(err), gone)

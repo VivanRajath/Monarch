@@ -2,7 +2,7 @@
 import { test } from "node:test";
 import assert from "node:assert";
 
-for (const k of ["GROQ_API_KEYS", "ANTHROPIC_API_KEY", "ANTHROPIC_OAUTH_TOKEN", "OPENAI_API_KEY", "GEMINI_API_KEY", "GITCLAW_MODEL", "JR_PROVIDER_KEYS", "GROQ_KNOWLEDGE_API_KEY"]) delete process.env[k];
+for (const k of ["GROQ_API_KEYS", "ANTHROPIC_API_KEY", "ANTHROPIC_OAUTH_TOKEN", "OPENAI_API_KEY", "GEMINI_API_KEY", "GITCLAW_MODEL", "MONARCH_PROVIDER_KEYS", "GROQ_KNOWLEDGE_API_KEY"]) delete process.env[k];
 for (let i = 2; i <= 10; i++) delete process.env[`GROQ_API_KEY_${i}`];
 process.env.GROQ_API_KEY = "test-groq-system";
 const { applyKeys, GROQ_KEYS, POOLS, providerHasKey, firstAvailableProvider, modelFor, rotateKey, dropRejectedKey, outputCap } = await import("./llm.js");
@@ -59,9 +59,9 @@ test("applyKeys sets and clears provider keys and the Groq pool", () => {
 });
 
 test("applyKeys ignores anything that is not a provider key", () => {
-  applyKeys({ PATH: "/evil", JR_INTERNAL_TOKEN: "x" });
+  applyKeys({ PATH: "/evil", MONARCH_INTERNAL_TOKEN: "x" });
   assert.notStrictEqual(process.env.PATH, "/evil");
-  assert.notStrictEqual(process.env.JR_INTERNAL_TOKEN, "x");
+  assert.notStrictEqual(process.env.MONARCH_INTERNAL_TOKEN, "x");
   applyKeys({ keys: { PATH: ["/evil"] } });
   assert.notStrictEqual(process.env.PATH, "/evil");
 });

@@ -11,7 +11,7 @@ let got = "";
 ws.on("open", () => { if (send) ws.send(Buffer.from(send)); });
 ws.on("message", (m) => {
   got += m.toString();
-  if (!send || got.includes("JRMARK")) { clearTimeout(timer); done(0, got.slice(0, 300)); }
+  if (!send || got.includes("MONARCHMARK")) { clearTimeout(timer); done(0, got.slice(0, 300)); }
 });
 ws.on("unexpected-response", (_req, res) => { clearTimeout(timer); done(1, `HTTP ${res.statusCode}`); });
 ws.on("error", (e) => { clearTimeout(timer); done(1, `ERROR ${e.message}`); });

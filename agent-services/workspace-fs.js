@@ -14,10 +14,10 @@ function real(p) {
   try { return fs.realpathSync.native(p); } catch { return null; }
 }
 
-// The Go server creates every workspace as <JR_WORK_DIR or tmp>/sandbox-* or builder-*.
+// The Go server creates every workspace as <MONARCH_WORK_DIR or tmp>/sandbox-* or builder-*.
 export function workspaceRootOf(p) {
   const abs = resolve(String(p));
-  const bases = [process.env.JR_WORK_DIR, tmpdir()].filter(Boolean).map((b) => resolve(b));
+  const bases = [process.env.MONARCH_WORK_DIR, tmpdir()].filter(Boolean).map((b) => resolve(b));
   for (const base of bases) {
     if (abs === base || !inside(base, abs)) continue;
     const name = abs.slice(base.length).split(/[\\/]/).filter(Boolean)[0];
@@ -141,7 +141,7 @@ export const rmSync = fs.rmSync;
 // Repo config can name programs (fsmonitor, hooks, diff drivers) that git would run on the host.
 export const SAFE_GIT = [
   "-c", "core.fsmonitor=false",
-  "-c", `core.hooksPath=${join(tmpdir(), "jr-no-hooks")}`,
+  "-c", `core.hooksPath=${join(tmpdir(), "monarch-no-hooks")}`,
   "-c", "diff.external=",
   "-c", "core.pager=cat",
   "-c", "protocol.file.allow=never",

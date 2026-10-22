@@ -3,18 +3,18 @@ import react from '@vitejs/plugin-react';
 import fs from 'node:fs';
 import path from 'node:path';
 
-// Runs Agent Hub workflows inside the dev server, so the tokens in jr-workflows.json never reach the browser.
-function jrWorkflows() {
+// Runs Agent Hub workflows inside the dev server, so the tokens in monarch-workflows.json never reach the browser.
+function monarchWorkflows() {
   return {
-    name: 'jr-workflows',
+    name: 'monarch-workflows',
     configureServer(server) {
       server.middlewares.use('/api/workflows/', async (req, res) => {
         const send = (code, body) => { res.statusCode = code; res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify(body)); };
         if (req.method !== 'POST') return send(405, { status: 'failed', error: 'POST only' });
         let cfg = { workflows: {} };
-        try { cfg = JSON.parse(fs.readFileSync('jr-workflows.json', 'utf8')); } catch { /* no workflows yet */ }
+        try { cfg = JSON.parse(fs.readFileSync('monarch-workflows.json', 'utf8')); } catch { /* no workflows yet */ }
         const flow = (cfg.workflows || {})[decodeURIComponent(req.url.replace(/^\//, '').split('?')[0])];
-        if (!flow) { console.log(`[workflow] ${req.url}: unknown workflow (check jr-workflows.json)`); return send(404, { status: 'failed', error: 'Unknown workflow' }); }
+        if (!flow) { console.log(`[workflow] ${req.url}: unknown workflow (check monarch-workflows.json)`); return send(404, { status: 'failed', error: 'Unknown workflow' }); }
         const started = Date.now();
         let raw = '';
         for await (const chunk of req) raw += chunk;
@@ -37,7 +37,7 @@ function jrWorkflows() {
 }
 
 export default defineConfig({
-  plugins: [react(), jrWorkflows()],
+  plugins: [react(), monarchWorkflows()],
   resolve: { alias: { '@': path.resolve(process.cwd(), 'src') } },
   server: { host: '0.0.0.0', port: 5173, allowedHosts: true },
 });

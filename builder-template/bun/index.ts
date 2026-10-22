@@ -1,14 +1,14 @@
-// Serves the UI from public/ and runs Agent Hub workflows for it; the tokens in jr-workflows.json never reach the browser.
+// Serves the UI from public/ and runs Agent Hub workflows for it; the tokens in monarch-workflows.json never reach the browser.
 const json = (code: number, body: unknown) => Response.json(body, { status: code });
 
 async function workflowConfig(): Promise<{ base?: string; workflows: Record<string, { id: string; token: string }> }> {
-  try { return await Bun.file('jr-workflows.json').json(); } catch { return { workflows: {} }; }
+  try { return await Bun.file('monarch-workflows.json').json(); } catch { return { workflows: {} }; }
 }
 
 async function runWorkflow(key: string, req: Request) {
   const cfg = await workflowConfig();
   const flow = (cfg.workflows || {})[key];
-  if (!flow) { console.log(`[workflow] ${key}: unknown workflow (check jr-workflows.json)`); return json(404, { status: 'failed', error: 'Unknown workflow' }); }
+  if (!flow) { console.log(`[workflow] ${key}: unknown workflow (check monarch-workflows.json)`); return json(404, { status: 'failed', error: 'Unknown workflow' }); }
   const started = Date.now();
   const input = await req.json().catch(() => ({}));
   try {

@@ -172,7 +172,7 @@ func runUploadHandler(w http.ResponseWriter, r *http.Request) {
 		core.JSONError(w, "expected a multipart upload", 400)
 		return
 	}
-	staging, err := os.MkdirTemp(core.Cfg.WorkDir, "jr-upload-*")
+	staging, err := os.MkdirTemp(core.Cfg.WorkDir, "monarch-upload-*")
 	if err != nil {
 		core.JSONError(w, err.Error(), 500)
 		return
@@ -310,7 +310,7 @@ func writeUploaded(dst, rel string, r io.Reader, budget int64) (int64, error) {
 
 // zip.Reader needs random access, so the archive is spooled to disk first.
 func extractZipPart(part io.Reader, dst string) error {
-	tmp, err := os.CreateTemp(core.Cfg.WorkDir, "jr-upload-*.zip")
+	tmp, err := os.CreateTemp(core.Cfg.WorkDir, "monarch-upload-*.zip")
 	if err != nil {
 		return err
 	}

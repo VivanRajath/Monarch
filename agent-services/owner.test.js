@@ -20,13 +20,13 @@ test("a registered sandbox answers only its owner, over HTTP and WebSocket", asy
     });
     assert.equal(reg.status, 200);
 
-    const knowledge = (user) => fetch(`http://${base}/agent/knowledge?container=c-own`, { headers: { "x-jr-user": user } }).then((r) => r.status);
+    const knowledge = (user) => fetch(`http://${base}/agent/knowledge?container=c-own`, { headers: { "x-monarch-user": user } }).then((r) => r.status);
     assert.equal(await knowledge("u-b"), 404);
     assert.equal(await knowledge("u-a"), 200);
     assert.equal(await knowledge("internal"), 200);
 
     const bind = (user) => new Promise((resolve, reject) => {
-      const ws = new WebSocket(`ws://${base}/agent/ws`, { headers: { "x-jr-user": user } });
+      const ws = new WebSocket(`ws://${base}/agent/ws`, { headers: { "x-monarch-user": user } });
       ws.on("open", () => ws.send(JSON.stringify({ type: "bind", container: "c-own" })));
       ws.on("message", (m) => { ws.close(); resolve(JSON.parse(m.toString()).type); });
       ws.on("error", reject);

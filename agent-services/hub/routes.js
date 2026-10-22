@@ -17,7 +17,7 @@ const DRAFT_RUN_TTL = 30 * 60 * 1000;
 const HOOK_USER = "hook";
 
 export function publicBase() {
-  return (process.env.JR_PUBLIC_ORIGIN || `http://127.0.0.1:${process.env.HOST_PORT || 9000}`).replace(/\/$/, "");
+  return (process.env.MONARCH_PUBLIC_ORIGIN || `http://127.0.0.1:${process.env.HOST_PORT || 9000}`).replace(/\/$/, "");
 }
 
 // A plausible value for each field, so the n8n template and the test panel start with valid input.
@@ -42,7 +42,7 @@ export function n8nWorkflow(def, token) {
         parameters: {
           method: "POST", url,
           sendHeaders: true,
-          headerParameters: { parameters: [{ name: "Authorization", value: `Bearer ${token || "PASTE_YOUR_JR_AGENT_TOKEN"}` }] },
+          headerParameters: { parameters: [{ name: "Authorization", value: `Bearer ${token || "PASTE_YOUR_MONARCH_AGENT_TOKEN"}` }] },
           sendBody: true, specifyBody: "json",
           jsonBody: JSON.stringify({ input: sampleFor(def.inputSchema) }, null, 2),
           options: { timeout: 130000 },
@@ -115,9 +115,9 @@ function connectInfo(def, token) {
     pollUrl: `${base}/runs/{runId}`,
     decisionUrl: `${base}/runs/{runId}/decision`,
     exampleBody: body,
-    ...snippets(`${base}/run`, body, token, "JR_AGENT_TOKEN"),
+    ...snippets(`${base}/run`, body, token, "MONARCH_AGENT_TOKEN"),
     workflow: n8nWorkflow(def, token),
-    localOnly: !process.env.JR_PUBLIC_ORIGIN,
+    localOnly: !process.env.MONARCH_PUBLIC_ORIGIN,
   };
 }
 
@@ -127,8 +127,8 @@ function wfHookInfo(w, token) {
   const body = { input: trigger ? trigger.config.sample : {} };
   return {
     runUrl: `${base}/run`, pollUrl: `${base}/runs/{runId}`, decisionUrl: `${base}/runs/{runId}/decision`, exampleBody: body,
-    ...snippets(`${base}/run`, body, token, "JR_WORKFLOW_TOKEN"),
-    localOnly: !process.env.JR_PUBLIC_ORIGIN,
+    ...snippets(`${base}/run`, body, token, "MONARCH_WORKFLOW_TOKEN"),
+    localOnly: !process.env.MONARCH_PUBLIC_ORIGIN,
   };
 }
 
@@ -149,7 +149,7 @@ export function createHubRouter({ allowLLM }) {
   const draftRuns = new Map();
 
   const userOf = (req) => {
-    const u = req.get("x-jr-user");
+    const u = req.get("x-monarch-user");
     if (!u || u === HOOK_USER || u === "internal") throw new HttpError(401, "login required");
     return u;
   };
@@ -241,7 +241,7 @@ export function createHubRouter({ allowLLM }) {
   r.get("/agents/:id/export", async (req, res) => {
     const user = userOf(req);
     const def = await mustAgent(user, req.params.id);
-    res.setHeader("Content-Disposition", `attachment; filename="${def.id}.jr-agent.json"`);
+    res.setHeader("Content-Disposition", `attachment; filename="${def.id}.monarch-agent.json"`);
     res.json(store.exportBundle(def));
   });
 

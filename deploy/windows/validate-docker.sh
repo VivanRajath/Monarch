@@ -17,26 +17,26 @@ json() { python -c "import sys,json
 try: d=json.load(sys.stdin)
 except Exception: d={}
 print($1)" 2>/dev/null; }
-login() { curl -s -c "$1" -o /dev/null -w '%{http_code}' -X POST -H 'X-Jr: 1' -H 'Content-Type: application/json' -d '{"code":"docker-validate"}' $B/auth/login; }
-api() { curl -s -b "$1" -X "$2" -H 'X-Jr: 1' -H 'Content-Type: application/json' ${4:+-d "$4"} "$B$3"; }
-code() { curl -s -o /dev/null -w '%{http_code}' -b "$1" -X "$2" -H 'X-Jr: 1' -H 'Content-Type: application/json' ${4:+-d "$4"} "$B$3"; }
-cookie() { awk '$6=="jr_session"{print $6"="$7}' "$1"; }
+login() { curl -s -c "$1" -o /dev/null -w '%{http_code}' -X POST -H 'X-Monarch: 1' -H 'Content-Type: application/json' -d '{"code":"docker-validate"}' $B/auth/login; }
+api() { curl -s -b "$1" -X "$2" -H 'X-Monarch: 1' -H 'Content-Type: application/json' ${4:+-d "$4"} "$B$3"; }
+code() { curl -s -o /dev/null -w '%{http_code}' -b "$1" -X "$2" -H 'X-Monarch: 1' -H 'Content-Type: application/json' ${4:+-d "$4"} "$B$3"; }
+cookie() { awk '$6=="monarch_session"{print $6"="$7}' "$1"; }
 status() { api "$1" GET "/sandbox/status?container=$2"; }
 workdir() { echo "$WORK/${1#sandbox-}"; }
 tunnels() { tasklist //FI "IMAGENAME eq cloudflared.exe" 2>/dev/null | grep -c cloudflared.exe; }
 
-JR_PID=""
-start_jr() {
-  (cd "$REPO" && env JR_LISTEN_ADDR=127.0.0.1:$PORT AGENT_PORT=$AGENT JR_PUBLIC_ORIGIN=$ORIGIN JR_PREVIEW_MODE=quicktunnel \
-    JR_CLOUDFLARED="$CLOUDFLARED" JR_BETA_CODE=docker-validate JR_SESSION_SECRET=$(head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n') \
-    JR_WORK_DIR="$WORK" JR_PREHEAT_IMAGES=react JR_MAX_SANDBOXES=2 JR_MAX_PER_USER=1 ./jr-docker-test.exe >> "$WORK/../jr-docker.log" 2>&1 &
-    echo $! > "$WORK/../jr.pid")
-  JR_PID=$(cat "$WORK/../jr.pid")
+MONARCH_PID=""
+start_monarch() {
+  (cd "$REPO" && env MONARCH_LISTEN_ADDR=127.0.0.1:$PORT AGENT_PORT=$AGENT MONARCH_PUBLIC_ORIGIN=$ORIGIN MONARCH_PREVIEW_MODE=quicktunnel \
+    MONARCH_CLOUDFLARED="$CLOUDFLARED" MONARCH_BETA_CODE=docker-validate MONARCH_SESSION_SECRET=$(head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n') \
+    MONARCH_WORK_DIR="$WORK" MONARCH_PREHEAT_IMAGES=react MONARCH_MAX_SANDBOXES=2 MONARCH_MAX_PER_USER=1 ./monarch-docker-test.exe >> "$WORK/../monarch-docker.log" 2>&1 &
+    echo $! > "$WORK/../monarch.pid")
+  MONARCH_PID=$(cat "$WORK/../monarch.pid")
   for _ in $(seq 1 90); do [ "$(curl -s -o /dev/null -w '%{http_code}' $B/ready)" = 200 ] && return 0; sleep 2; done
   return 1
 }
-# Kills jr and its agent child the way a crash would, by the listener on the port ($! is only the MSYS wrapper).
-kill_jr() {
+# Kills monarch and its agent child the way a crash would, by the listener on the port ($! is only the MSYS wrapper).
+kill_monarch() {
   local p
   for p in $(netstat -ano | awk -v a="127.0.0.1:$PORT" '$2 == a && $4 == "LISTENING" {print $5}' | sort -u); do
     taskkill //F //T //PID "$p" >/dev/null 2>&1
@@ -61,18 +61,18 @@ phase "0. clean slate on Docker Desktop"
 docker version --format 'engine {{.Server.Version}}' || { echo "Docker is not running"; exit 1; }
 docker rm -f -v $(docker ps -aq --filter label=monarch.sandbox) >/dev/null 2>&1
 docker rmi -f sandbox-react sandbox-static >/dev/null 2>&1
-rm -rf "$WORK" && mkdir -p "$WORK" && : > "$WORK/../jr-docker.log"
-go build -o jr-docker-test.exe . || { echo "build failed"; exit 1; }
+rm -rf "$WORK" && mkdir -p "$WORK" && : > "$WORK/../monarch-docker.log"
+go build -o monarch-docker-test.exe . || { echo "build failed"; exit 1; }
 cp deploy/wsl/wsclient.mjs deploy/wsl/reload.mjs agent-services/
-trap 'kill_jr; rm -f agent-services/wsclient.mjs agent-services/reload.mjs jr-docker-test.exe' EXIT
+trap 'kill_monarch; rm -f agent-services/wsclient.mjs agent-services/reload.mjs monarch-docker-test.exe' EXIT
 
-phase "1. server on Docker (default JR_CONTAINER_CLI)"
-start_jr && pass "server up, /ready 200 (docker engine + agent)" || { fail "server not ready"; tail -20 "$WORK/../jr-docker.log"; exit 1; }
+phase "1. server on Docker (default MONARCH_CONTAINER_CLI)"
+start_monarch && pass "server up, /ready 200 (docker engine + agent)" || { fail "server not ready"; tail -20 "$WORK/../monarch-docker.log"; exit 1; }
 for _ in $(seq 1 60); do docker image inspect sandbox-react >/dev/null 2>&1 && break; sleep 10; done
 docker image inspect sandbox-react >/dev/null 2>&1 && pass "sandbox-react rebuilt from the current Dockerfile at startup" || fail "sandbox-react not built"
 docker image inspect sandbox-static >/dev/null 2>&1 && fail "sandbox-static should not be preheated" || pass "sandbox-static not preheated"
-grep -q "jr-sandbox" <(docker network ls --format '{{.Name}}') && pass "jr-sandbox network exists" || fail "jr-sandbox network missing"
-docker network inspect jr-sandbox --format '{{index .Options "com.docker.network.bridge.enable_icc"}}' | grep -q false && pass "jr-sandbox has inter-container traffic off" || fail "icc not disabled"
+grep -q "monarch-sandbox" <(docker network ls --format '{{.Name}}') && pass "monarch-sandbox network exists" || fail "monarch-sandbox network missing"
+docker network inspect monarch-sandbox --format '{{index .Options "com.docker.network.bridge.enable_icc"}}' | grep -q false && pass "monarch-sandbox has inter-container traffic off" || fail "icc not disabled"
 
 phase "2. sandbox A: $REPO_A"
 JA=$(mktemp) JB=$(mktemp) JC=$(mktemp)
@@ -85,11 +85,11 @@ HA=${URL_A#https://}; HA=${HA%/}
 [ -d "$(workdir "$CA")/node_modules/react" ] && pass "npm install populated node_modules" || fail "node_modules missing"
 I=$(docker inspect "$CA" --format '{{.HostConfig.SecurityOpt}} {{.HostConfig.CapDrop}} {{.HostConfig.Memory}} {{.HostConfig.NetworkMode}} {{index .Config.Labels "monarch.sandbox"}}')
 info "container: $I"
-for want in no-new-privileges NET_RAW jr-sandbox "$CA"; do echo "$I" | grep -q -- "$want" && pass "hardening present: $want" || fail "missing: $want"; done
-OUT=$(api "$JA" POST /terminal/exec "{\"container\":\"$CA\",\"command\":\"echo JRMARK \$(node -v)\"}")
-echo "$OUT" | grep -q 'JRMARK v' && pass "terminal exec" || fail "terminal exec: $OUT"
-WS=$(node agent-services/wsclient.mjs "ws://127.0.0.1:$PORT/terminal/ws?container=$CA" "$ORIGIN" "$(cookie "$JA")" $'echo JRMARK\n')
-echo "$WS" | grep -q JRMARK && pass "interactive terminal over WebSocket (Docker Engine SDK)" || fail "terminal websocket: $WS"
+for want in no-new-privileges NET_RAW monarch-sandbox "$CA"; do echo "$I" | grep -q -- "$want" && pass "hardening present: $want" || fail "missing: $want"; done
+OUT=$(api "$JA" POST /terminal/exec "{\"container\":\"$CA\",\"command\":\"echo MONARCHMARK \$(node -v)\"}")
+echo "$OUT" | grep -q 'MONARCHMARK v' && pass "terminal exec" || fail "terminal exec: $OUT"
+WS=$(node agent-services/wsclient.mjs "ws://127.0.0.1:$PORT/terminal/ws?container=$CA" "$ORIGIN" "$(cookie "$JA")" $'echo MONARCHMARK\n')
+echo "$WS" | grep -q MONARCHMARK && pass "interactive terminal over WebSocket (Docker Engine SDK)" || fail "terminal websocket: $WS"
 curl -sf -o /dev/null "http://127.0.0.1:$PORT_A" && pass "host -> sandbox on 127.0.0.1:$PORT_A" || fail "host -> sandbox"
 curl -s -m 20 "$URL_A" | grep -q 'id="root"' && pass "preview through Cloudflare serves the app" || fail "preview"
 HMR=$(node agent-services/wsclient.mjs "wss://$HA/ws" "https://$HA")
@@ -106,7 +106,7 @@ docker image inspect sandbox-static >/dev/null 2>&1 && pass "sandbox-static buil
 [ "$(code "$JB" GET "/sandbox/status?container=$CA")" = 404 ] && pass "tester B gets 404 for A's sandbox" || fail "ownership"
 [ "$(code "$JC" GET /sandboxes)" = 401 ] && pass "no session -> 401" || fail "auth gate"
 login "$JC" >/dev/null
-G=$(curl -s -w ' %{http_code}' -b "$JC" -X POST -H 'X-Jr: 1' -H 'Content-Type: application/json' -d "{\"repo\":\"$REPO_B\"}" $B/run | tr -d '\n')
+G=$(curl -s -w ' %{http_code}' -b "$JC" -X POST -H 'X-Monarch: 1' -H 'Content-Type: application/json' -d "{\"repo\":\"$REPO_B\"}" $B/run | tr -d '\n')
 case "$G" in *" 429") pass "global cap (2) -> 429" ;; *) fail "global cap: $G" ;; esac
 IP_B=$(docker inspect "$CB" --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}')
 probe() { docker exec "$CA" sh -c "curl -s -o /dev/null -m 6 -w '%{http_code}' $1 || true"; }
@@ -115,9 +115,9 @@ info "sandbox -> internet: $(probe https://example.com)"
 # host.docker.internal reaches the host's loopback on Docker Desktop, so these check what a sandbox can do there, not whether it connects.
 info "sandbox -> Monarch public /health via host.docker.internal: $(probe "http://host.docker.internal:$PORT/health") (public by design)"
 [ "$(probe "http://host.docker.internal:$PORT/sandboxes")" = 401 ] && pass "sandbox gets 401 from the Monarch API (no session)" || fail "sandbox used the Monarch API"
-[ "$(docker exec "$CA" sh -c "curl -s -o /dev/null -m 6 -w '%{http_code}' -X POST -H 'X-Jr: 1' -H 'X-Jr-Internal: guess' -H 'Content-Type: application/json' -d '{}' http://host.docker.internal:$PORT/terminal/exec || true")" = 401 ] && pass "sandbox cannot pass as Go's agent (guessed token -> 401)" || fail "guessed internal token accepted"
+[ "$(docker exec "$CA" sh -c "curl -s -o /dev/null -m 6 -w '%{http_code}' -X POST -H 'X-Monarch: 1' -H 'X-Monarch-Internal: guess' -H 'Content-Type: application/json' -d '{}' http://host.docker.internal:$PORT/terminal/exec || true")" = 401 ] && pass "sandbox cannot pass as Go's agent (guessed token -> 401)" || fail "guessed internal token accepted"
 [ "$(probe "http://host.docker.internal:$AGENT/agent/health")" = 403 ] && pass "sandbox gets 403 from the agent without Go's token" || fail "sandbox used the agent directly"
-[ "$(docker exec "$CA" sh -c "curl -s -o /dev/null -m 6 -w '%{http_code}' -X POST -H 'x-jr-user: internal' -H 'Content-Type: application/json' -d '{\"container\":\"$CB\",\"message\":\"hi\"}' http://host.docker.internal:$AGENT/agent/chat || true")" = 403 ] && pass "sandbox cannot drive the agent on another sandbox" || fail "agent chat on another sandbox accepted"
+[ "$(docker exec "$CA" sh -c "curl -s -o /dev/null -m 6 -w '%{http_code}' -X POST -H 'x-monarch-user: internal' -H 'Content-Type: application/json' -d '{\"container\":\"$CB\",\"message\":\"hi\"}' http://host.docker.internal:$AGENT/agent/chat || true")" = 403 ] && pass "sandbox cannot drive the agent on another sandbox" || fail "agent chat on another sandbox accepted"
 info "sandbox -> B's published port via host.docker.internal: $(probe "http://host.docker.internal:$(status "$JB" "$CB" | json "d['services'][0]['port']")")"
 
 phase "4. destroy and cleanup"
@@ -133,12 +133,12 @@ sleep 3
 info "dangling volumes: $(docker volume ls -qf dangling=true | wc -l)"
 
 phase "5. crash and restart recovery"
-docker run -d --name jr-orphan --label monarch.sandbox=jr-orphan sandbox-node sleep 600 >/dev/null
+docker run -d --name monarch-orphan --label monarch.sandbox=monarch-orphan sandbox-node sleep 600 >/dev/null
 mkdir -p "$WORK/sandbox-999999" && echo x > "$WORK/sandbox-999999/f"
-kill_jr
+kill_monarch
 [ "$(curl -s -o /dev/null -w '%{http_code}' -m 3 $B/health)" = 000 ] && pass "server process tree killed" || fail "server survived the kill"
-start_jr && pass "server restarted and ready" || fail "restart"
-docker container inspect jr-orphan >/dev/null 2>&1 && fail "orphaned container survived restart" || pass "orphaned labelled container removed at startup"
+start_monarch && pass "server restarted and ready" || fail "restart"
+docker container inspect monarch-orphan >/dev/null 2>&1 && fail "orphaned container survived restart" || pass "orphaned labelled container removed at startup"
 [ -e "$WORK/sandbox-999999" ] && fail "orphaned workdir survived restart" || pass "orphaned workdir removed at startup"
 
 printf '\n=== RESULTS: %d passed, %d failed\n' "$P" "$F"

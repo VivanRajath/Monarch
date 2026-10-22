@@ -118,9 +118,9 @@ func TestSupervisorInstallsBeforeItStarts(t *testing.T) {
 
 	// Servers are backgrounded, installs are not.
 	for _, want := range []string{
-		"(cd frontend && npm run dev -- -H 0.0.0.0) >> /tmp/jr/frontend.log 2>&1 &",
-		"(cd backend && python manage.py runserver 0.0.0.0:8000) >> /tmp/jr/backend.log 2>&1 &",
-		"(cd frontend && npm install) >> /tmp/jr/frontend.log 2>&1\n",
+		"(cd frontend && npm run dev -- -H 0.0.0.0) >> /tmp/monarch/frontend.log 2>&1 &",
+		"(cd backend && python manage.py runserver 0.0.0.0:8000) >> /tmp/monarch/backend.log 2>&1 &",
+		"(cd frontend && npm install) >> /tmp/monarch/frontend.log 2>&1\n",
 	} {
 		if !strings.Contains(script, want) {
 			t.Errorf("missing %q in:\n%s", want, script)
@@ -141,7 +141,7 @@ func TestSupervisorSkipsCdAtRoot(t *testing.T) {
 	if strings.Contains(script, "cd  &&") || strings.Contains(script, "cd &&") {
 		t.Errorf("emitted an empty cd:\n%s", script)
 	}
-	if !strings.Contains(script, "(npm run dev) >> /tmp/jr/app.log 2>&1 &") {
+	if !strings.Contains(script, "(npm run dev) >> /tmp/monarch/app.log 2>&1 &") {
 		t.Errorf("root service command is wrong:\n%s", script)
 	}
 }

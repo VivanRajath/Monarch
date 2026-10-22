@@ -43,8 +43,8 @@ async function removeKey(btn) {
 mountAccountCard(document.getElementById('account'));
 
 (async () => {
-  renderProviders(await jrKeyStatus(true));
-  jrMountKeyInput(document.getElementById('keyInput'), {
+  renderProviders(await monarchKeyStatus(true));
+  monarchMountKeyInput(document.getElementById('keyInput'), {
     onSaved: (d) => renderProviders({ providers: d.providers, editable: true }),
   });
 })();

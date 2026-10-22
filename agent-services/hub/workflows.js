@@ -7,7 +7,7 @@ import { slugify, bumpPatch } from "./definition.js";
 import { hasDb, col, objectId, trimRuns, saveRunDoc, readRunDoc, listRunDocs } from "./db.js";
 import { startRun, resolveApproval, checkPublicUrl, privateNetAllowed } from "./runtime.js";
 
-export const MAX_WORKFLOWS_PER_USER = Number(process.env.JR_HUB_MAX_WORKFLOWS) || (process.env.JR_PUBLIC_ORIGIN ? 25 : 500);
+export const MAX_WORKFLOWS_PER_USER = Number(process.env.MONARCH_HUB_MAX_WORKFLOWS) || (process.env.MONARCH_PUBLIC_ORIGIN ? 25 : 500);
 const MAX_NODES = 40;
 const MAX_EDGES = 80;
 const MAX_EXECUTIONS = 50;
@@ -398,7 +398,7 @@ async function callHttp(cfg, ctx) {
   const u = await checkPublicUrl(url, { allowHttp: privateNetAllowed() });
   const headers = { "User-Agent": "Monarch-Workflow" };
   for (const [k, v] of Object.entries(resolveTemplate(cfg.headers, ctx) || {})) {
-    if (/^[A-Za-z0-9-]{1,60}$/.test(k) && !/^(host|cookie|x-jr.*)$/i.test(k)) headers[k] = String(v).slice(0, 2000);
+    if (/^[A-Za-z0-9-]{1,60}$/.test(k) && !/^(host|cookie|x-monarch.*)$/i.test(k)) headers[k] = String(v).slice(0, 2000);
   }
   const init = { method: cfg.method, headers, redirect: "manual", signal: AbortSignal.timeout(20000) };
   if (cfg.method === "POST") {

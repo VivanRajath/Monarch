@@ -10,7 +10,7 @@ import (
 )
 
 func sampleFlow() BuiltWorkflow {
-	return BuiltWorkflow{Key: "summarize_note", ID: "summarize-note", Name: "Summarize note", Description: "Short summary", Token: "jrw_abc_summarize-note_0123456789",
+	return BuiltWorkflow{Key: "summarize_note", ID: "summarize-note", Name: "Summarize note", Description: "Short summary", Token: "mnw_abc_summarize-note_0123456789",
 		Input: map[string]string{"note": "The note"}, Output: map[string]string{"summary": "Summary"}}
 }
 
@@ -21,7 +21,7 @@ func TestValidateBuiltWorkflowsRefusesUnsafeValues(t *testing.T) {
 	bad := []func(*BuiltWorkflow){
 		func(f *BuiltWorkflow) { f.Key = "Bad-Key" },
 		func(f *BuiltWorkflow) { f.ID = "../etc" },
-		func(f *BuiltWorkflow) { f.Token = "tok\nJR_API_BASE=http://evil" },
+		func(f *BuiltWorkflow) { f.Token = "tok\nMONARCH_API_BASE=http://evil" },
 		func(f *BuiltWorkflow) { f.Input = map[string]string{"a b": ""} },
 		func(f *BuiltWorkflow) { f.Output = map[string]string{"x'); alert(1); //": ""} },
 	}
@@ -45,7 +45,7 @@ func TestWriteWorkflowClient(t *testing.T) {
 		t.Fatal(err)
 	}
 	env, _ := os.ReadFile(filepath.Join(dir, ".env.local"))
-	if !strings.Contains(string(env), "JR_WF_SUMMARIZE_NOTE_TOKEN="+f.Token) || !strings.Contains(string(env), "JR_API_BASE=http") {
+	if !strings.Contains(string(env), "MONARCH_WF_SUMMARIZE_NOTE_TOKEN="+f.Token) || !strings.Contains(string(env), "MONARCH_API_BASE=http") {
 		t.Fatalf(".env.local missing the base or token:\n%s", env)
 	}
 	route, _ := os.ReadFile(filepath.Join(dir, "app", "api", "workflows", "[key]", "route.ts"))

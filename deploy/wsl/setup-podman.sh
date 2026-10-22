@@ -2,13 +2,13 @@
 # Rootless Podman for Monarch on Ubuntu (WSL or bare metal). Run as root: bash setup-podman.sh [user]
 set -euo pipefail
 
-JR_USER="${1:-monarch}"
+MONARCH_USER="${1:-monarch}"
 MIN_FREE_GB="${MIN_FREE_GB:-8}"
 
 say() { printf '\n==> %s\n' "$*"; }
 die() { printf '\nERROR: %s\n' "$*" >&2; exit 1; }
 
-[ "$(id -u)" = 0 ] || die "run as root (sudo bash $0 $JR_USER)"
+[ "$(id -u)" = 0 ] || die "run as root (sudo bash $0 $MONARCH_USER)"
 command -v apt-get >/dev/null || die "this script expects Ubuntu/Debian (apt-get not found)"
 
 free_gb=$(df -BG --output=avail / | tail -1 | tr -dc 0-9)
@@ -79,28 +79,28 @@ fi
 [ "$node_major" -ge 20 ] || die "Node $node_major is still too old for agent-services"
 echo "Node $(node --version)"
 
-say "Service user: $JR_USER"
-id "$JR_USER" >/dev/null 2>&1 || useradd -m -s /bin/bash "$JR_USER"
-JR_UID=$(id -u "$JR_USER")
-grep -q "^$JR_USER:" /etc/subuid || usermod --add-subuids 100000-165535 "$JR_USER"
-grep -q "^$JR_USER:" /etc/subgid || usermod --add-subgids 100000-165535 "$JR_USER"
+say "Service user: $MONARCH_USER"
+id "$MONARCH_USER" >/dev/null 2>&1 || useradd -m -s /bin/bash "$MONARCH_USER"
+MONARCH_UID=$(id -u "$MONARCH_USER")
+grep -q "^$MONARCH_USER:" /etc/subuid || usermod --add-subuids 100000-165535 "$MONARCH_USER"
+grep -q "^$MONARCH_USER:" /etc/subgid || usermod --add-subgids 100000-165535 "$MONARCH_USER"
 
 # Rootless --cpus needs the cpu controller delegated to user sessions; memory and pids usually are already.
 mkdir -p /etc/systemd/system/user@.service.d
 printf '[Service]\nDelegate=cpu cpuset io memory pids\n' > /etc/systemd/system/user@.service.d/delegate.conf
 systemctl daemon-reload
 
-say "Starting $JR_USER's user session and the Podman socket"
-loginctl enable-linger "$JR_USER"
-systemctl restart "user@${JR_UID}.service"
-for _ in $(seq 1 30); do [ -S "/run/user/$JR_UID/bus" ] && break; sleep 1; done
-[ -S "/run/user/$JR_UID/bus" ] || die "the user session for $JR_USER did not start"
+say "Starting $MONARCH_USER's user session and the Podman socket"
+loginctl enable-linger "$MONARCH_USER"
+systemctl restart "user@${MONARCH_UID}.service"
+for _ in $(seq 1 30); do [ -S "/run/user/$MONARCH_UID/bus" ] && break; sleep 1; done
+[ -S "/run/user/$MONARCH_UID/bus" ] || die "the user session for $MONARCH_USER did not start"
 as_user() {
-  sudo -u "$JR_USER" XDG_RUNTIME_DIR="/run/user/$JR_UID" \
-    DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$JR_UID/bus" "$@"
+  sudo -u "$MONARCH_USER" XDG_RUNTIME_DIR="/run/user/$MONARCH_UID" \
+    DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$MONARCH_UID/bus" "$@"
 }
 as_user systemctl --user enable --now podman.socket >/dev/null
-SOCK="/run/user/$JR_UID/podman/podman.sock"
+SOCK="/run/user/$MONARCH_UID/podman/podman.sock"
 for _ in $(seq 1 10); do [ -S "$SOCK" ] && break; sleep 1; done
 [ -S "$SOCK" ] || die "podman.socket did not create $SOCK"
 
@@ -123,10 +123,10 @@ cat <<ENV
 
 Setup complete. Add these to Monarch's environment (.env or the systemd unit):
 
-  JR_CONTAINER_CLI=podman
+  MONARCH_CONTAINER_CLI=podman
   DOCKER_HOST=unix://$SOCK
-  JR_WORK_DIR=/home/$JR_USER/monarch/work
-  JR_PREHEAT_IMAGES=node,react,python,builder
+  MONARCH_WORK_DIR=/home/$MONARCH_USER/monarch/work
+  MONARCH_PREHEAT_IMAGES=node,react,python,builder
 
-Images are built by Monarch itself at startup (JR_PREHEAT_IMAGES) or on first use.
+Images are built by Monarch itself at startup (MONARCH_PREHEAT_IMAGES) or on first use.
 ENV

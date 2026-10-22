@@ -88,36 +88,36 @@ func (c Config) ListenPort() string {
 
 func LoadConfig() (Config, error) {
 	c := DefaultConfig()
-	c.ListenAddr = envStr("JR_LISTEN_ADDR", c.ListenAddr)
-	c.PublicOrigin = strings.TrimSuffix(envStr("JR_PUBLIC_ORIGIN", ""), "/")
-	c.PreviewDomain = strings.ToLower(strings.Trim(envStr("JR_PREVIEW_DOMAIN", ""), "."))
-	c.WorkDir = envStr("JR_WORK_DIR", c.WorkDir)
-	c.DataDir = envStr("JR_DATA_DIR", c.DataDir)
+	c.ListenAddr = envStr("MONARCH_LISTEN_ADDR", c.ListenAddr)
+	c.PublicOrigin = strings.TrimSuffix(envStr("MONARCH_PUBLIC_ORIGIN", ""), "/")
+	c.PreviewDomain = strings.ToLower(strings.Trim(envStr("MONARCH_PREVIEW_DOMAIN", ""), "."))
+	c.WorkDir = envStr("MONARCH_WORK_DIR", c.WorkDir)
+	c.DataDir = envStr("MONARCH_DATA_DIR", c.DataDir)
 	c.MongoURI = envStr("MONGODB_URI", "")
 	c.MongoDB = envStr("MONGODB_DB", "monarch")
-	c.BetaCode = envStr("JR_BETA_CODE", "")
-	c.SessionSecret = []byte(envStr("JR_SESSION_SECRET", ""))
-	c.GoogleClientID = envStr("JR_GOOGLE_CLIENT_ID", "")
-	c.GoogleClientSecret = envStr("JR_GOOGLE_CLIENT_SECRET", "")
-	c.GitHubClientID = envStr("JR_GITHUB_CLIENT_ID", "")
-	c.GitHubClientSecret = envStr("JR_GITHUB_CLIENT_SECRET", "")
-	c.GitHubCollaborator = strings.TrimPrefix(envStr("JR_GITHUB_COLLABORATOR", ""), "@")
-	c.GitHubCollaboratorToken = envStr("JR_GITHUB_COLLABORATOR_TOKEN", "")
-	for _, a := range strings.Split(envStr("JR_OAUTH_ALLOW", ""), ",") {
+	c.BetaCode = envStr("MONARCH_BETA_CODE", "")
+	c.SessionSecret = []byte(envStr("MONARCH_SESSION_SECRET", ""))
+	c.GoogleClientID = envStr("MONARCH_GOOGLE_CLIENT_ID", "")
+	c.GoogleClientSecret = envStr("MONARCH_GOOGLE_CLIENT_SECRET", "")
+	c.GitHubClientID = envStr("MONARCH_GITHUB_CLIENT_ID", "")
+	c.GitHubClientSecret = envStr("MONARCH_GITHUB_CLIENT_SECRET", "")
+	c.GitHubCollaborator = strings.TrimPrefix(envStr("MONARCH_GITHUB_COLLABORATOR", ""), "@")
+	c.GitHubCollaboratorToken = envStr("MONARCH_GITHUB_COLLABORATOR_TOKEN", "")
+	for _, a := range strings.Split(envStr("MONARCH_OAUTH_ALLOW", ""), ",") {
 		if a = strings.ToLower(strings.TrimSpace(a)); a != "" {
 			c.OAuthAllow = append(c.OAuthAllow, a)
 		}
 	}
-	c.InternalToken = envStr("JR_INTERNAL_TOKEN", "")
-	c.ContainerCLI = envStr("JR_CONTAINER_CLI", c.ContainerCLI)
-	c.PreviewMode = strings.ToLower(envStr("JR_PREVIEW_MODE", ""))
-	c.Cloudflared = envStr("JR_CLOUDFLARED", c.Cloudflared)
-	for _, p := range strings.Split(envStr("JR_DISK_CHECK_PATHS", ""), ",") {
+	c.InternalToken = envStr("MONARCH_INTERNAL_TOKEN", "")
+	c.ContainerCLI = envStr("MONARCH_CONTAINER_CLI", c.ContainerCLI)
+	c.PreviewMode = strings.ToLower(envStr("MONARCH_PREVIEW_MODE", ""))
+	c.Cloudflared = envStr("MONARCH_CLOUDFLARED", c.Cloudflared)
+	for _, p := range strings.Split(envStr("MONARCH_DISK_CHECK_PATHS", ""), ",") {
 		if p = strings.TrimSpace(p); p != "" {
 			c.DiskCheckPaths = append(c.DiskCheckPaths, p)
 		}
 	}
-	if v := envStr("JR_PREHEAT_IMAGES", ""); v != "" {
+	if v := envStr("MONARCH_PREHEAT_IMAGES", ""); v != "" {
 		c.PreheatImages = []string{}
 		for _, name := range strings.Split(v, ",") {
 			if name = strings.TrimSpace(name); name != "" && name != "none" {
@@ -138,7 +138,7 @@ func LoadConfig() (Config, error) {
 	if len(c.SessionSecret) == 0 && c.AuthEnabled() && !c.Public() {
 		c.SessionSecret = []byte(localSecret(c.DataDir))
 	}
-	c.PreviewScheme = envStr("JR_PREVIEW_SCHEME", c.PreviewScheme)
+	c.PreviewScheme = envStr("MONARCH_PREVIEW_SCHEME", c.PreviewScheme)
 	if c.PreviewMode == "quicktunnel" {
 		c.PreviewScheme = "https"
 	}
@@ -162,25 +162,25 @@ func LoadConfig() (Config, error) {
 			*dst = d
 		}
 	}
-	set("JR_MAX_SANDBOXES", &c.MaxSandboxes)
-	set("JR_MAX_PER_USER", &c.MaxPerUser)
-	set("JR_LLM_PER_HOUR", &c.LLMPerHour)
+	set("MONARCH_MAX_SANDBOXES", &c.MaxSandboxes)
+	set("MONARCH_MAX_PER_USER", &c.MaxPerUser)
+	set("MONARCH_LLM_PER_HOUR", &c.LLMPerHour)
 	set("AGENT_PORT", &c.AgentPort)
 	disk := int(c.MinFreeDiskMB)
-	set("JR_MIN_FREE_DISK_MB", &disk)
+	set("MONARCH_MIN_FREE_DISK_MB", &disk)
 	c.MinFreeDiskMB = int64(disk)
 	perSandbox := int(c.MaxSandboxDiskMB)
-	set("JR_SANDBOX_MAX_DISK_MB", &perSandbox)
+	set("MONARCH_SANDBOX_MAX_DISK_MB", &perSandbox)
 	c.MaxSandboxDiskMB = int64(perSandbox)
-	setDur("JR_SANDBOX_IDLE_TTL", &c.IdleTTL)
-	setDur("JR_SANDBOX_MAX_TTL", &c.MaxTTL)
-	if v := envStr("JR_SPAWN_AGENT", ""); v != "" {
+	setDur("MONARCH_SANDBOX_IDLE_TTL", &c.IdleTTL)
+	setDur("MONARCH_SANDBOX_MAX_TTL", &c.MaxTTL)
+	if v := envStr("MONARCH_SPAWN_AGENT", ""); v != "" {
 		c.SpawnAgent = v != "0" && !strings.EqualFold(v, "false")
 	}
 	if err != nil {
 		return c, err
 	}
-	// A spawned agent inherits a fresh token; a separately run one must share JR_INTERNAL_TOKEN.
+	// A spawned agent inherits a fresh token; a separately run one must share MONARCH_INTERNAL_TOKEN.
 	if c.InternalToken == "" && c.SpawnAgent {
 		c.InternalToken = randomHex(32)
 	}
@@ -193,36 +193,36 @@ func LoadConfig() (Config, error) {
 // A public server with a gap in its access control refuses to start rather than run open.
 func (c Config) Validate() error {
 	if c.IdleTTL > c.MaxTTL {
-		return fmt.Errorf("JR_SANDBOX_IDLE_TTL (%s) cannot exceed JR_SANDBOX_MAX_TTL (%s)", c.IdleTTL, c.MaxTTL)
+		return fmt.Errorf("MONARCH_SANDBOX_IDLE_TTL (%s) cannot exceed MONARCH_SANDBOX_MAX_TTL (%s)", c.IdleTTL, c.MaxTTL)
 	}
 	if c.AuthEnabled() && len(c.InternalToken) < 32 {
-		return fmt.Errorf("JR_INTERNAL_TOKEN must be at least 32 characters when the agent runs as its own service")
+		return fmt.Errorf("MONARCH_INTERNAL_TOKEN must be at least 32 characters when the agent runs as its own service")
 	}
 	if c.AuthEnabled() && len(c.SessionSecret) < 32 {
-		return fmt.Errorf("JR_SESSION_SECRET must be at least 32 characters when a login (JR_BETA_CODE or an OAuth app) is set")
+		return fmt.Errorf("MONARCH_SESSION_SECRET must be at least 32 characters when a login (MONARCH_BETA_CODE or an OAuth app) is set")
 	}
 	if c.PreviewMode != "" && c.PreviewMode != "quicktunnel" {
-		return fmt.Errorf("JR_PREVIEW_MODE must be empty or quicktunnel, got %q", c.PreviewMode)
+		return fmt.Errorf("MONARCH_PREVIEW_MODE must be empty or quicktunnel, got %q", c.PreviewMode)
 	}
 	if c.ContainerCLI != "docker" && c.ContainerCLI != "podman" {
-		return fmt.Errorf("JR_CONTAINER_CLI must be docker or podman, got %q", c.ContainerCLI)
+		return fmt.Errorf("MONARCH_CONTAINER_CLI must be docker or podman, got %q", c.ContainerCLI)
 	}
 	for _, name := range c.PreheatImages {
 		if ImageBuildDir("sandbox-"+name) == "" {
-			return fmt.Errorf("JR_PREHEAT_IMAGES names %q, which is not a sandbox image", name)
+			return fmt.Errorf("MONARCH_PREHEAT_IMAGES names %q, which is not a sandbox image", name)
 		}
 	}
 	if !c.Public() {
 		return nil
 	}
 	if !strings.HasPrefix(c.PublicOrigin, "https://") && !strings.HasPrefix(c.PublicOrigin, "http://") {
-		return fmt.Errorf("JR_PUBLIC_ORIGIN must be an http(s) origin, got %q", c.PublicOrigin)
+		return fmt.Errorf("MONARCH_PUBLIC_ORIGIN must be an http(s) origin, got %q", c.PublicOrigin)
 	}
 	if !c.AuthEnabled() {
-		return fmt.Errorf("JR_PUBLIC_ORIGIN is set but no login is: set JR_BETA_CODE or a Google/GitHub OAuth app")
+		return fmt.Errorf("MONARCH_PUBLIC_ORIGIN is set but no login is: set MONARCH_BETA_CODE or a Google/GitHub OAuth app")
 	}
 	if c.PreviewDomain == "" && c.PreviewMode != "quicktunnel" {
-		return fmt.Errorf("JR_PUBLIC_ORIGIN is set but neither JR_PREVIEW_DOMAIN nor JR_PREVIEW_MODE=quicktunnel is: previews would point at 127.0.0.1")
+		return fmt.Errorf("MONARCH_PUBLIC_ORIGIN is set but neither MONARCH_PREVIEW_DOMAIN nor MONARCH_PREVIEW_MODE=quicktunnel is: previews would point at 127.0.0.1")
 	}
 	return nil
 }

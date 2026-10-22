@@ -66,7 +66,7 @@ func TestRunArgsHardensEveryContainer(t *testing.T) {
 		t.Errorf("unexpected flag in %s", args)
 	}
 	sandboxNetwork = SandboxNetwork
-	if args := strings.Join(RunArgs("c1", "1g", "1", 100, nil, "/w", nil, nil, "img", "true"), " "); !strings.Contains(args, "--network jr-sandbox") {
+	if args := strings.Join(RunArgs("c1", "1g", "1", 100, nil, "/w", nil, nil, "img", "true"), " "); !strings.Contains(args, "--network monarch-sandbox") {
 		t.Errorf("sandbox network not applied: %s", args)
 	}
 }

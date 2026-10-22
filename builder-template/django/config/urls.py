@@ -3,11 +3,11 @@
 from django.contrib import admin
 from django.urls import include, path, re_path
 
-from . import jr
+from . import monarch
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("api/workflows/<str:key>", jr.run_workflow),
+    path("api/workflows/<str:key>", monarch.run_workflow),
     path("tasks/", include("core.urls")),
-    re_path(r"^(?P<path>.*)$", jr.public_file),
+    re_path(r"^(?P<path>.*)$", monarch.public_file),
 ]

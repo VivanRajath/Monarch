@@ -339,7 +339,7 @@ export async function installAgent(dir, entry, pin) {
   }
   mkdirSync(resolve(dir, AGENTS_DIR), { recursive: true });
   // Checkout runs outside the bind mount, where the sandbox cannot rewrite .git/config mid-install.
-  const staging = mkdtempSync(join(tmpdir(), "jr-agent-clone-"));
+  const staging = mkdtempSync(join(tmpdir(), "monarch-agent-clone-"));
   const cloned = join(staging, "repo");
   try {
     await gitIn(staging, ["clone", "--depth", "1", entry.repository, cloned]);

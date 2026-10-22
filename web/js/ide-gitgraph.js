@@ -160,7 +160,7 @@ async function ggUnshallow(btn) {
   btn.disabled = true;
   btn.textContent = 'Fetching…';
   try {
-    const res = await fetch('/github/unshallow', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Jr': '1' }, body: JSON.stringify({ container: IDE.container }) });
+    const res = await fetch('/github/unshallow', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Monarch': '1' }, body: JSON.stringify({ container: IDE.container }) });
     const d = await res.json();
     if (!res.ok) throw new Error(d.error || 'fetch failed');
     await loadGitGraph(true);

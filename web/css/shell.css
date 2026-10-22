@@ -15,7 +15,7 @@ body.has-rail.rail-pinned {
   padding-left: var(--rail-w);
 }
 
-body.ide-mode .jr-rail {
+body.ide-mode .monarch-rail {
   display: none;
 }
 
@@ -29,7 +29,7 @@ input[type="radio"] {
 }
 
 /* ── Sidebar: icons on a transparent strip, opening over the page on hover ── */
-.jr-rail {
+.monarch-rail {
   position: fixed;
   inset: 0 auto 0 0;
   width: var(--rail-collapsed);
@@ -44,26 +44,26 @@ input[type="radio"] {
   transition: width 180ms var(--ease), background 180ms var(--ease), box-shadow 180ms var(--ease);
 }
 
-.jr-rail:hover,
-.jr-rail:has(:focus-visible),
-body.rail-pinned .jr-rail {
+.monarch-rail:hover,
+.monarch-rail:has(:focus-visible),
+body.rail-pinned .monarch-rail {
   width: var(--rail-w);
   background: color-mix(in srgb, var(--surface) 72%, transparent);
   -webkit-backdrop-filter: blur(16px) saturate(140%);
   backdrop-filter: blur(16px) saturate(140%);
 }
 
-.jr-rail:hover,
-.jr-rail:has(:focus-visible) {
+.monarch-rail:hover,
+.monarch-rail:has(:focus-visible) {
   box-shadow: var(--shadow-lg);
   transition-delay: 80ms;
 }
 
-body.rail-pinned .jr-rail {
+body.rail-pinned .monarch-rail {
   box-shadow: none;
 }
 
-.jr-rail-brand {
+.monarch-rail-brand {
   display: flex;
   align-items: center;
   gap: var(--sp-3);
@@ -72,7 +72,7 @@ body.rail-pinned .jr-rail {
   text-decoration: none;
 }
 
-.jr-rail-logo {
+.monarch-rail-logo {
   display: block;
   flex-shrink: 0;
   width: 28px;
@@ -80,53 +80,53 @@ body.rail-pinned .jr-rail {
   border-radius: var(--r-md);
 }
 
-.jr-rail-name,
-.jr-rail-label,
-.jr-rail-item span {
+.monarch-rail-name,
+.monarch-rail-label,
+.monarch-rail-item span {
   white-space: nowrap;
   opacity: 0;
   transition: opacity 120ms var(--ease);
 }
 
-.jr-rail:hover .jr-rail-name,
-.jr-rail:hover .jr-rail-label,
-.jr-rail:hover .jr-rail-item span,
-.jr-rail:has(:focus-visible) .jr-rail-name,
-.jr-rail:has(:focus-visible) .jr-rail-label,
-.jr-rail:has(:focus-visible) .jr-rail-item span,
-body.rail-pinned .jr-rail-name,
-body.rail-pinned .jr-rail-label,
-body.rail-pinned .jr-rail-item span {
+.monarch-rail:hover .monarch-rail-name,
+.monarch-rail:hover .monarch-rail-label,
+.monarch-rail:hover .monarch-rail-item span,
+.monarch-rail:has(:focus-visible) .monarch-rail-name,
+.monarch-rail:has(:focus-visible) .monarch-rail-label,
+.monarch-rail:has(:focus-visible) .monarch-rail-item span,
+body.rail-pinned .monarch-rail-name,
+body.rail-pinned .monarch-rail-label,
+body.rail-pinned .monarch-rail-item span {
   opacity: 1;
   transition-delay: 100ms;
 }
 
-.jr-rail-name {
+.monarch-rail-name {
   font-size: var(--fs-sm);
   font-weight: var(--fw-semibold);
 }
 
-.jr-rail-group {
+.monarch-rail-group {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
-.jr-rail-label {
+.monarch-rail-label {
   padding: 0 var(--sp-3) var(--sp-2);
   font-size: var(--fs-xs);
   font-weight: var(--fw-medium);
   color: var(--text3);
 }
 
-.jr-rail-foot {
+.monarch-rail-foot {
   display: flex;
   flex-direction: column;
   gap: 2px;
   margin-top: auto;
 }
 
-.jr-rail-item {
+.monarch-rail-item {
   display: flex;
   align-items: center;
   gap: var(--sp-4);
@@ -144,27 +144,27 @@ body.rail-pinned .jr-rail-item span {
   cursor: pointer;
 }
 
-.jr-rail-item svg {
+.monarch-rail-item svg {
   flex-shrink: 0;
   color: var(--text3);
 }
 
-.jr-rail-item:hover {
+.monarch-rail-item:hover {
   background: var(--hover-strong);
   color: var(--text);
 }
 
-.jr-rail-item.active {
+.monarch-rail-item.active {
   background: var(--hover-strong);
   color: var(--text);
   font-weight: var(--fw-medium);
 }
 
-.jr-rail-item.active svg {
+.monarch-rail-item.active svg {
   color: var(--text);
 }
 
-body.rail-pinned .jr-rail-pin svg {
+body.rail-pinned .monarch-rail-pin svg {
   color: var(--text);
 }
 
@@ -174,7 +174,7 @@ body.rail-pinned .jr-rail-pin svg {
     padding-bottom: 60px;
   }
 
-  .jr-rail {
+  .monarch-rail {
     inset: auto 0 0 0;
     width: auto;
     height: 56px;
@@ -190,46 +190,46 @@ body.rail-pinned .jr-rail-pin svg {
     padding-left: 0;
   }
 
-  .jr-rail,
-  .jr-rail:hover,
-  .jr-rail:has(:focus-visible),
-  body.rail-pinned .jr-rail {
+  .monarch-rail,
+  .monarch-rail:hover,
+  .monarch-rail:has(:focus-visible),
+  body.rail-pinned .monarch-rail {
     width: auto;
     background: var(--surface);
     box-shadow: none;
   }
 
-  .jr-rail-brand,
-  .jr-rail-label,
-  .jr-rail-pin {
+  .monarch-rail-brand,
+  .monarch-rail-label,
+  .monarch-rail-pin {
     display: none;
   }
 
-  .jr-rail-group,
-  .jr-rail-foot {
+  .monarch-rail-group,
+  .monarch-rail-foot {
     flex-direction: row;
     margin: 0;
   }
 
-  .jr-rail-group {
+  .monarch-rail-group {
     flex: 1;
     justify-content: space-around;
   }
 
-  .jr-rail-item {
+  .monarch-rail-item {
     width: 40px;
     height: 40px;
     justify-content: center;
     padding: 0;
   }
 
-  .jr-rail-item span {
+  .monarch-rail-item span {
     display: none;
   }
 }
 
 /* ── API key widget ───────────────────────────────────────────────────────── */
-.jr-key-row {
+.monarch-key-row {
   display: flex;
   align-items: center;
   gap: var(--sp-3);
@@ -242,17 +242,17 @@ body.rail-pinned .jr-rail-pin svg {
   transition: box-shadow var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
 }
 
-.jr-key-row:focus-within {
+.monarch-key-row:focus-within {
   border-color: var(--text3);
   box-shadow: 0 0 0 3px var(--accent-glow);
 }
 
-.jr-key-icon {
+.monarch-key-icon {
   display: flex;
   color: var(--text3);
 }
 
-.jr-key-input {
+.monarch-key-input {
   flex: 1;
   min-width: 0;
   border: 0;
@@ -264,12 +264,12 @@ body.rail-pinned .jr-rail-pin svg {
   -webkit-text-security: disc;
 }
 
-.jr-key-input::placeholder {
+.monarch-key-input::placeholder {
   font-family: var(--sans);
   color: var(--text3);
 }
 
-.jr-key-badge {
+.monarch-key-badge {
   flex-shrink: 0;
   padding: 2px 8px;
   border: 1px solid var(--border);
@@ -280,11 +280,11 @@ body.rail-pinned .jr-rail-pin svg {
   white-space: nowrap;
 }
 
-.jr-key-badge.ok {
+.monarch-key-badge.ok {
   color: var(--text);
 }
 
-.jr-key-save {
+.monarch-key-save {
   flex-shrink: 0;
   height: 30px;
   padding: 0 var(--sp-4);
@@ -298,30 +298,30 @@ body.rail-pinned .jr-rail-pin svg {
   cursor: pointer;
 }
 
-.jr-key-save:hover {
+.monarch-key-save:hover {
   background: var(--accent2);
 }
 
-.jr-key-save:disabled {
+.monarch-key-save:disabled {
   opacity: .5;
   cursor: default;
 }
 
-.jr-key-note {
+.monarch-key-note {
   margin-top: var(--sp-3);
   font-size: var(--fs-xs);
   color: var(--text3);
 }
 
-.jr-key-note:empty {
+.monarch-key-note:empty {
   display: none;
 }
 
-.jr-key-note.ok { color: var(--green); }
-.jr-key-note.warn { color: var(--yellow); }
-.jr-key-note.err { color: var(--red); }
+.monarch-key-note.ok { color: var(--green); }
+.monarch-key-note.warn { color: var(--yellow); }
+.monarch-key-note.err { color: var(--red); }
 
-.jr-key-banner {
+.monarch-key-banner {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
   gap: var(--sp-5);
@@ -335,26 +335,26 @@ body.rail-pinned .jr-rail-pin svg {
   line-height: var(--lh-normal);
 }
 
-.jr-key-banner strong {
+.monarch-key-banner strong {
   display: block;
   color: var(--text);
   font-weight: var(--fw-medium);
 }
 
-.jr-key-banner[hidden] {
+.monarch-key-banner[hidden] {
   display: none;
 }
 
-.ide-agent-panel .jr-key-banner {
+.ide-agent-panel .monarch-key-banner {
   grid-template-columns: 1fr;
   margin: var(--sp-4) var(--sp-3) 0;
   text-align: left;
 }
 
 @media (max-width: 820px) {
-  .jr-key-banner {
+  .monarch-key-banner {
     grid-template-columns: 1fr;
   }
 }
 
-.jr-rail-avatar { width: 16px; height: 16px; flex: none; border-radius: 50%; display: inline-grid; place-items: center; font-size: var(--fs-2xs); font-weight: 700; background: var(--surface2); color: var(--text); object-fit: cover; }
+.monarch-rail-avatar { width: 16px; height: 16px; flex: none; border-radius: 50%; display: inline-grid; place-items: center; font-size: var(--fs-2xs); font-weight: 700; background: var(--surface2); color: var(--text); object-fit: cover; }

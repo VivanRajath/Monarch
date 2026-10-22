@@ -5,7 +5,7 @@
     const url = new URL(input instanceof Request ? input.url : String(input), location.href);
     if (url.origin !== location.origin) return nativeFetch(input, init);
     const headers = new Headers(init.headers || undefined);
-    headers.set('X-Jr', '1');
+    headers.set('X-Monarch', '1');
     const res = await nativeFetch(input, { ...init, headers });
     if (res.status === 401 && !url.pathname.startsWith('/auth/')) location.href = '/login';
     return res;
@@ -145,7 +145,7 @@ async function renderApiPanel(el, kind, id, { onChange } = {}, fresh = null) {
 }
 
 // shell.js owns the theme.
-function toggleTheme() { if (window.jrToggleTheme) window.jrToggleTheme(); }
+function toggleTheme() { if (window.monarchToggleTheme) window.monarchToggleTheme(); }
 
 // --- context menu: items are {label, icon, hint, danger, confirm, disabled, onClick, items} or '-' for a divider ---
 
@@ -191,8 +191,8 @@ function buildMenu(items) {
     b.className = `h-menu-item${it.danger ? ' danger' : ''}`;
     b.disabled = !!it.disabled;
     b.setAttribute('role', 'menuitem');
-    const icon = it.icon && window.jrIcon ? jrIcon(it.icon, 15) : '';
-    const tail = it.items ? (window.jrIcon ? jrIcon('chevronRight', 14) : '') : it.hint ? `<kbd>${esc(it.hint)}</kbd>` : '';
+    const icon = it.icon && window.monarchIcon ? monarchIcon(it.icon, 15) : '';
+    const tail = it.items ? (window.monarchIcon ? monarchIcon('chevronRight', 14) : '') : it.hint ? `<kbd>${esc(it.hint)}</kbd>` : '';
     b.innerHTML = `<span class="h-menu-icon">${icon}</span><span class="h-menu-label">${esc(it.label)}</span>${tail}`;
     if (it.items) {
       b.addEventListener('mouseenter', () => openSubmenu(m, b, it.items));
@@ -239,7 +239,7 @@ document.addEventListener('keydown', (e) => {
 }, true);
 
 // Studio saves in its own window; the Hub listens so its list stays current.
-const hubChannel = 'BroadcastChannel' in window ? new BroadcastChannel('jr-agent-hub') : null;
+const hubChannel = 'BroadcastChannel' in window ? new BroadcastChannel('monarch-agent-hub') : null;
 
 function openStudio(agentId) {
   location.href = agentId ? `/studio.html?agent=${encodeURIComponent(agentId)}` : '/studio.html';

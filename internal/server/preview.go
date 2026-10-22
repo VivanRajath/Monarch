@@ -46,7 +46,7 @@ func previewProxy(publicHost string, svc core.Service) *httputil.ReverseProxy {
 				pr.Out.Header.Set("Origin", "http://"+inner)
 			}
 			for k := range pr.Out.Header {
-				if strings.HasPrefix(strings.ToLower(k), "x-jr-") {
+				if strings.HasPrefix(strings.ToLower(k), "x-monarch-") {
 					pr.Out.Header.Del(k)
 				}
 			}

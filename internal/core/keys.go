@@ -331,9 +331,9 @@ func saveLocked(keys map[string][]string) error {
 	return nil
 }
 
-// The model Build mode uses with each provider; JR_MODEL_<PROVIDER> overrides it.
+// The model Build mode uses with each provider; MONARCH_MODEL_<PROVIDER> overrides it.
 func ProviderModel(id string) string {
-	if v := strings.TrimSpace(os.Getenv("JR_MODEL_" + strings.ToUpper(id))); v != "" {
+	if v := strings.TrimSpace(os.Getenv("MONARCH_MODEL_" + strings.ToUpper(id))); v != "" {
 		return v
 	}
 	switch id {

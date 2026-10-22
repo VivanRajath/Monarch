@@ -123,20 +123,20 @@ func TestTunnelFinishingAfterReapIsDropped(t *testing.T) {
 }
 
 func TestQuickTunnelConfig(t *testing.T) {
-	clearJREnv(t)
-	t.Setenv("JR_PREVIEW_MODE", "")
-	t.Setenv("JR_PUBLIC_ORIGIN", "https://inspiron.tail1234.ts.net")
-	t.Setenv("JR_BETA_CODE", "x")
-	t.Setenv("JR_SESSION_SECRET", strings.Repeat("s", 32))
+	clearMonarchEnv(t)
+	t.Setenv("MONARCH_PREVIEW_MODE", "")
+	t.Setenv("MONARCH_PUBLIC_ORIGIN", "https://inspiron.tail1234.ts.net")
+	t.Setenv("MONARCH_BETA_CODE", "x")
+	t.Setenv("MONARCH_SESSION_SECRET", strings.Repeat("s", 32))
 	if _, err := LoadConfig(); err == nil {
 		t.Fatal("public mode with neither a preview domain nor quick tunnels must be refused")
 	}
-	t.Setenv("JR_PREVIEW_MODE", "quicktunnel")
+	t.Setenv("MONARCH_PREVIEW_MODE", "quicktunnel")
 	c, err := LoadConfig()
 	if err != nil || c.PreviewScheme != "https" {
 		t.Fatalf("quicktunnel config: %v %+v", err, c)
 	}
-	t.Setenv("JR_PREVIEW_MODE", "ngrok")
+	t.Setenv("MONARCH_PREVIEW_MODE", "ngrok")
 	if _, err := LoadConfig(); err == nil {
 		t.Fatal("an unknown preview mode must be refused")
 	}

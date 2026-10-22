@@ -4,8 +4,8 @@ import * as fs from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-const base = fs.mkdtempSync(join(tmpdir(), "jr-wsfs-"));
-process.env.JR_WORK_DIR = base;
+const base = fs.mkdtempSync(join(tmpdir(), "monarch-wsfs-"));
+process.env.MONARCH_WORK_DIR = base;
 process.env.AGENT_NO_LISTEN = "1";
 
 const wsfs = await import("./workspace-fs.js");

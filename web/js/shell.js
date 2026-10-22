@@ -35,20 +35,20 @@
     open: '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
   };
   const icon = (name, size = 20) => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name]}</svg>`;
-  window.jrIcon = icon;
+  window.monarchIcon = icon;
 
   function storedDark() {
-    try { return localStorage.getItem('jr-dark-mode') !== 'false'; } catch { return true; }
+    try { return localStorage.getItem('monarch-dark-mode') !== 'false'; } catch { return true; }
   }
 
-  // ide.js listens for jr-theme to retheme Monaco.
-  window.jrSetTheme = (dark) => {
+  // ide.js listens for monarch-theme to retheme Monaco.
+  window.monarchSetTheme = (dark) => {
     document.body.classList.toggle('dark-mode', dark);
-    try { localStorage.setItem('jr-dark-mode', dark); } catch { /* storage blocked */ }
-    window.dispatchEvent(new CustomEvent('jr-theme', { detail: { dark } }));
+    try { localStorage.setItem('monarch-dark-mode', dark); } catch { /* storage blocked */ }
+    window.dispatchEvent(new CustomEvent('monarch-theme', { detail: { dark } }));
   };
-  window.jrIsDark = () => document.body.classList.contains('dark-mode');
-  window.jrToggleTheme = () => window.jrSetTheme(!window.jrIsDark());
+  window.monarchIsDark = () => document.body.classList.contains('dark-mode');
+  window.monarchToggleTheme = () => window.monarchSetTheme(!window.monarchIsDark());
 
   const NAV = [
     ['home', 'Home', '/', (p) => p === '/' || p === '/index.html', 'Workspace'],
@@ -68,7 +68,7 @@
   async function mountAccount(rail) {
     let me;
     try {
-      const r = await fetch('/auth/me', { headers: { 'X-Jr': '1' } });
+      const r = await fetch('/auth/me', { headers: { 'X-Monarch': '1' } });
       if (!r.ok) return;
       me = await r.json();
     } catch { return; }
@@ -77,56 +77,56 @@
     const name = p.name || p.login || p.email || 'Beta user';
     const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     const avatar = p.avatar
-      ? `<img class="jr-rail-avatar" src="${esc(p.avatar)}" alt="" width="16" height="16">`
-      : `<b class="jr-rail-avatar">${esc(name.charAt(0).toUpperCase())}</b>`;
+      ? `<img class="monarch-rail-avatar" src="${esc(p.avatar)}" alt="" width="16" height="16">`
+      : `<b class="monarch-rail-avatar">${esc(name.charAt(0).toUpperCase())}</b>`;
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'jr-rail-item jr-rail-account';
+    btn.className = 'monarch-rail-item monarch-rail-account';
     btn.title = `Signed in as ${name}. Click to sign out.`;
     btn.innerHTML = `${avatar}<span>Sign out · ${esc(name)}</span>`;
     btn.addEventListener('click', async () => {
-      try { await fetch('/auth/logout', { method: 'POST', headers: { 'X-Jr': '1' } }); } catch { /* sign in again anyway */ }
+      try { await fetch('/auth/logout', { method: 'POST', headers: { 'X-Monarch': '1' } }); } catch { /* sign in again anyway */ }
       location.href = '/login';
     });
-    rail.querySelector('.jr-rail-foot').prepend(btn);
+    rail.querySelector('.monarch-rail-foot').prepend(btn);
   }
 
   function renderRail() {
     const rail = document.createElement('nav');
-    rail.className = 'jr-rail';
+    rail.className = 'monarch-rail';
     rail.setAttribute('aria-label', 'Main');
-    const item = ([ic, label, href]) => `<a class="jr-rail-item" href="${href}" data-nav="${ic}">${icon(ic, 16)}<span>${label}</span></a>`;
-    const group = (name) => `<div class="jr-rail-group"><div class="jr-rail-label">${name}</div>${NAV.filter((n) => n[4] === name).map(item).join('')}</div>`;
+    const item = ([ic, label, href]) => `<a class="monarch-rail-item" href="${href}" data-nav="${ic}">${icon(ic, 16)}<span>${label}</span></a>`;
+    const group = (name) => `<div class="monarch-rail-group"><div class="monarch-rail-label">${name}</div>${NAV.filter((n) => n[4] === name).map(item).join('')}</div>`;
     rail.innerHTML = `
-      <a class="jr-rail-brand" href="/"><img class="jr-rail-logo" src="/img/brand/monarch-mark.png" alt=""><span class="jr-rail-name">Monarch</span></a>
+      <a class="monarch-rail-brand" href="/"><img class="monarch-rail-logo" src="/img/brand/monarch-mark.png" alt=""><span class="monarch-rail-name">Monarch</span></a>
       ${group('Workspace')}
       ${group('Automation')}
-      <div class="jr-rail-foot">
-        <button class="jr-rail-item jr-rail-tour" type="button">${icon('flag', 16)}<span>Take the tour</span></button>
-        <button class="jr-rail-item jr-rail-pin" type="button">${icon('panelLeft', 16)}<span></span></button>
-        <button class="jr-rail-item jr-rail-theme" type="button">${icon('theme', 16)}<span>Toggle theme</span></button>
+      <div class="monarch-rail-foot">
+        <button class="monarch-rail-item monarch-rail-tour" type="button">${icon('flag', 16)}<span>Take the tour</span></button>
+        <button class="monarch-rail-item monarch-rail-pin" type="button">${icon('panelLeft', 16)}<span></span></button>
+        <button class="monarch-rail-item monarch-rail-theme" type="button">${icon('theme', 16)}<span>Toggle theme</span></button>
       </div>`;
-    rail.querySelector('.jr-rail-theme').addEventListener('click', () => window.jrToggleTheme());
+    rail.querySelector('.monarch-rail-theme').addEventListener('click', () => window.monarchToggleTheme());
     // The tour lives on the home page; elsewhere this goes there and starts it.
-    rail.querySelector('.jr-rail-tour').addEventListener('click', () => {
-      if (typeof window.jrStartTour === 'function' && !document.body.classList.contains('ide-mode')) window.jrStartTour();
+    rail.querySelector('.monarch-rail-tour').addEventListener('click', () => {
+      if (typeof window.monarchStartTour === 'function' && !document.body.classList.contains('ide-mode')) window.monarchStartTour();
       else location.href = '/?tour=1';
     });
     // Collapsed to icons by default and opened by hovering; pinning keeps it open and pushes the page over.
-    const pin = rail.querySelector('.jr-rail-pin');
+    const pin = rail.querySelector('.monarch-rail-pin');
     const setPinned = (on) => {
       document.body.classList.toggle('rail-pinned', on);
       pin.querySelector('span').textContent = on ? 'Collapse sidebar' : 'Keep sidebar open';
       pin.title = pin.querySelector('span').textContent;
-      try { localStorage.setItem('jr-rail-pinned', on); } catch { /* storage blocked */ }
+      try { localStorage.setItem('monarch-rail-pinned', on); } catch { /* storage blocked */ }
     };
     let pinned = false;
-    try { pinned = localStorage.getItem('jr-rail-pinned') === 'true'; } catch { /* storage blocked */ }
+    try { pinned = localStorage.getItem('monarch-rail-pinned') === 'true'; } catch { /* storage blocked */ }
     setPinned(pinned);
     pin.addEventListener('click', () => { setPinned(!document.body.classList.contains('rail-pinned')); pin.blur(); });
     mountAccount(rail);
     markActive(rail);
-    ['hashchange', 'jr-nav'].forEach((ev) => window.addEventListener(ev, () => markActive(rail)));
+    ['hashchange', 'monarch-nav'].forEach((ev) => window.addEventListener(ev, () => markActive(rail)));
     document.body.prepend(rail);
     document.body.classList.add('has-rail');
   }
@@ -137,42 +137,42 @@
     .slice(1);
 
   let keyCache = null;
-  window.jrKeyStatus = async (fresh = false) => {
+  window.monarchKeyStatus = async (fresh = false) => {
     if (keyCache && !fresh) return keyCache;
     try {
-      const r = await fetch('/settings/keys', { headers: { 'X-Jr': '1' } });
+      const r = await fetch('/settings/keys', { headers: { 'X-Monarch': '1' } });
       keyCache = r.ok ? await r.json() : { providers: [], editable: false };
     } catch { keyCache = { providers: [], editable: false }; }
     return keyCache;
   };
-  window.jrHasAnyKey = async () => (await window.jrKeyStatus()).providers.some(p => p.configured);
+  window.monarchHasAnyKey = async () => (await window.monarchKeyStatus()).providers.some(p => p.configured);
 
   const esc = (s) => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
   // Renders into el; onSaved runs after a key is stored so the host page can refresh what depended on it.
-  window.jrMountKeyInput = (el, { onSaved, compact = false } = {}) => {
-    el.classList.add('jr-key');
-    if (compact) el.classList.add('jr-key-compact');
+  window.monarchMountKeyInput = (el, { onSaved, compact = false } = {}) => {
+    el.classList.add('monarch-key');
+    if (compact) el.classList.add('monarch-key-compact');
     el.innerHTML = `
-      <div class="jr-key-row">
-        <span class="jr-key-icon">${icon('key', 16)}</span>
-        <input class="jr-key-input" type="text" autocomplete="off" spellcheck="false" data-1p-ignore data-lpignore="true"
+      <div class="monarch-key-row">
+        <span class="monarch-key-icon">${icon('key', 16)}</span>
+        <input class="monarch-key-input" type="text" autocomplete="off" spellcheck="false" data-1p-ignore data-lpignore="true"
           placeholder="Paste any API key: Groq, OpenAI, Anthropic or Gemini" aria-label="API key">
-        <span class="jr-key-badge" hidden></span>
-        <button class="jr-key-save" type="button" disabled>Save key</button>
+        <span class="monarch-key-badge" hidden></span>
+        <button class="monarch-key-save" type="button" disabled>Save key</button>
       </div>
-      <div class="jr-key-note" role="status"></div>`;
-    const input = el.querySelector('.jr-key-input');
-    const badge = el.querySelector('.jr-key-badge');
-    const btn = el.querySelector('.jr-key-save');
-    const note = el.querySelector('.jr-key-note');
-    const setNote = (text, kind = '') => { note.textContent = text; note.className = `jr-key-note ${kind}`; };
+      <div class="monarch-key-note" role="status"></div>`;
+    const input = el.querySelector('.monarch-key-input');
+    const badge = el.querySelector('.monarch-key-badge');
+    const btn = el.querySelector('.monarch-key-save');
+    const note = el.querySelector('.monarch-key-note');
+    const setNote = (text, kind = '') => { note.textContent = text; note.className = `monarch-key-note ${kind}`; };
 
     input.addEventListener('input', () => {
       const key = input.value.trim();
       const [id, label] = detect(key);
       badge.hidden = !key;
-      badge.className = `jr-key-badge${id ? ' ok' : ''}`;
+      badge.className = `monarch-key-badge${id ? ' ok' : ''}`;
       badge.textContent = id ? `${label} detected` : 'Unknown key';
       btn.disabled = !id;
       setNote(key && !id ? 'Keys start with gsk_ (Groq), sk-ant- (Anthropic), sk- (OpenAI) or AIza (Gemini).' : '');
@@ -185,7 +185,7 @@
       setNote('Checking the key with the provider…');
       try {
         const r = await fetch('/settings/keys', {
-          method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Jr': '1' }, body: JSON.stringify({ key }),
+          method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Monarch': '1' }, body: JSON.stringify({ key }),
         });
         const d = await r.json();
         if (!r.ok) throw new Error(d.error || 'Could not save the key');
@@ -204,22 +204,22 @@
   };
 
   // A dismissible strip that only appears while no provider has a key.
-  window.jrKeyBanner = async (host, { onSaved } = {}) => {
-    const status = await window.jrKeyStatus();
+  window.monarchKeyBanner = async (host, { onSaved } = {}) => {
+    const status = await window.monarchKeyStatus();
     if (status.providers.some(p => p.configured) || !status.editable) {
       host.hidden = true;
       return;
     }
     host.hidden = false;
-    host.classList.add('jr-key-banner');
-    host.innerHTML = `<div class="jr-key-banner-text"><strong>Add an AI key to get started.</strong> The agent, Build mode and Agent Studio need one. It stays on this server.</div><div class="jr-key-banner-input"></div>`;
-    window.jrMountKeyInput(host.querySelector('.jr-key-banner-input'), {
+    host.classList.add('monarch-key-banner');
+    host.innerHTML = `<div class="monarch-key-banner-text"><strong>Add an AI key to get started.</strong> The agent, Build mode and Agent Studio need one. It stays on this server.</div><div class="monarch-key-banner-input"></div>`;
+    window.monarchMountKeyInput(host.querySelector('.monarch-key-banner-input'), {
       compact: true,
       onSaved: (d) => { setTimeout(() => { host.hidden = true; }, 1600); if (onSaved) onSaved(d); },
     });
   };
 
-  window.jrEsc = esc;
+  window.monarchEsc = esc;
 
   function boot() {
     document.body.classList.toggle('dark-mode', storedDark());

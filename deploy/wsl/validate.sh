@@ -23,22 +23,22 @@ except Exception: d={}
 print($1)" 2>/dev/null; }
 
 start_server() {
-  systemctl --user stop jr-validate 2>/dev/null
-  systemctl --user reset-failed jr-validate 2>/dev/null
+  systemctl --user stop monarch-validate 2>/dev/null
+  systemctl --user reset-failed monarch-validate 2>/dev/null
   cat > "$APP/validate.env" <<ENV
-JR_CONTAINER_CLI=podman
+MONARCH_CONTAINER_CLI=podman
 DOCKER_HOST=unix://$XDG_RUNTIME_DIR/podman/podman.sock
-JR_WORK_DIR=$WORK
-JR_PREHEAT_IMAGES=react
-JR_PUBLIC_ORIGIN=$ORIGIN
-JR_PREVIEW_MODE=quicktunnel
-JR_BETA_CODE=validate-code
-JR_SESSION_SECRET=$(head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n')
-JR_MAX_SANDBOXES=2
-JR_MAX_PER_USER=1
+MONARCH_WORK_DIR=$WORK
+MONARCH_PREHEAT_IMAGES=react
+MONARCH_PUBLIC_ORIGIN=$ORIGIN
+MONARCH_PREVIEW_MODE=quicktunnel
+MONARCH_BETA_CODE=validate-code
+MONARCH_SESSION_SECRET=$(head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n')
+MONARCH_MAX_SANDBOXES=2
+MONARCH_MAX_PER_USER=1
 ENV
   for kv in "$@"; do echo "$kv" >> "$APP/validate.env"; done
-  systemd-run --user --unit=jr-validate --collect -p WorkingDirectory="$APP" -p EnvironmentFile="$APP/validate.env" "$APP/jr" >/dev/null
+  systemd-run --user --unit=monarch-validate --collect -p WorkingDirectory="$APP" -p EnvironmentFile="$APP/validate.env" "$APP/monarch" >/dev/null
   for _ in $(seq 1 60); do
     code=$(curl -s -o /dev/null -w '%{http_code}' $B/health)
     [ "$code" = 200 ] && return 0
@@ -48,10 +48,10 @@ ENV
   return 1
 }
 
-login() { curl -s -c "$1" -o /dev/null -w '%{http_code}' -X POST -H 'X-Jr: 1' -H 'Content-Type: application/json' -d '{"code":"validate-code"}' $B/auth/login; }
-api() { curl -s -b "$1" -X "$2" -H 'X-Jr: 1' -H 'Content-Type: application/json' ${4:+-d "$4"} "$B$3"; }
-code() { curl -s -o /dev/null -w '%{http_code}' -b "$1" -X "$2" -H 'X-Jr: 1' -H 'Content-Type: application/json' ${4:+-d "$4"} "$B$3"; }
-cookie() { awk '$6=="jr_session"{print $6"="$7}' "$1"; }
+login() { curl -s -c "$1" -o /dev/null -w '%{http_code}' -X POST -H 'X-Monarch: 1' -H 'Content-Type: application/json' -d '{"code":"validate-code"}' $B/auth/login; }
+api() { curl -s -b "$1" -X "$2" -H 'X-Monarch: 1' -H 'Content-Type: application/json' ${4:+-d "$4"} "$B$3"; }
+code() { curl -s -o /dev/null -w '%{http_code}' -b "$1" -X "$2" -H 'X-Monarch: 1' -H 'Content-Type: application/json' ${4:+-d "$4"} "$B$3"; }
+cookie() { awk '$6=="monarch_session"{print $6"="$7}' "$1"; }
 status() { api "$1" GET "/sandbox/status?container=$2"; }
 workdir() { echo "$WORK/${1#sandbox-}"; }
 tunnels() { pgrep -c -x cloudflared || true; }
@@ -81,15 +81,15 @@ cp "$HERE/wsclient.mjs" "$HERE/reload.mjs" "$APP/agent-services/"
 WSC="$APP/agent-services/wsclient.mjs"
 # The installed service owns :9000; it is paused for the run and restarted at the end.
 systemctl --user stop monarch.service 2>/dev/null
-trap 'systemctl --user stop jr-validate 2>/dev/null; systemctl --user is-enabled -q monarch.service 2>/dev/null && systemctl --user start monarch.service' EXIT
-systemctl --user stop jr-validate 2>/dev/null
+trap 'systemctl --user stop monarch-validate 2>/dev/null; systemctl --user is-enabled -q monarch.service 2>/dev/null && systemctl --user start monarch.service' EXIT
+systemctl --user stop monarch-validate 2>/dev/null
 podman rm -f -v $(podman ps -aq --filter label=monarch.sandbox) >/dev/null 2>&1
 podman rmi -f sandbox-static >/dev/null 2>&1
 mkdir -p "$WORK" && find "$WORK" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
 info "podman $(podman --version | awk '{print $3}'), network backend $(podman info --format '{{.Host.NetworkBackend}}'), rootless net $(podman info --format '{{.Host.Slirp4NetNS.Executable}}{{.Host.Pasta.Executable}}' 2>/dev/null)"
 
 phase "1. server on podman"
-if start_server; then pass "server started, /health 200 (podman socket + agent)"; else fail "server did not become healthy"; journalctl --user -u jr-validate --no-pager | tail -30; exit 1; fi
+if start_server; then pass "server started, /health 200 (podman socket + agent)"; else fail "server did not become healthy"; journalctl --user -u monarch-validate --no-pager | tail -30; exit 1; fi
 info "health: $(curl -s $B/health)"
 check "preheated sandbox-react exists (built at startup)" bash -c 'for i in $(seq 1 90); do podman image exists sandbox-react && exit 0; sleep 10; done; exit 1'
 check "sandbox-static not preheated (so it must build lazily)" bash -c '! podman image exists sandbox-static'
@@ -112,10 +112,10 @@ info "limits in container: mem=$(in_sandbox "$CA" 'cat /sys/fs/cgroup/memory.max
 check "memory limit enforced" bash -c "[ \"\$(podman exec $CA cat /sys/fs/cgroup/memory.max)\" != max ]"
 check "no-new-privileges set" bash -c "podman exec $CA grep -q 'NoNewPrivs:[[:space:]]*1' /proc/1/status"
 check "NET_RAW dropped" bash -c "! podman exec $CA grep CapBnd /proc/1/status | grep -q 00000000a80425fb"
-OUT=$(api "$JA" POST /terminal/exec "{\"container\":\"$CA\",\"command\":\"echo JRMARK \$(id -u) \$(node -v)\"}")
-echo "$OUT" | grep -q 'JRMARK 0 v' && pass "terminal exec: $(echo "$OUT" | json "d['output'].strip()")" || fail "terminal exec: $OUT"
-WS=$(node "$WSC" "ws://127.0.0.1:9000/terminal/ws?container=$CA" "$ORIGIN" "$(cookie "$JA")" $'echo JRMARK\n')
-echo "$WS" | grep -q JRMARK && pass "interactive terminal over WebSocket via podman API socket" || fail "terminal websocket: $WS"
+OUT=$(api "$JA" POST /terminal/exec "{\"container\":\"$CA\",\"command\":\"echo MONARCHMARK \$(id -u) \$(node -v)\"}")
+echo "$OUT" | grep -q 'MONARCHMARK 0 v' && pass "terminal exec: $(echo "$OUT" | json "d['output'].strip()")" || fail "terminal exec: $OUT"
+WS=$(node "$WSC" "ws://127.0.0.1:9000/terminal/ws?container=$CA" "$ORIGIN" "$(cookie "$JA")" $'echo MONARCHMARK\n')
+echo "$WS" | grep -q MONARCHMARK && pass "interactive terminal over WebSocket via podman API socket" || fail "terminal websocket: $WS"
 check "host -> sandbox on 127.0.0.1:$PORT_A" bash -c "curl -sf -o /dev/null http://127.0.0.1:$PORT_A"
 BODY=$(curl -s -m 20 "$URL_A")
 echo "$BODY" | grep -q 'id="root"' && pass "preview through Cloudflare quick tunnel serves the CRA app" || fail "preview body: ${BODY:0:200}"
@@ -134,7 +134,7 @@ check "sandbox-static was built on first use" podman image exists sandbox-static
 PORT_B=$(status "$JB" "$CB" | json "d['services'][0]['port']")
 [ "$(code "$JB" GET "/sandbox/status?container=$CA")" = 404 ] && pass "tester B gets 404 for A's sandbox" || fail "ownership"
 JC=$(mktemp); login "$JC" >/dev/null
-GC=$(curl -s -w ' %{http_code}' -b "$JC" -X POST -H 'X-Jr: 1' -H 'Content-Type: application/json' -d "{\"repo\":\"$REPO_B\"}" $B/run | tr -d '
+GC=$(curl -s -w ' %{http_code}' -b "$JC" -X POST -H 'X-Monarch: 1' -H 'Content-Type: application/json' -d "{\"repo\":\"$REPO_B\"}" $B/run | tr -d '
 ')
 case "$GC" in *" 429") pass "third tester while A and B run: global cap (2) -> 429" ;; *) fail "global cap: $GC"; api "$JC" POST "/stop/$(echo "${GC% *}" | json "d.get('container','')")" >/dev/null ;; esac
 
@@ -189,15 +189,15 @@ api "$JA" POST "/stop/$CF" >/dev/null
 check "failed sandbox workdir removed on stop" test ! -e "$(workdir "$CF")"
 
 phase "8. startup reaper on real podman"
-podman run -d --name jr-orphan --label monarch.sandbox=jr-orphan docker.io/library/alpine:3 sleep 600 >/dev/null
+podman run -d --name monarch-orphan --label monarch.sandbox=monarch-orphan docker.io/library/alpine:3 sleep 600 >/dev/null
 mkdir -p "$WORK/sandbox-999999" && podman unshare sh -c "touch '$WORK/sandbox-999999/owned-by-subuid' && chown 1000:1000 '$WORK/sandbox-999999/owned-by-subuid'"
 info "orphan file owner on host: $(stat -c %u "$WORK/sandbox-999999/owned-by-subuid")"
 start_server || fail "restart"
-check "orphaned labelled container removed at startup" bash -c "! podman container exists jr-orphan"
+check "orphaned labelled container removed at startup" bash -c "! podman container exists monarch-orphan"
 check "orphaned workdir with subuid-owned files removed (podman unshare)" test ! -e "$WORK/sandbox-999999"
 
 phase "9. disk floor (simulated with an impossible floor, nothing is filled)"
-ALLOW_503=1 start_server JR_MIN_FREE_DISK_MB=99999999 JR_DISK_CHECK_PATHS=/mnt/c || fail "restart with disk floor"
+ALLOW_503=1 start_server MONARCH_MIN_FREE_DISK_MB=99999999 MONARCH_DISK_CHECK_PATHS=/mnt/c || fail "restart with disk floor"
 [ "$(curl -s -o /dev/null -w '%{http_code}' $B/health)" = 200 ] && pass "/health (liveness) stays 200 below the floor" || fail "/health went down for a capacity problem"
 H=$(curl -s -w ' %{http_code}' $B/ready | tr -d '
 ')
@@ -210,12 +210,12 @@ WANT=$(( POOL < WIN ? POOL : WIN ))
 HD=$(echo "${H% *}" | json "d.get('diskFreeMB')")
 [ -n "$HD" ] && [ $((HD - WANT)) -le 64 ] && [ $((WANT - HD)) -le 64 ] && pass "disk check reports the tightest real limit (${HD}MB; pool ${POOL}MB, Windows ${WIN}MB), not the sparse WSL disk" || fail "disk check reported ${HD}MB, expected ~${WANT}MB (pool ${POOL}MB, Windows ${WIN}MB)"
 login "$JA" >/dev/null
-R=$(curl -s -w ' %{http_code}' -b "$JA" -X POST -H 'X-Jr: 1' -H 'Content-Type: application/json' -d "{\"repo\":\"$REPO_B\"}" $B/run | tr -d '
+R=$(curl -s -w ' %{http_code}' -b "$JA" -X POST -H 'X-Monarch: 1' -H 'Content-Type: application/json' -d "{\"repo\":\"$REPO_B\"}" $B/run | tr -d '
 ')
 echo "$R" | grep -q 'low on disk.* 429$' && pass "new sandbox below the floor -> 429 ($R)" || fail "disk floor: $R"
-check "nothing was created below the floor" bash -c "[ -z \"\$(ls -A $WORK | grep -v jr-agent-homes)\" ]"
+check "nothing was created below the floor" bash -c "[ -z \"\$(ls -A $WORK | grep -v monarch-agent-homes)\" ]"
 
-systemctl --user stop jr-validate
+systemctl --user stop monarch-validate
 printf '\n=== RESULTS\n'
 printf '%s\n' "${RESULTS[@]}"
 printf '\n%d passed, %d failed\n' "$(printf '%s\n' "${RESULTS[@]}" | grep -c '^PASS')" "$(printf '%s\n' "${RESULTS[@]}" | grep -c '^FAIL')"

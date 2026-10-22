@@ -10,7 +10,7 @@ function showError(msg) {
   errorBox.hidden = !msg;
 }
 
-try { if (localStorage.getItem('jr-dark-mode') === 'false') document.body.classList.remove('dark-mode'); } catch { /* storage blocked */ }
+try { if (localStorage.getItem('monarch-dark-mode') === 'false') document.body.classList.remove('dark-mode'); } catch { /* storage blocked */ }
 if (params.get('error')) showError(params.get('error'));
 
 (async () => {
@@ -61,7 +61,7 @@ document.getElementById('auth-form').addEventListener('submit', async (e) => {
   try {
     const res = await fetch('/auth/login', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Jr': '1' },
+      headers: { 'Content-Type': 'application/json', 'X-Monarch': '1' },
       body: JSON.stringify({ code }),
     });
     if (res.ok) { location.href = next; return; }

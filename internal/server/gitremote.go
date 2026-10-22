@@ -185,7 +185,7 @@ func secureRemoteGit(sb core.Sandbox, token string, op remoteOp) (string, error)
 	if op.Op == "push" && (!objSHARe.MatchString(op.SHA) || !validBranch(op.Branch)) {
 		return "", fmt.Errorf("invalid push target")
 	}
-	ctl, err := os.MkdirTemp("", "jr-git-")
+	ctl, err := os.MkdirTemp("", "monarch-git-")
 	if err != nil {
 		return "", err
 	}

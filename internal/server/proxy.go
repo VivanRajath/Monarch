@@ -36,8 +36,8 @@ func newAgentProxy(targetURL string) http.Handler {
 			return
 		}
 		// Node trusts these for ownership and to know the call came through Go; client copies never survive.
-		r.Header.Set("X-Jr-User", core.UserOf(r))
-		r.Header.Set("X-Jr-Internal", core.Cfg.InternalToken)
+		r.Header.Set("X-Monarch-User", core.UserOf(r))
+		r.Header.Set("X-Monarch-Internal", core.Cfg.InternalToken)
 		r.Header.Del("Cookie")
 		proxy.ServeHTTP(w, r)
 	})

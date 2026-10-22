@@ -11,7 +11,7 @@ import {
 import { classifySlot, assignSlot, readPipelineManifest, overlayPaths, BUILTIN_SKILLS } from "./registry.js";
 
 function fixture() {
-  const dir = mkdtempSync(join(tmpdir(), "jr-knowledge-"));
+  const dir = mkdtempSync(join(tmpdir(), "monarch-knowledge-"));
   const put = (rel, body) => {
     const abs = join(dir, ...rel.split("/"));
     mkdirSync(join(abs, ".."), { recursive: true });

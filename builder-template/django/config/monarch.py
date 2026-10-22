@@ -15,7 +15,7 @@ PUBLIC = settings.BASE_DIR / "public"
 
 def workflow_config():
     try:
-        return json.loads((settings.BASE_DIR / "jr-workflows.json").read_text(encoding="utf-8"))
+        return json.loads((settings.BASE_DIR / "monarch-workflows.json").read_text(encoding="utf-8"))
     except (OSError, ValueError):
         return {"workflows": {}}
 
@@ -34,7 +34,7 @@ def run_workflow(request, key):
     cfg = workflow_config()
     flow = cfg.get("workflows", {}).get(key)
     if not flow:
-        print(f"[workflow] {key}: unknown workflow (check jr-workflows.json)", flush=True)
+        print(f"[workflow] {key}: unknown workflow (check monarch-workflows.json)", flush=True)
         return JsonResponse({"status": "failed", "error": "Unknown workflow"}, status=404)
     started = time.monotonic()
     try:

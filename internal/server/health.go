@@ -30,7 +30,7 @@ var (
 	agentUp = func() bool {
 		c := http.Client{Timeout: 3 * time.Second}
 		req, _ := http.NewRequest("GET", fmt.Sprintf("http://127.0.0.1:%d/agent/health", core.Cfg.AgentPort), nil)
-		req.Header.Set("X-Jr-Internal", core.Cfg.InternalToken)
+		req.Header.Set("X-Monarch-Internal", core.Cfg.InternalToken)
 		res, err := c.Do(req)
 		if err != nil {
 			return false

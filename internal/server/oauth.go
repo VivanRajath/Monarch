@@ -85,9 +85,9 @@ func safeNext(next string) string {
 
 func oauthCookieName() string {
 	if secureCookies() {
-		return "__Host-jr_oauth"
+		return "__Host-monarch_oauth"
 	}
-	return "jr_oauth"
+	return "monarch_oauth"
 }
 
 type oauthState struct {
@@ -305,7 +305,7 @@ func githubLink(id oauthIdentity, via string) core.GitHubLink {
 	return core.GitHubLink{ID: id.GitHubID, Login: id.Login, Name: id.Name, Email: id.Email, Avatar: id.Avatar, Scopes: id.Scopes, Via: via, Token: id.Token}
 }
 
-// JR_OAUTH_ALLOW entries match an email, an "@domain" or a "gh:login".
+// MONARCH_OAUTH_ALLOW entries match an email, an "@domain" or a "gh:login".
 func allowedToSignIn(id oauthIdentity) bool {
 	if len(core.Cfg.OAuthAllow) == 0 {
 		return true

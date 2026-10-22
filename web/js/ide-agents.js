@@ -39,7 +39,7 @@ async function ogPost(path, body, okMsg) {
   if (OG.busy) return null;
   OG.busy = true;
   try {
-    const res = await fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Jr': '1' }, body: JSON.stringify({ container: IDE.container, ...body }) });
+    const res = await fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Monarch': '1' }, body: JSON.stringify({ container: IDE.container, ...body }) });
     const d = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(d.error || `failed (${res.status})`);
     if (d.agents) OG.status = d;
@@ -166,7 +166,7 @@ async function ogSmoke(name) {
   gaRender();
   try {
     const provider = (document.getElementById('agent-provider') || {}).value;
-    const res = await fetch('/agent/opengap/smoke', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Jr': '1' }, body: JSON.stringify({ container: IDE.container, name, provider }) });
+    const res = await fetch('/agent/opengap/smoke', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Monarch': '1' }, body: JSON.stringify({ container: IDE.container, name, provider }) });
     const d = await res.json();
     if (!res.ok) throw new Error(d.error || 'smoke test failed');
     OG.smoke[name] = d.steps;

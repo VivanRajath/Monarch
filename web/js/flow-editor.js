@@ -6,7 +6,7 @@ const F = {
 };
 const NODE_W = 200;
 const TYPE_ICON = { trigger: 'play', agent: 'bot', if: 'branch', set: 'braces', approval: 'userCheck', http: 'globe', output: 'flag' };
-const nodeIcon = (type) => `<span class="f-icon">${jrIcon(TYPE_ICON[type], 16)}</span>`;
+const nodeIcon = (type) => `<span class="f-icon">${monarchIcon(TYPE_ICON[type], 16)}</span>`;
 const OP_LABEL = { equals: 'equals', not_equals: 'does not equal', contains: 'contains', exists: 'exists', not_exists: 'is empty', greater: 'is greater than', less: 'is less than', is_true: 'is true' };
 
 const $ = (id) => document.getElementById(id);
@@ -35,7 +35,7 @@ async function boot() {
     if (agent) seedWithAgent(wf, agent);
     load(wf, false);
   }
-  document.querySelectorAll('[data-icon]').forEach((el) => { el.innerHTML = jrIcon(el.dataset.icon, 16); });
+  document.querySelectorAll('[data-icon]').forEach((el) => { el.innerHTML = monarchIcon(el.dataset.icon, 16); });
   loadLayout();
   renderPalette();
   bindCanvas();
@@ -141,9 +141,9 @@ function renderPalette() {
   $('f-palette').innerHTML = `
     <div class="f-pal-head">
       <span class="f-pal-title">Nodes</span>
-      <button class="f-tool" id="f-pal-toggle" type="button" title="${F.layout.nodes ? 'Collapse' : 'Expand'} the nodes panel">${jrIcon('panelLeft', 16)}</button>
+      <button class="f-tool" id="f-pal-toggle" type="button" title="${F.layout.nodes ? 'Collapse' : 'Expand'} the nodes panel">${monarchIcon('panelLeft', 16)}</button>
     </div>
-    <label class="f-pal-search">${jrIcon('search', 14)}<input id="f-pal-q" placeholder="Search nodes" value="${esc(F.palQuery)}" aria-label="Search nodes"></label>
+    <label class="f-pal-search">${monarchIcon('search', 14)}<input id="f-pal-q" placeholder="Search nodes" value="${esc(F.palQuery)}" aria-label="Search nodes"></label>
     <div class="f-pal-list">
       <span class="f-pal-group">Your agents</span>
       ${agents || (F.agents.length ? '' : '<div class="f-pal-empty">No agents yet. <a href="/studio.html">Create one</a>.</div>')}
@@ -165,7 +165,7 @@ function renderPalette() {
   $('f-palette').querySelectorAll('.f-pal-item').forEach((el) => {
     if (el.classList.contains('disabled')) return;
     el.addEventListener('dragstart', (e) => {
-      e.dataTransfer.setData('application/x-jr-node', JSON.stringify({ type: el.dataset.type, agentId: el.dataset.agent }));
+      e.dataTransfer.setData('application/x-monarch-node', JSON.stringify({ type: el.dataset.type, agentId: el.dataset.agent }));
       e.dataTransfer.effectAllowed = 'copy';
     });
     el.addEventListener('click', () => addFromPalette(el.dataset.type, el.dataset.agent));
@@ -175,7 +175,7 @@ function renderPalette() {
 // --- layout: both side panels collapse, and the choice is remembered ---
 
 function loadLayout() {
-  try { Object.assign(F.layout, JSON.parse(localStorage.getItem('jr-flow-layout') || '{}')); } catch { /* storage blocked */ }
+  try { Object.assign(F.layout, JSON.parse(localStorage.getItem('monarch-flow-layout') || '{}')); } catch { /* storage blocked */ }
   applyLayout();
 }
 
@@ -188,7 +188,7 @@ function applyLayout() {
 
 function toggleLayout(which, value = !F.layout[which]) {
   F.layout[which] = value;
-  try { localStorage.setItem('jr-flow-layout', JSON.stringify(F.layout)); } catch { /* storage blocked */ }
+  try { localStorage.setItem('monarch-flow-layout', JSON.stringify(F.layout)); } catch { /* storage blocked */ }
   applyLayout();
   if (which === 'nodes') renderPalette();
 }
@@ -478,7 +478,7 @@ function bindCanvas() {
   });
 
   canvas.addEventListener('dragover', (e) => {
-    if (![...e.dataTransfer.types].includes('application/x-jr-node')) return;
+    if (![...e.dataTransfer.types].includes('application/x-monarch-node')) return;
     e.preventDefault();
     e.dataTransfer.dropEffect = 'copy';
     canvas.classList.add('drop-target');
@@ -486,7 +486,7 @@ function bindCanvas() {
   canvas.addEventListener('dragleave', () => canvas.classList.remove('drop-target'));
   canvas.addEventListener('drop', (e) => {
     canvas.classList.remove('drop-target');
-    const raw = e.dataTransfer.getData('application/x-jr-node');
+    const raw = e.dataTransfer.getData('application/x-monarch-node');
     if (!raw) return;
     e.preventDefault();
     const { type, agentId } = JSON.parse(raw);
@@ -508,7 +508,7 @@ function bindCanvas() {
 
 // --- bin: removed nodes wait here with their connections until restored or emptied ---
 
-const binKey = () => `jr-flow-bin:${F.id || 'new'}`;
+const binKey = () => `monarch-flow-bin:${F.id || 'new'}`;
 
 function loadBin() {
   try { F.bin = JSON.parse(localStorage.getItem(binKey()) || '[]'); } catch { F.bin = []; }

@@ -16,11 +16,11 @@ import (
 	"sandbox/internal/core"
 )
 
-// Goes through Cloudflare's real edge, so it only runs with JR_LIVE_CLOUDFLARED=<path to cloudflared>.
+// Goes through Cloudflare's real edge, so it only runs with MONARCH_LIVE_CLOUDFLARED=<path to cloudflared>.
 func TestQuickTunnelPreviewThroughCloudflare(t *testing.T) {
-	bin := os.Getenv("JR_LIVE_CLOUDFLARED")
+	bin := os.Getenv("MONARCH_LIVE_CLOUDFLARED")
 	if bin == "" {
-		t.Skip("set JR_LIVE_CLOUDFLARED to run against Cloudflare")
+		t.Skip("set MONARCH_LIVE_CLOUDFLARED to run against Cloudflare")
 	}
 	withAuthConfig(t)
 	core.Cfg.PreviewDomain = ""

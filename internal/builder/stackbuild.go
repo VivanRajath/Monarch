@@ -134,7 +134,7 @@ func uiPath(stack Stack, p string) (string, bool) {
 		if strings.Contains(p, "/") || !strings.HasSuffix(p, ".html") && !strings.HasSuffix(p, ".css") && !strings.HasSuffix(p, ".js") {
 			return "", false
 		}
-		if p == "jr-workflows.js" || p == "ui.css" || p == "ui.js" || p == "core.js" {
+		if p == "monarch-workflows.js" || p == "ui.css" || p == "ui.js" || p == "core.js" {
 			return "", false
 		}
 		if stack.UIDir == "" {
@@ -164,7 +164,7 @@ func ensureUIFiles(workdir string, stack Stack) {
 	}
 }
 
-// jr-workflows.json holds the server's view (base URL and tokens); the browser only gets a runWorkflow function.
+// monarch-workflows.json holds the server's view (base URL and tokens); the browser only gets a runWorkflow function.
 func writeStackWorkflowClient(workdir string, stack Stack, flows []BuiltWorkflow) error {
 	type entry struct {
 		ID    string `json:"id"`
@@ -186,7 +186,7 @@ func writeStackWorkflowClient(workdir string, stack Stack, flows []BuiltWorkflow
 		meta[f.Key] = map[string]any{"name": f.Name, "description": f.Description, "input": tsShape(f.Input), "output": typedShape(f.Output, f.OutputTypes)}
 	}
 	data, _ := json.MarshalIndent(cfg, "", "  ")
-	if err := os.WriteFile(filepath.Join(workdir, "jr-workflows.json"), data, 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(workdir, "monarch-workflows.json"), data, 0644); err != nil {
 		return err
 	}
 	metaJSON, _ := json.Marshal(meta)
@@ -233,8 +233,8 @@ func writeStackWorkflowClient(workdir string, stack Stack, flows []BuiltWorkflow
 		rel = "src/workflows.js"
 		body = header + "export const WORKFLOWS = " + string(metaJSON) + ";\n\n// A list field as an array, whether the agent sent an array or newline-separated text.\nexport " + asList + "\n\nexport " + call + "\n"
 	} else {
-		rel = path.Join(stack.UIDir, "jr-workflows.js")
-		body = header + "window.JR_WORKFLOWS = " + string(metaJSON) + ";\n\n// A list field as an array, whether the agent sent an array or newline-separated text.\nwindow.asList = " + asList + ";\n\nwindow.runWorkflow = " + call + ";\n"
+		rel = path.Join(stack.UIDir, "monarch-workflows.js")
+		body = header + "window.MONARCH_WORKFLOWS = " + string(metaJSON) + ";\n\n// A list field as an array, whether the agent sent an array or newline-separated text.\nwindow.asList = " + asList + ";\n\nwindow.runWorkflow = " + call + ";\n"
 	}
 	abs := filepath.Join(workdir, filepath.FromSlash(rel))
 	if err := os.MkdirAll(filepath.Dir(abs), 0755); err != nil {
@@ -245,7 +245,7 @@ func writeStackWorkflowClient(workdir string, stack Stack, flows []BuiltWorkflow
 
 // The plain-HTML brief; the script and stylesheet order matters because app.js uses window.ui and window.runWorkflow.
 func vanillaUISystem(stack Stack) string {
-	scripts := `"ui.js", then "jr-workflows.js", then "app.js"`
+	scripts := `"ui.js", then "monarch-workflows.js", then "app.js"`
 	if !stack.AI {
 		scripts = `"ui.js", then "app.js"`
 	}
@@ -279,7 +279,7 @@ func uiWorkflowContract(stack Stack, flows []BuiltWorkflow) string {
 		return "\n\nThis app has no AI workflows; do not fake AI features."
 	}
 	call := "window.runWorkflow"
-	how := "jr-workflows.js (already written, do not generate it) defines window.runWorkflow and window.asList."
+	how := "monarch-workflows.js (already written, do not generate it) defines window.runWorkflow and window.asList."
 	if stack.UI == "react" {
 		call = "runWorkflow"
 		how = `src/workflows.js already exists (do not generate it): import { runWorkflow, asList } from "@/workflows.js".`

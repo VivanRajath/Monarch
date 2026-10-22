@@ -151,7 +151,7 @@ Write ONLY these files now: src/lib/data.js, src/App.jsx, %s and the src/compone
 	} else {
 		scripts := []string{"ui.js"}
 		if stack.AI {
-			scripts = append(scripts, "jr-workflows.js")
+			scripts = append(scripts, "monarch-workflows.js")
 		}
 		scripts = append(scripts, "core.js", "app.js")
 		for _, v := range views {
@@ -267,7 +267,7 @@ func stubView(v viewSpec, react bool) GeneratedFile {
 
 // The shared state every view reads and writes, written by the server so the model cannot break it.
 func writeAppState(workdir string, stack Stack, prd *PRD) error {
-	key := "jr-" + strings.Trim(nonSlug.ReplaceAllString(strings.ToLower(prd.Name), "-"), "-")
+	key := "monarch-" + strings.Trim(nonSlug.ReplaceAllString(strings.ToLower(prd.Name), "-"), "-")
 	var rel, body string
 	if stack.UI == "react" {
 		rel = "src/lib/store.js"

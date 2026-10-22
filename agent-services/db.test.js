@@ -5,7 +5,7 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-process.env.JR_HUB_DIR = mkdtempSync(join(tmpdir(), "jr-db-test-"));
+process.env.MONARCH_HUB_DIR = mkdtempSync(join(tmpdir(), "monarch-db-test-"));
 const uri = process.env.MONGODB_TEST_URI;
 const skip = uri ? false : "MONGODB_TEST_URI not set";
 
@@ -21,7 +21,7 @@ test("agents, versions, workflows and runs are stored with ids", { skip }, async
   const fromFiles = await store.createAgent("u-files", { ...agentInput, identity: { name: "Old Agent" } });
   await store.saveRun("u-files", fromFiles.id, { id: "r-00000000000000aa", status: "completed", startedAt: Date.now() });
 
-  await db.connectDb(uri, `jr_test_${process.pid}`);
+  await db.connectDb(uri, `monarch_test_${process.pid}`);
   after(() => db.dropDb());
   // The Go server imports users before the agent service starts; the hub matches its folders to them.
   await db.col("users").insertOne({ _id: "u-files", provider: "github" });

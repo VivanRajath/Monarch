@@ -10,7 +10,7 @@ import (
 	"sandbox/internal/core"
 )
 
-const SandboxSettingsModule = "jr_sandbox_settings"
+const SandboxSettingsModule = "monarch_sandbox_settings"
 
 type djangoProject struct {
 	Dir      string // absolute directory containing manage.py

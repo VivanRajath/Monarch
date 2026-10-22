@@ -87,13 +87,13 @@ func TestSandboxListIsPerUser(t *testing.T) {
 func TestAgentProxyOverwritesSpoofedUser(t *testing.T) {
 	var seen, cookie, internal string
 	backend := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		seen, cookie, internal = r.Header.Get("X-Jr-User"), r.Header.Get("Cookie"), r.Header.Get("X-Jr-Internal")
+		seen, cookie, internal = r.Header.Get("X-Monarch-User"), r.Header.Get("Cookie"), r.Header.Get("X-Monarch-Internal")
 	}))
 	defer backend.Close()
 	req := httptest.NewRequest("POST", "/agent/chat", strings.NewReader(`{}`))
-	req.Header.Set("X-Jr-User", "u-victim")
-	req.Header.Set("X-Jr-Internal", "guess")
-	req.Header.Set("Cookie", "jr_session=abc")
+	req.Header.Set("X-Monarch-User", "u-victim")
+	req.Header.Set("X-Monarch-Internal", "guess")
+	req.Header.Set("Cookie", "monarch_session=abc")
 	old := core.Cfg.InternalToken
 	core.Cfg.InternalToken = "the-real-token-that-only-go-holds-0123456789"
 	defer func() { core.Cfg.InternalToken = old }()

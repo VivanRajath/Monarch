@@ -2,7 +2,7 @@
 import WebSocket from "ws";
 
 const [url, origin, api, cookie, container, file] = process.argv.slice(2);
-const headers = { Cookie: cookie, "X-Jr": "1", "Content-Type": "application/json" };
+const headers = { Cookie: cookie, "X-Monarch": "1", "Content-Type": "application/json" };
 const ws = new WebSocket(url, { headers: { Origin: origin } });
 const done = (code, msg) => { console.log(msg); ws.terminate(); process.exit(code); };
 setTimeout(() => done(1, "TIMEOUT waiting for a rebuild after the save"), 90000);
@@ -11,7 +11,7 @@ ws.on("open", () => setTimeout(async () => {
   // Only a file in webpack's import graph triggers a rebuild, so an existing one is edited in place.
   const cur = await fetch(`${api}/file?container=${container}&path=${encodeURIComponent(file)}`, { headers });
   if (!cur.ok) return done(1, `READ failed: HTTP ${cur.status}`);
-  const content = (await cur.text()) + `\n// jr live-reload check ${Date.now()}\n`;
+  const content = (await cur.text()) + `\n// monarch live-reload check ${Date.now()}\n`;
   // Watchers can rebuild before the save request returns (Docker Desktop's write-through is slow), so listen from here.
   saved = true;
   const res = await fetch(`${api}/file/save`, { method: "POST", headers, body: JSON.stringify({ container, path: file, content }) });

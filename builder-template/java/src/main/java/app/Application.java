@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-// Serves the UI from public/ (see application.properties) and runs Agent Hub workflows; the tokens in jr-workflows.json never reach the browser.
+// Serves the UI from public/ (see application.properties) and runs Agent Hub workflows; the tokens in monarch-workflows.json never reach the browser.
 @SpringBootApplication
 @RestController
 public class Application {
@@ -41,13 +41,13 @@ public class Application {
     public ResponseEntity<JsonNode> runWorkflow(@PathVariable String key, @RequestBody(required = false) JsonNode input) {
         JsonNode cfg;
         try {
-            cfg = JSON.readTree(Files.readString(Path.of("jr-workflows.json")));
+            cfg = JSON.readTree(Files.readString(Path.of("monarch-workflows.json")));
         } catch (Exception e) {
             cfg = JSON.createObjectNode();
         }
         JsonNode flow = cfg.path("workflows").path(key);
         if (flow.isMissingNode()) {
-            System.out.println("[workflow] " + key + ": unknown workflow (check jr-workflows.json)");
+            System.out.println("[workflow] " + key + ": unknown workflow (check monarch-workflows.json)");
             return ResponseEntity.status(404).body(result("failed", null, "Unknown workflow"));
         }
         long started = System.currentTimeMillis();

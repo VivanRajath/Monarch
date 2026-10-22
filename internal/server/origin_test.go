@@ -16,17 +16,17 @@ func TestIsAllowedOriginByMode(t *testing.T) {
 	defer func() { core.Cfg = old }()
 
 	core.Cfg = core.DefaultConfig()
-	if !core.IsAllowedOrigin("http://127.0.0.1:9000") || core.IsAllowedOrigin("https://jr.example") {
+	if !core.IsAllowedOrigin("http://127.0.0.1:9000") || core.IsAllowedOrigin("https://monarch.example") {
 		t.Fatal("local mode should allow loopback only")
 	}
-	core.Cfg.PublicOrigin = "https://jr.example"
+	core.Cfg.PublicOrigin = "https://monarch.example"
 	for o, want := range map[string]bool{
-		"https://jr.example":          true,
-		"https://JR.example/":         true,
+		"https://monarch.example":          true,
+		"https://MONARCH.example/":         true,
 		"http://127.0.0.1:9000":       false,
-		"https://p-abc.jr.example":    false,
-		"https://jr.example.evil.com": false,
-		"http://jr.example":           false,
+		"https://p-abc.monarch.example":    false,
+		"https://monarch.example.evil.com": false,
+		"http://monarch.example":           false,
 	} {
 		if got := core.IsAllowedOrigin(o); got != want {
 			t.Errorf("public IsAllowedOrigin(%q) = %v, want %v", o, got, want)
@@ -43,11 +43,11 @@ func TestOriginGuardBlocksForeignWritesAndUpgrades(t *testing.T) {
 		upgrade        bool
 		pass           bool
 	}{
-		{"POST", "https://p-abc.jr.example", false, false},
-		{"GET", "https://p-abc.jr.example", true, false},
-		{"POST", "https://jr.example", false, true},
-		{"GET", "https://jr.example", true, true},
-		{"GET", "https://p-abc.jr.example", false, true},
+		{"POST", "https://p-abc.monarch.example", false, false},
+		{"GET", "https://p-abc.monarch.example", true, false},
+		{"POST", "https://monarch.example", false, true},
+		{"GET", "https://monarch.example", true, true},
+		{"GET", "https://p-abc.monarch.example", false, true},
 		{"POST", "", false, true},
 	}
 	for _, c := range cases {
@@ -76,10 +76,10 @@ func TestTerminalUpgraderAcceptsThePublicOrigin(t *testing.T) {
 	}))
 	defer srv.Close()
 	url := "ws" + strings.TrimPrefix(srv.URL, "http")
-	if _, _, err := websocket.DefaultDialer.Dial(url, http.Header{"Origin": {"https://jr.example"}}); err != nil {
+	if _, _, err := websocket.DefaultDialer.Dial(url, http.Header{"Origin": {"https://monarch.example"}}); err != nil {
 		t.Fatalf("public origin refused: %v", err)
 	}
-	if _, _, err := websocket.DefaultDialer.Dial(url, http.Header{"Origin": {"https://p-x.jr.example"}}); err == nil {
+	if _, _, err := websocket.DefaultDialer.Dial(url, http.Header{"Origin": {"https://p-x.monarch.example"}}); err == nil {
 		t.Fatal("a preview origin opened the terminal socket")
 	}
 }

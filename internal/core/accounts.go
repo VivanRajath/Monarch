@@ -266,7 +266,7 @@ func secretKey() []byte {
 	if len(secret) == 0 {
 		secret = []byte(localSecret(Cfg.DataDir))
 	}
-	sum := sha256.Sum256(append([]byte("jr-token-seal|"), secret...))
+	sum := sha256.Sum256(append([]byte("monarch-token-seal|"), secret...))
 	return sum[:]
 }
 

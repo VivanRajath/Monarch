@@ -6,12 +6,12 @@ import (
 	"testing"
 )
 
-// An n8n call carries no session and no X-Jr header; it must still reach Node, as the hook user, on the hub path.
+// An n8n call carries no session and no X-Monarch header; it must still reach Node, as the hook user, on the hub path.
 func TestHookReachesTheHubWithoutASession(t *testing.T) {
 	withAuthConfig(t)
 	var gotPath, gotUser, gotAuth string
 	backend := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		gotPath, gotUser, gotAuth = r.URL.Path, r.Header.Get("X-Jr-User"), r.Header.Get("Authorization")
+		gotPath, gotUser, gotAuth = r.URL.Path, r.Header.Get("X-Monarch-User"), r.Header.Get("Authorization")
 		w.Write([]byte(`{"status":"completed"}`))
 	}))
 	defer backend.Close()
@@ -19,12 +19,12 @@ func TestHookReachesTheHubWithoutASession(t *testing.T) {
 
 	h := RequireAuth(newHookProxy(backend.URL))
 	rec := do(h, "POST", "/hooks/agents/triage/run", `{"input":{}}`, map[string]string{
-		"Authorization": "Bearer jrk_x", "X-Jr-User": "u-someone-else",
+		"Authorization": "Bearer mnk_x", "X-Monarch-User": "u-someone-else",
 	})
 	if rec.Code != 200 {
 		t.Fatalf("status %d: %s", rec.Code, rec.Body.String())
 	}
-	if gotPath != "/agent/hub/hook/triage/run" || gotUser != "hook" || gotAuth != "Bearer jrk_x" {
+	if gotPath != "/agent/hub/hook/triage/run" || gotUser != "hook" || gotAuth != "Bearer mnk_x" {
 		t.Fatalf("backend saw path=%q user=%q auth=%q", gotPath, gotUser, gotAuth)
 	}
 	if rec := do(h, "POST", "/hooks/workflows/triage-flow/run", `{}`, nil); rec.Code != 200 || gotPath != "/agent/hub/hook-wf/triage-flow/run" {
@@ -35,7 +35,7 @@ func TestHookReachesTheHubWithoutASession(t *testing.T) {
 func TestHookExemptionDoesNotOpenTheAgentAPI(t *testing.T) {
 	withAuthConfig(t)
 	h := authFront()
-	if rec := do(h, "POST", "/agent/hub/agents", `{}`, map[string]string{"X-Jr": "1"}); rec.Code != 401 {
+	if rec := do(h, "POST", "/agent/hub/agents", `{}`, map[string]string{"X-Monarch": "1"}); rec.Code != 401 {
 		t.Fatalf("/agent/hub without a session = %d, want 401", rec.Code)
 	}
 	if rec := do(h, "GET", "/hub.html", "", map[string]string{"Accept": "text/html"}); rec.Code != http.StatusFound {

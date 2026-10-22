@@ -1,11 +1,11 @@
-// Same-origin calls carry X-Jr for the server's CSRF check, and a lapsed session goes back to the login page.
+// Same-origin calls carry X-Monarch for the server's CSRF check, and a lapsed session goes back to the login page.
 (() => {
   const nativeFetch = window.fetch.bind(window);
   window.fetch = async (input, init = {}) => {
     const url = new URL(input instanceof Request ? input.url : String(input), location.href);
     if (url.origin !== location.origin) return nativeFetch(input, init);
     const headers = new Headers(init.headers || (input instanceof Request ? input.headers : undefined));
-    headers.set('X-Jr', '1');
+    headers.set('X-Monarch', '1');
     const res = await nativeFetch(input, { ...init, headers });
     if (res.status === 401 && !url.pathname.startsWith('/auth/')) location.href = '/login';
     return res;
@@ -1366,11 +1366,11 @@ async function initHome() {
   if (typeof mountRepoPicker === 'function') mountRepoPicker(document.getElementById('gh-picker'), openGitHubRepo);
   if (q.get('open') === 'repo') {
     let pick = null;
-    try { pick = JSON.parse(sessionStorage.getItem('jr-open-repo') || 'null'); sessionStorage.removeItem('jr-open-repo'); } catch { /* storage blocked */ }
+    try { pick = JSON.parse(sessionStorage.getItem('monarch-open-repo') || 'null'); sessionStorage.removeItem('monarch-open-repo'); } catch { /* storage blocked */ }
     if (pick && /^https:\/\/github\.com\//.test(pick.url || '')) openGitHubRepo(pick.url, pick.branch || '');
   }
   if (q.toString()) history.replaceState(null, '', '/');
-  if (window.jrKeyBanner) jrKeyBanner(document.getElementById('keyBanner'));
+  if (window.monarchKeyBanner) monarchKeyBanner(document.getElementById('keyBanner'));
 }
 
 initHome();

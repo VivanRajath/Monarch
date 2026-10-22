@@ -292,11 +292,11 @@ test("gatherEditFiles leads with stylesheets for a colour change and skips data 
   mkdirSync(join(dir, "public"), { recursive: true });
   writeFileSync(join(dir, "public", "index.html"), "<link rel=stylesheet href=styles.css><div class=ui>orange</div>\n");
   writeFileSync(join(dir, "public", "styles.css"), ":root{--accent:orange}\n.ui{color:var(--accent)}\n");
-  writeFileSync(join(dir, "jr-workflows.example.json"), '{"ui":"orange"}\n');
+  writeFileSync(join(dir, "monarch-workflows.example.json"), '{"ui":"orange"}\n');
   const files = await gatherEditFiles(dir, "change the ui from orange to light blue and pink");
   const paths = files.map((f) => f.path);
   assert.equal(paths[0], "public/styles.css");
-  assert.ok(!paths.includes("jr-workflows.example.json"));
+  assert.ok(!paths.includes("monarch-workflows.example.json"));
 });
 
 test("editOutputBudget leaves room for the reply under Groq's limit", () => {

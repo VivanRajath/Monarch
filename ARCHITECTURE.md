@@ -36,7 +36,7 @@ Diagrams (in `docs/architecture/`):
 
 This is what happens, request by request, when someone types an idea on the home page.
 
-1. **Sign-in.** Google or GitHub OAuth (with a state cookie) or a beta code creates a session. The cookie is `HttpOnly` and `SameSite=Lax`; in production it is also `Secure` and `__Host-` prefixed. Every write needs an `X-Jr` header and a matching `Origin`, so a cross-site form cannot act as the user.
+1. **Sign-in.** Google or GitHub OAuth (with a state cookie) or a beta code creates a session. The cookie is `HttpOnly` and `SameSite=Lax`; in production it is also `Secure` and `__Host-` prefixed. Every write needs an `X-Monarch` header and a matching `Origin`, so a cross-site form cannot act as the user.
 2. **Questions** (`POST /build/questions`). The Go builder asks the model for a few design decisions about the idea, each with a recommended answer. The call spends from the user's hourly model budget.
 3. **Plan** (`POST /build/prd`). The answers become a PRD: pages, data, the agents the app needs, and the workflows that chain them. The user can edit the plan before anything is built.
 4. **Agents and workflows** (`POST /agent/hub/blueprint`, proxied to Node). The agents are created as versioned definitions (instructions, tools, input and output schemas, guardrails), and the workflows wire them together. Each workflow gets a webhook token. Only the token's hash is stored.
@@ -145,7 +145,7 @@ The repository's OpenGAP hooks are folded into the same decision, and every deci
 The proxy sits inside the Go server, in front of everything, in this order: preview dispatch, then the origin guard, then authentication, then the request log, then the routes.
 
 - **Preview proxy.** A `p-<token>` host is resolved server-side to a sandbox and port. The token is random and never the container name. HTTP and WebSocket are proxied to `127.0.0.1:<port>`. A preview host can never reach the IDE or its API.
-- **Agent proxy.** `/agent/*` is forwarded to Node on loopback. The proxy sets `X-Jr-User` from the session, overwriting anything the client sent. It adds the internal token and strips cookies. Node refuses any request without that token, and Go refuses Node's callbacks unless they come from loopback with the token.
+- **Agent proxy.** `/agent/*` is forwarded to Node on loopback. The proxy sets `X-Monarch-User` from the session, overwriting anything the client sent. It adds the internal token and strips cookies. Node refuses any request without that token, and Go refuses Node's callbacks unless they come from loopback with the token.
 
 ### 4.6 GitHub integration
 
@@ -201,7 +201,7 @@ MongoDB holds everything durable, and every record has an id.
 
 | Boundary | Enforced by |
 |---|---|
-| Browser to server | Session cookie, origin check and `X-Jr` header, ownership lookup on every resource, rate limits on login and model calls |
+| Browser to server | Session cookie, origin check and `X-Monarch` header, ownership lookup on every resource, rate limits on login and model calls |
 | Server to agent service | Loopback, the internal token, identity set by the proxy |
 | Model to system | Edit guard, OpenGAP hooks, command policy with server-held approvals, Hub tool allowlists and the SSRF guard |
 | Repository code to secrets | Container isolation; the GitHub token never enters the sandbox; keys never leave the server |

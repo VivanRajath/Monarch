@@ -1,4 +1,4 @@
-// Serves the UI from public/ and runs Agent Hub workflows for it; the tokens in jr-workflows.json never reach the browser.
+// Serves the UI from public/ and runs Agent Hub workflows for it; the tokens in monarch-workflows.json never reach the browser.
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
@@ -8,13 +8,13 @@ app.use(express.json({ limit: '256kb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 function workflowConfig() {
-  try { return JSON.parse(fs.readFileSync(path.join(__dirname, 'jr-workflows.json'), 'utf8')); } catch { return { workflows: {} }; }
+  try { return JSON.parse(fs.readFileSync(path.join(__dirname, 'monarch-workflows.json'), 'utf8')); } catch { return { workflows: {} }; }
 }
 
 app.post('/api/workflows/:key', async (req, res) => {
   const cfg = workflowConfig();
   const flow = (cfg.workflows || {})[req.params.key];
-  if (!flow) { console.log(`[workflow] ${req.params.key}: unknown workflow (check jr-workflows.json)`); return res.status(404).json({ status: 'failed', error: 'Unknown workflow' }); }
+  if (!flow) { console.log(`[workflow] ${req.params.key}: unknown workflow (check monarch-workflows.json)`); return res.status(404).json({ status: 'failed', error: 'Unknown workflow' }); }
   const started = Date.now();
   try {
     const r = await fetch(`${cfg.base}/hooks/workflows/${flow.id}/run`, {

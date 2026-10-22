@@ -24,7 +24,7 @@ const gitFallbackImage = "docker.io/alpine/git:latest"
 const gitTimeout = 5 * time.Minute
 
 // Paths Monarch writes into a workspace; while the repo does not track them they are never committed.
-var generatedPaths = []string{".gitagent", "agent.yaml", "knowledge", "INSTRUCTIONS.md", ".env.local", "jr-workflows.json", "node_modules", ".next"}
+var generatedPaths = []string{".gitagent", "agent.yaml", "knowledge", "INSTRUCTIONS.md", ".env.local", "monarch-workflows.json", "node_modules", ".next"}
 
 // The parts of .gitagent/ an OpenGAP team lives in, which belong in the user's repository.
 var openGapShared = []string{"agents", "hooks", "DUTIES.md"}

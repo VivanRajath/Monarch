@@ -36,7 +36,7 @@ function initIDE(containerId, repoUrl, port) {
   startLogsPolling();
   startStatusPolling();
   setDarkMode(document.body.classList.contains('dark-mode'));
-  if (window.jrKeyBanner) jrKeyBanner(document.getElementById('agent-keybanner'));
+  if (window.monarchKeyBanner) monarchKeyBanner(document.getElementById('agent-keybanner'));
   if (typeof scmInit === 'function') scmInit();
 }
 
@@ -995,7 +995,7 @@ function showChangesInPreview() {
   hidePreviewLoading();
   const iframe = document.getElementById('preview-iframe');
   const base = IDE.previewUrl;
-  const bust = (base.includes('?') ? '&' : '?') + '_jr=' + Date.now();
+  const bust = (base.includes('?') ? '&' : '?') + '_monarch=' + Date.now();
   iframe.style.display = '';
   iframe.src = base + bust;
   return true;
@@ -1105,8 +1105,8 @@ function toggleAgentPanel() {
 // shell.js owns the body class and the stored choice; this keeps Monaco and the terminals in step.
 function setDarkMode(enabled) {
   IDE.darkMode = enabled;
-  if (document.body.classList.contains('dark-mode') !== enabled && window.jrSetTheme) {
-    window.jrSetTheme(enabled);
+  if (document.body.classList.contains('dark-mode') !== enabled && window.monarchSetTheme) {
+    window.monarchSetTheme(enabled);
     return;
   }
   if (IDE.editor && typeof monaco !== 'undefined') {
@@ -1116,7 +1116,7 @@ function setDarkMode(enabled) {
   IDE.terminals.forEach(t => { if (t.term) t.term.options.theme = termTheme; });
 }
 
-window.addEventListener('jr-theme', (e) => setDarkMode(e.detail.dark));
+window.addEventListener('monarch-theme', (e) => setDarkMode(e.detail.dark));
 
 // ── Toast ──
 function showToast(msg, type) {

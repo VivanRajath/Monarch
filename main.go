@@ -51,11 +51,11 @@ func startAgentService() {
 		fmt.Sprintf("AGENT_PORT=%d", core.Cfg.AgentPort),
 		// Side effects (docker exec, container write-through) belong to Go; the agent service calls back here for them.
 		"HOST_PORT="+core.Cfg.ListenPort(),
-		"JR_WORK_DIR="+core.Cfg.WorkDir,
-		"JR_INTERNAL_TOKEN="+core.Cfg.InternalToken,
+		"MONARCH_WORK_DIR="+core.Cfg.WorkDir,
+		"MONARCH_INTERNAL_TOKEN="+core.Cfg.InternalToken,
 		// Keys saved in Settings; the agent service already reads the .env ones itself.
-		"JR_PROVIDER_KEYS="+agentKeysJSON(),
-		fmt.Sprintf("JR_LLM_PER_HOUR=%d", core.Cfg.LLMPerHour),
+		"MONARCH_PROVIDER_KEYS="+agentKeysJSON(),
+		fmt.Sprintf("MONARCH_LLM_PER_HOUR=%d", core.Cfg.LLMPerHour),
 	)
 	if err := cmd.Start(); err != nil {
 		fmt.Printf("[agent-service] failed to start: %v\n", err)

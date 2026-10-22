@@ -16,7 +16,7 @@ import (
 
 // A public server shares its keys with every beta user, so changing them there takes an explicit opt-in.
 func keysEditable() bool {
-	return !core.Cfg.Public() || os.Getenv("JR_KEYS_EDITABLE") == "true"
+	return !core.Cfg.Public() || os.Getenv("MONARCH_KEYS_EDITABLE") == "true"
 }
 
 func keysHandler(w http.ResponseWriter, r *http.Request) {
@@ -109,7 +109,7 @@ func pushKeysToAgent() {
 		return
 	}
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("X-Jr-Internal", core.Cfg.InternalToken)
+	req.Header.Set("X-Monarch-Internal", core.Cfg.InternalToken)
 	res, err := (&http.Client{Timeout: 5 * time.Second}).Do(req)
 	if err != nil {
 		core.Logf("settings", "could not update the agent service's keys: %v", err)

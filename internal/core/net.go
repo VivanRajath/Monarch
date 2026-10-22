@@ -20,7 +20,7 @@ func IsLoopbackOrigin(origin string) bool {
 	return host == "127.0.0.1" || host == "localhost" || host == "::1"
 }
 
-// The IDE's own origin: exactly JR_PUBLIC_ORIGIN when public, any loopback origin locally.
+// The IDE's own origin: exactly MONARCH_PUBLIC_ORIGIN when public, any loopback origin locally.
 func IsAllowedOrigin(origin string) bool {
 	if Cfg.Public() {
 		return strings.EqualFold(strings.TrimSuffix(origin, "/"), Cfg.PublicOrigin)

@@ -3,7 +3,7 @@
 const PG = { workflows: [], id: null, info: null, messages: [], values: {}, raw: false, busy: false };
 
 function pgIcon(name, size = 16) {
-  return window.jrIcon ? window.jrIcon(name, size) : '';
+  return window.monarchIcon ? window.monarchIcon(name, size) : '';
 }
 
 const pgPath = (id, rest = '') => `/workflows/${encodeURIComponent(id)}/playground${rest}`;

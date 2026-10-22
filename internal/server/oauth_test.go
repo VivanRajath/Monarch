@@ -85,12 +85,12 @@ func oauthRoundTrip(t *testing.T, h http.Handler, provider, code, startQuery str
 	}
 	loc, _ := url.Parse(start.Header().Get("Location"))
 	state := loc.Query().Get("state")
-	if state == "" || loc.Query().Get("redirect_uri") != "https://jr.example/auth/oauth/"+provider+"/callback" {
+	if state == "" || loc.Query().Get("redirect_uri") != "https://monarch.example/auth/oauth/"+provider+"/callback" {
 		t.Fatalf("authorize redirect is missing state or redirect_uri: %s", loc)
 	}
 	var stateCookie string
 	for _, c := range start.Result().Cookies() {
-		if c.Name == "__Host-jr_oauth" {
+		if c.Name == "__Host-monarch_oauth" {
 			stateCookie = c.Name + "=" + c.Value
 		}
 	}
@@ -104,7 +104,7 @@ func oauthRoundTrip(t *testing.T, h http.Handler, provider, code, startQuery str
 func sessionFrom(t *testing.T, rec *httptest.ResponseRecorder) string {
 	t.Helper()
 	for _, c := range rec.Result().Cookies() {
-		if c.Name == "__Host-jr_session" && c.Value != "" {
+		if c.Name == "__Host-monarch_session" && c.Value != "" {
 			return c.Name + "=" + c.Value
 		}
 	}
@@ -186,7 +186,7 @@ func TestGoogleUserConnectsGitHub(t *testing.T) {
 		t.Fatalf("link should return to settings: %d %s", rec.Code, loc)
 	}
 	for _, c := range rec.Result().Cookies() {
-		if c.Name == "__Host-jr_session" && c.Value != "" {
+		if c.Name == "__Host-monarch_session" && c.Value != "" {
 			t.Fatal("linking must not switch the signed-in user")
 		}
 	}
@@ -213,7 +213,7 @@ func TestCallbackRejectsAForeignOrMissingState(t *testing.T) {
 		t.Fatalf("missing state cookie must fail: %d %s", rec.Code, rec.Header().Get("Location"))
 	}
 	st := oauthState{Provider: "github", Mode: "login", Nonce: "n1", Next: "/", Exp: time.Now().Add(time.Minute).Unix()}
-	rec = do(h, "GET", "/auth/oauth/github/callback?code=gh-code&state=n2", "", map[string]string{"Cookie": "__Host-jr_oauth=" + encodeState(st)})
+	rec = do(h, "GET", "/auth/oauth/github/callback?code=gh-code&state=n2", "", map[string]string{"Cookie": "__Host-monarch_oauth=" + encodeState(st)})
 	if !strings.HasPrefix(rec.Header().Get("Location"), "/login?error=") {
 		t.Fatal("a mismatched state must fail")
 	}
@@ -252,15 +252,15 @@ func TestPersonalTokenLinksGitHub(t *testing.T) {
 	fakeProviders(t, "", false)
 	h := authFront()
 	g := sessionFrom(t, oauthRoundTrip(t, h, "google", "g-code", ""))
-	bad := do(h, "POST", "/github/token", `{"token":"nope"}`, map[string]string{"Cookie": g, "X-Jr": "1"})
+	bad := do(h, "POST", "/github/token", `{"token":"nope"}`, map[string]string{"Cookie": g, "X-Monarch": "1"})
 	if bad.Code != 400 {
 		t.Fatalf("a rejected token should be a 400, got %d", bad.Code)
 	}
-	ok := do(h, "POST", "/github/token", `{"token":"test-github-pat"}`, map[string]string{"Cookie": g, "X-Jr": "1"})
+	ok := do(h, "POST", "/github/token", `{"token":"test-github-pat"}`, map[string]string{"Cookie": g, "X-Monarch": "1"})
 	if ok.Code != 200 || !strings.Contains(ok.Body.String(), `"via":"token"`) || strings.Contains(ok.Body.String(), "test-github-pat") {
 		t.Fatalf("token link: %d %s", ok.Code, ok.Body.String())
 	}
-	if do(h, "POST", "/github/disconnect", `{}`, map[string]string{"Cookie": g, "X-Jr": "1"}).Code != 200 {
+	if do(h, "POST", "/github/disconnect", `{}`, map[string]string{"Cookie": g, "X-Monarch": "1"}).Code != 200 {
 		t.Fatal("disconnect failed")
 	}
 	if !strings.Contains(do(h, "GET", "/github/status", "", map[string]string{"Cookie": g}).Body.String(), `"connected":false`) {

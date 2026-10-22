@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# End-to-end check of Jr-Arch on real rootless Podman. Run as the service user after setup-podman.sh: bash validate.sh
+# End-to-end check of Monarch on real rootless Podman. Run as the service user after setup-podman.sh: bash validate.sh
 set -uo pipefail
 
 APP=${APP:-$HOME/app}
-WORK=$HOME/jrarch/work
+WORK=$HOME/monarch/work
 B=http://127.0.0.1:9000
 ORIGIN=http://localhost:9000
 REPO_A=${REPO_A:-https://github.com/VivanRajath/React-Portfolio}
@@ -80,10 +80,10 @@ phase "0. clean slate"
 cp "$HERE/wsclient.mjs" "$HERE/reload.mjs" "$APP/agent-services/"
 WSC="$APP/agent-services/wsclient.mjs"
 # The installed service owns :9000; it is paused for the run and restarted at the end.
-systemctl --user stop jrarch.service 2>/dev/null
-trap 'systemctl --user stop jr-validate 2>/dev/null; systemctl --user is-enabled -q jrarch.service 2>/dev/null && systemctl --user start jrarch.service' EXIT
+systemctl --user stop monarch.service 2>/dev/null
+trap 'systemctl --user stop jr-validate 2>/dev/null; systemctl --user is-enabled -q monarch.service 2>/dev/null && systemctl --user start monarch.service' EXIT
 systemctl --user stop jr-validate 2>/dev/null
-podman rm -f -v $(podman ps -aq --filter label=jrarch.sandbox) >/dev/null 2>&1
+podman rm -f -v $(podman ps -aq --filter label=monarch.sandbox) >/dev/null 2>&1
 podman rmi -f sandbox-static >/dev/null 2>&1
 mkdir -p "$WORK" && find "$WORK" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
 info "podman $(podman --version | awk '{print $3}'), network backend $(podman info --format '{{.Host.NetworkBackend}}'), rootless net $(podman info --format '{{.Host.Slirp4NetNS.Executable}}{{.Host.Pasta.Executable}}' 2>/dev/null)"
@@ -104,7 +104,7 @@ SA=$(status "$JA" "$CA")
 URL_A=$(echo "$SA" | json "d.get('url','')")
 PORT_A=$(echo "$SA" | json "d['services'][0]['port']")
 WA=$(workdir "$CA")
-check "container is labelled jrarch.sandbox" bash -c "podman ps --filter label=jrarch.sandbox=$CA --format '{{.Names}}' | grep -qx $CA"
+check "container is labelled monarch.sandbox" bash -c "podman ps --filter label=monarch.sandbox=$CA --format '{{.Names}}' | grep -qx $CA"
 check "workdir bind-mounted at /workspace" bash -c "podman inspect $CA --format '{{range .Mounts}}{{.Source}}={{.Destination}} {{end}}' | grep -q '$WA=/workspace'"
 check "npm install populated node_modules" test -d "$WA/node_modules/react"
 info "node_modules owner on host: $(stat -c %U:%G "$WA/node_modules" 2>/dev/null)"
@@ -146,8 +146,8 @@ info "host -> sandbox B (127.0.0.1:$PORT_B): $(curl -s -o /dev/null -m 6 -w '%{h
 info "sandbox A -> B's published port via 127.0.0.1:$PORT_B: $(probe http://127.0.0.1:$PORT_B)"
 info "sandbox A -> B's published port via host.containers.internal:$PORT_B: $(probe http://host.containers.internal:$PORT_B)"
 info "sandbox A -> B's container address $IP_B:80: $(probe http://$IP_B:80)"
-info "sandbox A -> Jr-Arch API 127.0.0.1:9000: $(probe http://127.0.0.1:9000/health)"
-info "sandbox A -> Jr-Arch API host.containers.internal:9000: $(probe http://host.containers.internal:9000/health)"
+info "sandbox A -> Monarch API 127.0.0.1:9000: $(probe http://127.0.0.1:9000/health)"
+info "sandbox A -> Monarch API host.containers.internal:9000: $(probe http://host.containers.internal:9000/health)"
 info "sandbox A -> agent 127.0.0.1:8001: $(probe http://127.0.0.1:8001/agent/health)"
 info "preview tunnel -> sandbox: covered by the preview checks above"
 
@@ -173,7 +173,7 @@ for pair in "$JA $CA" "$JB $CB"; do
   check "stop $2: workdir removed" test ! -e "$(workdir "$2")"
 done
 sleep 3
-check "no labelled containers left" bash -c "[ -z \"\$(podman ps -aq --filter label=jrarch.sandbox)\" ]"
+check "no labelled containers left" bash -c "[ -z \"\$(podman ps -aq --filter label=monarch.sandbox)\" ]"
 check "no cloudflared processes left" bash -c "[ \"\$(pgrep -c -x cloudflared)\" = 0 ]"
 info "volumes left: $(podman volume ls --format '{{.Name}}' | tr '\n' ' ') (named caches are expected)"
 check "no anonymous volumes left" bash -c "! podman volume ls --format '{{.Name}}' | grep -Eq '^[0-9a-f]{64}$'"
@@ -181,7 +181,7 @@ info "networks: $(podman network ls --format '{{.Name}}' | tr '\n' ' ')"
 info "work dir now holds: $(ls -A "$WORK" | tr '\n' ' ')"
 
 phase "7. failed clone cleans up"
-CF=$(api "$JA" POST /run '{"repo":"https://github.com/octocat/this-repo-does-not-exist-jrarch","autoApprove":true}' | json "d.get('container','')")
+CF=$(api "$JA" POST /run '{"repo":"https://github.com/octocat/this-repo-does-not-exist-monarch","autoApprove":true}' | json "d.get('container','')")
 sleep 15
 [ "$(status "$JA" "$CF" | json "d.get('status','')")" = failed ] && pass "missing repo -> status failed" || fail "failed clone status"
 check "failed clone started no container" bash -c "! podman container exists $CF"
@@ -189,7 +189,7 @@ api "$JA" POST "/stop/$CF" >/dev/null
 check "failed sandbox workdir removed on stop" test ! -e "$(workdir "$CF")"
 
 phase "8. startup reaper on real podman"
-podman run -d --name jr-orphan --label jrarch.sandbox=jr-orphan docker.io/library/alpine:3 sleep 600 >/dev/null
+podman run -d --name jr-orphan --label monarch.sandbox=jr-orphan docker.io/library/alpine:3 sleep 600 >/dev/null
 mkdir -p "$WORK/sandbox-999999" && podman unshare sh -c "touch '$WORK/sandbox-999999/owned-by-subuid' && chown 1000:1000 '$WORK/sandbox-999999/owned-by-subuid'"
 info "orphan file owner on host: $(stat -c %u "$WORK/sandbox-999999/owned-by-subuid")"
 start_server || fail "restart"

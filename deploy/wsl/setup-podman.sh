@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Rootless Podman for Jr-Arch on Ubuntu (WSL or bare metal). Run as root: bash setup-podman.sh [user]
+# Rootless Podman for Monarch on Ubuntu (WSL or bare metal). Run as root: bash setup-podman.sh [user]
 set -euo pipefail
 
-JR_USER="${1:-jrarch}"
+JR_USER="${1:-monarch}"
 MIN_FREE_GB="${MIN_FREE_GB:-8}"
 
 say() { printf '\n==> %s\n' "$*"; }
@@ -38,7 +38,7 @@ then run 'wsl --shutdown' and rerun this script"
 fi
 
 # WSL mounts / private, which breaks some rootless mount propagation; make it shared on every boot.
-cat > /etc/systemd/system/jrarch-rshared.service <<'UNIT'
+cat > /etc/systemd/system/monarch-rshared.service <<'UNIT'
 [Unit]
 Description=Make / a shared mount for rootless Podman
 DefaultDependencies=no
@@ -52,7 +52,7 @@ ExecStart=/bin/mount --make-rshared /
 WantedBy=multi-user.target
 UNIT
 systemctl daemon-reload
-systemctl enable --now jrarch-rshared.service >/dev/null
+systemctl enable --now monarch-rshared.service >/dev/null
 
 say "Installing Podman and helpers"
 apt-get update -qq
@@ -121,12 +121,12 @@ echo "API socket: ok"
 
 cat <<ENV
 
-Setup complete. Add these to Jr-Arch's environment (.env or the systemd unit):
+Setup complete. Add these to Monarch's environment (.env or the systemd unit):
 
   JR_CONTAINER_CLI=podman
   DOCKER_HOST=unix://$SOCK
-  JR_WORK_DIR=/home/$JR_USER/jrarch/work
+  JR_WORK_DIR=/home/$JR_USER/monarch/work
   JR_PREHEAT_IMAGES=node,react,python,builder
 
-Images are built by Jr-Arch itself at startup (JR_PREHEAT_IMAGES) or on first use.
+Images are built by Monarch itself at startup (JR_PREHEAT_IMAGES) or on first use.
 ENV

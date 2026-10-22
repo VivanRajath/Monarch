@@ -59,7 +59,7 @@ wait_running() {
 
 phase "0. clean slate on Docker Desktop"
 docker version --format 'engine {{.Server.Version}}' || { echo "Docker is not running"; exit 1; }
-docker rm -f -v $(docker ps -aq --filter label=jrarch.sandbox) >/dev/null 2>&1
+docker rm -f -v $(docker ps -aq --filter label=monarch.sandbox) >/dev/null 2>&1
 docker rmi -f sandbox-react sandbox-static >/dev/null 2>&1
 rm -rf "$WORK" && mkdir -p "$WORK" && : > "$WORK/../jr-docker.log"
 go build -o jr-docker-test.exe . || { echo "build failed"; exit 1; }
@@ -83,7 +83,7 @@ wait_running "$JA" "$CA" 1800 && pass "A running with a preview URL (clone, npm 
 SA=$(status "$JA" "$CA"); URL_A=$(echo "$SA" | json "d.get('url') or ''"); PORT_A=$(echo "$SA" | json "d['services'][0]['port']")
 HA=${URL_A#https://}; HA=${HA%/}
 [ -d "$(workdir "$CA")/node_modules/react" ] && pass "npm install populated node_modules" || fail "node_modules missing"
-I=$(docker inspect "$CA" --format '{{.HostConfig.SecurityOpt}} {{.HostConfig.CapDrop}} {{.HostConfig.Memory}} {{.HostConfig.NetworkMode}} {{index .Config.Labels "jrarch.sandbox"}}')
+I=$(docker inspect "$CA" --format '{{.HostConfig.SecurityOpt}} {{.HostConfig.CapDrop}} {{.HostConfig.Memory}} {{.HostConfig.NetworkMode}} {{index .Config.Labels "monarch.sandbox"}}')
 info "container: $I"
 for want in no-new-privileges NET_RAW jr-sandbox "$CA"; do echo "$I" | grep -q -- "$want" && pass "hardening present: $want" || fail "missing: $want"; done
 OUT=$(api "$JA" POST /terminal/exec "{\"container\":\"$CA\",\"command\":\"echo JRMARK \$(node -v)\"}")
@@ -113,8 +113,8 @@ probe() { docker exec "$CA" sh -c "curl -s -o /dev/null -m 6 -w '%{http_code}' $
 info "sandbox -> internet: $(probe https://example.com)"
 [ "$(probe "http://$IP_B:8080")" = 000 ] && pass "sandbox A cannot reach B at $IP_B:8080 (icc off)" || fail "A reached B directly"
 # host.docker.internal reaches the host's loopback on Docker Desktop, so these check what a sandbox can do there, not whether it connects.
-info "sandbox -> Jr-Arch public /health via host.docker.internal: $(probe "http://host.docker.internal:$PORT/health") (public by design)"
-[ "$(probe "http://host.docker.internal:$PORT/sandboxes")" = 401 ] && pass "sandbox gets 401 from the Jr-Arch API (no session)" || fail "sandbox used the Jr-Arch API"
+info "sandbox -> Monarch public /health via host.docker.internal: $(probe "http://host.docker.internal:$PORT/health") (public by design)"
+[ "$(probe "http://host.docker.internal:$PORT/sandboxes")" = 401 ] && pass "sandbox gets 401 from the Monarch API (no session)" || fail "sandbox used the Monarch API"
 [ "$(docker exec "$CA" sh -c "curl -s -o /dev/null -m 6 -w '%{http_code}' -X POST -H 'X-Jr: 1' -H 'X-Jr-Internal: guess' -H 'Content-Type: application/json' -d '{}' http://host.docker.internal:$PORT/terminal/exec || true")" = 401 ] && pass "sandbox cannot pass as Go's agent (guessed token -> 401)" || fail "guessed internal token accepted"
 [ "$(probe "http://host.docker.internal:$AGENT/agent/health")" = 403 ] && pass "sandbox gets 403 from the agent without Go's token" || fail "sandbox used the agent directly"
 [ "$(docker exec "$CA" sh -c "curl -s -o /dev/null -m 6 -w '%{http_code}' -X POST -H 'x-jr-user: internal' -H 'Content-Type: application/json' -d '{\"container\":\"$CB\",\"message\":\"hi\"}' http://host.docker.internal:$AGENT/agent/chat || true")" = 403 ] && pass "sandbox cannot drive the agent on another sandbox" || fail "agent chat on another sandbox accepted"
@@ -128,12 +128,12 @@ for pair in "$JA $CA" "$JB $CB"; do
   [ -e "$(workdir "$2")" ] && fail "workdir of $2 left" || pass "workdir of $2 removed"
 done
 sleep 3
-[ -z "$(docker ps -aq --filter label=jrarch.sandbox)" ] && pass "no labelled containers left" || fail "labelled containers left"
+[ -z "$(docker ps -aq --filter label=monarch.sandbox)" ] && pass "no labelled containers left" || fail "labelled containers left"
 [ "$(tunnels)" = 0 ] && pass "no cloudflared processes left" || fail "cloudflared still running"
 info "dangling volumes: $(docker volume ls -qf dangling=true | wc -l)"
 
 phase "5. crash and restart recovery"
-docker run -d --name jr-orphan --label jrarch.sandbox=jr-orphan sandbox-node sleep 600 >/dev/null
+docker run -d --name jr-orphan --label monarch.sandbox=jr-orphan sandbox-node sleep 600 >/dev/null
 mkdir -p "$WORK/sandbox-999999" && echo x > "$WORK/sandbox-999999/f"
 kill_jr
 [ "$(curl -s -o /dev/null -w '%{http_code}' -m 3 $B/health)" = 000 ] && pass "server process tree killed" || fail "server survived the kill"

@@ -1,5 +1,5 @@
-# Registers "JrArch Runtime", which keeps the jrarch WSL distro running from logon; run in a normal PowerShell: powershell -ExecutionPolicy Bypass -File install-task.ps1
-param([string]$Distro = "jrarch", [string]$TaskName = "JrArch Runtime")
+# Registers "Monarch Runtime", which keeps the monarch WSL distro running from logon; run in a normal PowerShell: powershell -ExecutionPolicy Bypass -File install-task.ps1
+param([string]$Distro = "monarch", [string]$TaskName = "Monarch Runtime")
 $ErrorActionPreference = "Stop"
 
 $wsl = Join-Path $env:WINDIR "System32\wsl.exe"
@@ -15,6 +15,6 @@ $trigger = @($logon, $recheck)
 $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable `
   -ExecutionTimeLimit ([TimeSpan]::Zero) -MultipleInstances IgnoreNew -RestartCount 999 -RestartInterval (New-TimeSpan -Minutes 1)
 Register-ScheduledTask -TaskName $TaskName -Action $action -Trigger $trigger -Settings $settings `
-  -Description "Keeps the $Distro WSL distro alive for Jr-Arch. Stop with stop-jrarch.ps1." -Force | Out-Null
+  -Description "Keeps the $Distro WSL distro alive for Monarch. Stop with stop-monarch.ps1." -Force | Out-Null
 Start-ScheduledTask -TaskName $TaskName
 Write-Host "Registered and started '$TaskName'. It starts again at every logon."

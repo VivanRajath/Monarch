@@ -48,13 +48,13 @@ process.on("uncaughtException", (err) => {
 const app = express();
 
 // Loopback is no boundary under Docker Desktop (host.docker.internal reaches it), so only callers holding Go's token get in.
-export function fromJrArch(headers, token = process.env.JR_INTERNAL_TOKEN || "") {
+export function fromMonarch(headers, token = process.env.JR_INTERNAL_TOKEN || "") {
   if (!token) return true;
   const got = Buffer.from(String(headers["x-jr-internal"] || ""));
   const want = Buffer.from(token);
   return got.length === want.length && timingSafeEqual(got, want);
 }
-app.use((req, res, next) => (fromJrArch(req.headers) ? next() : res.status(403).json({ error: "forbidden" })));
+app.use((req, res, next) => (fromMonarch(req.headers) ? next() : res.status(403).json({ error: "forbidden" })));
 app.use(express.json());
 
 const server = createServer(app);
@@ -69,7 +69,7 @@ export function isAllowedOrigin(origin) {
     return false;
   }
 }
-const wss = new WebSocketServer({ server, verifyClient: ({ origin, req }) => isAllowedOrigin(origin) && fromJrArch(req.headers) });
+const wss = new WebSocketServer({ server, verifyClient: ({ origin, req }) => isAllowedOrigin(origin) && fromMonarch(req.headers) });
 
 // Active sessions: container -> { dir, stack, owner, wss clients }
 const sessions = new Map();

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Puts workdirs and Podman storage on fixed-size disk images; run as root with Jr-Arch stopped: bash storage-pools.sh [user] [work GB] [storage GB]
+# Puts workdirs and Podman storage on fixed-size disk images; run as root with Monarch stopped: bash storage-pools.sh [user] [work GB] [storage GB]
 set -euo pipefail
 
-JR_USER="${1:-jrarch}"
+JR_USER="${1:-monarch}"
 WORK_GB="${2:-10}"
 STORE_GB="${3:-20}"
 die() { printf '\nERROR: %s\n' "$*" >&2; exit 1; }
@@ -11,9 +11,9 @@ say() { printf '\n==> %s\n' "$*"; }
 [ "$(id -u)" = 0 ] || die "run as root"
 JR_UID=$(id -u "$JR_USER")
 HOME_DIR=$(getent passwd "$JR_USER" | cut -d: -f6)
-WORK="$HOME_DIR/jrarch/work"
+WORK="$HOME_DIR/monarch/work"
 STORE="$HOME_DIR/.local/share/containers"
-POOLS=/var/lib/jrarch
+POOLS=/var/lib/monarch
 as_user() { sudo -u "$JR_USER" XDG_RUNTIME_DIR="/run/user/$JR_UID" DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$JR_UID/bus" "$@"; }
 
 free_gb=$(df -BG --output=avail /mnt/c 2>/dev/null | tail -1 | tr -dc 0-9)
@@ -34,8 +34,8 @@ pool() { # name, mountpoint, size GB
 
 mkdir -p "$POOLS" && chmod 700 "$POOLS"
 if ! findmnt -rn "$STORE" >/dev/null || ! findmnt -rn "$WORK" >/dev/null; then
-  say "Stopping Jr-Arch and Podman to move their storage"
-  as_user systemctl --user stop jrarch.service podman.socket podman.service 2>/dev/null || true
+  say "Stopping Monarch and Podman to move their storage"
+  as_user systemctl --user stop monarch.service podman.socket podman.service 2>/dev/null || true
   [ -z "$(as_user podman ps -q 2>/dev/null)" ] || die "sandboxes are still running; stop them first"
 fi
 
@@ -51,7 +51,7 @@ if ! findmnt -rn "$WORK" >/dev/null; then
   pool work "$WORK" "$WORK_GB"
 fi
 
-ENV="$HOME_DIR/.config/jrarch/jrarch.env"
+ENV="$HOME_DIR/.config/monarch/monarch.env"
 if [ -f "$ENV" ]; then
   # The floor has to watch the pools too: sandbox creation should stop before a pool fills, not after.
   sed -i "s#^JR_DISK_CHECK_PATHS=.*#JR_DISK_CHECK_PATHS=/mnt/c,$WORK,$STORE#" "$ENV"
@@ -60,4 +60,4 @@ fi
 
 as_user systemctl --user start podman.socket
 df -h "$WORK" "$STORE" | sed 1d
-echo "Pools ready. Start Jr-Arch: systemctl --user start jrarch (as $JR_USER); images rebuild on first start."
+echo "Pools ready. Start Monarch: systemctl --user start monarch (as $JR_USER); images rebuild on first start."

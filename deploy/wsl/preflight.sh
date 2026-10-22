@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Refuses to let Jr-Arch start unless every hardening control is actually in force. Runs as the service user.
+# Refuses to let Monarch start unless every hardening control is actually in force. Runs as the service user.
 set -uo pipefail
 
 bad=0
@@ -29,7 +29,7 @@ else
   ok "no WSLg display bridge"
 fi
 
-[ -e /run/jrarch/egress.ok ] && ok "egress firewall loaded this boot" || no "egress firewall not loaded (/run/jrarch/egress.ok missing)"
+[ -e /run/monarch/egress.ok ] && ok "egress firewall loaded this boot" || no "egress firewall not loaded (/run/monarch/egress.ok missing)"
 
 conf="$HOME/.config/containers/containers.conf"
 if grep -qs 'allow_host_loopback=false' "$conf" && grep -qs 'slirp4netns' "$conf"; then
@@ -39,7 +39,7 @@ else
 fi
 
 # Without the fixed-size pools one sandbox could fill the Windows drive the whole machine runs on.
-for pool in "$HOME/jrarch/work" "$HOME/.local/share/containers"; do
+for pool in "$HOME/monarch/work" "$HOME/.local/share/containers"; do
   if findmnt -rn -M "$pool" >/dev/null 2>&1; then ok "$pool is a size-capped pool ($(df -h --output=size "$pool" | tail -1 | tr -d ' '))"; else no "$pool is not a size-capped mount (run storage-pools.sh)"; fi
 done
 

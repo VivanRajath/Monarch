@@ -11,7 +11,7 @@ WIN_GW=$(ip -4 route show default | awk '{print $3}')
 DNS_IP=$(awk '/^nameserver/{print $2; exit}' /etc/resolv.conf)
 IMAGE=${IMAGE:-sandbox-react}
 FLAGS=(--security-opt no-new-privileges --cap-drop NET_RAW --cap-drop MKNOD --cap-drop SYS_CHROOT
-       --cap-drop AUDIT_WRITE --cap-drop SETFCAP --memory 512m --pids-limit 100 --label jrarch.sandbox=jr-probe)
+       --cap-drop AUDIT_WRITE --cap-drop SETFCAP --memory 512m --pids-limit 100 --label monarch.sandbox=jr-probe)
 
 PASSED=0 FAILED=0
 blocked() { # name, command that must fail inside the attacker
@@ -60,10 +60,10 @@ for h in 10.0.2.2 host.containers.internal "$WSL_IP"; do
   blocked "host loopback-only service via $h:47998" "$(tcp "$h:47998")"
 done
 
-echo "== Jr-Arch and its agent (meaningful while jrarch.service runs)"
-curl -s -o /dev/null -m 3 http://127.0.0.1:9000/health && echo "  (Jr-Arch is listening)" || echo "  (Jr-Arch is not running: these only prove the loopback isolation)"
+echo "== Monarch and its agent (meaningful while monarch.service runs)"
+curl -s -o /dev/null -m 3 http://127.0.0.1:9000/health && echo "  (Monarch is listening)" || echo "  (Monarch is not running: these only prove the loopback isolation)"
 for h in 127.0.0.1 10.0.2.2 host.containers.internal "$WSL_IP"; do
-  blocked "Jr-Arch API at $h:9000" "$(tcp "$h:9000")"
+  blocked "Monarch API at $h:9000" "$(tcp "$h:9000")"
   blocked "agent at $h:8001" "$(tcp "$h:8001")"
 done
 

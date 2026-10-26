@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Monarch</title>
+  <meta name="description" content="Describe an app and Monarch builds it, its AI agents and the workflows that connect them, puts it online and hands you the code. Developers can bring their own GitHub repo and keep building it with a team of coding agents.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" href="img/brand/favicon-64.png">
+  <link rel="apple-touch-icon" href="img/brand/apple-touch-icon.png">
+</head>
+<body>
+  <header class="nav">
+    <div class="wrap nav-in">
+      <a class="brand" href="#top"><img class="logo" src="img/brand/monarch-mark.png" alt=""> Monarch</a>
+      <nav class="links" id="links">
+        <a href="#build">Build</a>
+        <a href="#hub">Agent Hub</a>
+        <a href="#api">APIs</a>
+        <a href="#ide">IDE</a>
+        <a href="#github">GitHub</a>
+        <a href="#under-the-hood">Under the hood</a>
+        <a href="#live" class="btn btn-sm">Try it</a>
+      </nav>
+      <button class="menu" id="menu" aria-label="Menu"><span></span><span></span></button>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="wrap">
+        <p class="eyebrow">Monarch</p>
+        <h1>Describe an app.<br>Watch it get <span class="hl">built</span>, go <span class="hl">live</span>, and stay <span class="hl">yours</span>.</h1>
+        <p class="lead">One place for everyone who wants to make software. Describe an idea in plain words and get the app, its AI agents and the workflows that connect them. Or bring your own GitHub repo and keep building it with a team of coding agents.</p>
+        <div class="cta">
+          <a class="btn" href="#live">Try it yourself</a>
+          <a class="btn btn-ghost" href="#build">I don't code</a>
+          <a class="btn btn-ghost" href="#ide">I'm a developer</a>
+        </div>
+        <figure class="shot hero-shot" data-zoom>
+          <img src="img/home.webp" alt="Monarch home: one box to start" width="1418" height="802">
+          <figcaption>The home page: one box to start</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="idea" class="section alt">
+      <div class="wrap">
+        <p class="eyebrow">The idea</p>
+        <h2>Two kinds of builders, one platform</h2>
+        <div class="two audience">
+          <a class="card card-link" href="#build">
+            <p class="eyebrow">If you don't code</p>
+            <h3>From an idea to a running app</h3>
+            <p>Describe what you want in everyday words. Monarch asks a few design questions, writes a spec you can edit, builds the AI agents and workflows the app needs, then builds the app and puts it online.</p>
+          </a>
+          <a class="card card-link" href="#ide">
+            <p class="eyebrow">If you do code</p>
+            <h3>Your repo, a sandbox, a team of agents</h3>
+            <p>Open any of your GitHub repos in a sandboxed IDE with a terminal and live preview. Plan a change, let coding agents carry it out under guardrails you set, and push it back as a branch or pull request.</p>
+          </a>
+        </div>
+        <div class="pillars">
+          <div class="pillar"><span class="road-n">01</span><b>Your model</b><p>Groq, OpenAI, Anthropic or Gemini. Paste a key and it is recognised.</p></div>
+          <div class="pillar"><span class="road-n">02</span><b>Your code</b><p>Everything lands in your GitHub as a normal repo with a README.</p></div>
+          <div class="pillar"><span class="road-n">03</span><b>Real sandboxes</b><p>Every project runs in its own container with limits.</p></div>
+          <div class="pillar"><span class="road-n">04</span><b>Safe by default</b><p>Secrets stay on the server; the AI proposes, the server decides.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="build" class="section">
+      <div class="wrap">
+        <p class="eyebrow">Build mode · no code needed</p>
+        <h2>Describe it. Shape it. Get it.</h2>
+        <p class="sub">A one-line prompt becomes a full app in four visible steps, and you can change anything before the build starts.</p>
+        <ol class="flow">
+          <li>Questions</li>
+          <li>Spec</li>
+          <li>Agents &amp; workflows</li>
+          <li>App</li>
+        </ol>
+        <div class="two pair">
+          <div class="pair-item">
+            <figure class="shot" data-zoom><img src="img/questions.webp" alt="Design questions as cards" loading="lazy" width="680" height="608"><figcaption>Design questions</figcaption></figure>
+            <p><b>Design decisions, not a form.</b> Each question comes as a few choices with a recommended answer already picked.</p>
+          </div>
+          <div class="pair-item">
+            <figure class="shot" data-zoom><img src="img/prd.webp" alt="Editable product spec" loading="lazy" width="682" height="824"><figcaption>Editable spec</figcaption></figure>
+            <p><b>A spec you can edit.</b> Vision, users, the core loop, features page by page, data and design direction.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="agents-first" class="section alt">
+      <div class="wrap">
+        <p class="eyebrow">The difference</p>
+        <h2>Agents and workflows are built first</h2>
+        <div class="step slide">
+          <figure class="shot" data-zoom><img src="img/build.webp" alt="Build log creating agents and workflows, then the app" loading="lazy" width="680" height="421"><figcaption>The build log: agents and workflows created, then the app</figcaption></figure>
+          <div class="step-text">
+            <p>Before any UI exists, the AI agents the app needs are created and tested, wired into workflows, and given their own secure tokens. The app is then generated on top of them.</p>
+            <ul class="ticks">
+              <li>Real agents, versioned, with input and output schemas.</li>
+              <li>Branching workflows with human approval steps where it matters.</li>
+              <li>The app calls them through tokens written into its config, never hard-coded.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="apps" class="section">
+      <div class="wrap">
+        <p class="eyebrow">Then the app, designed for you</p>
+        <h2>Not one template, reskinned</h2>
+        <p class="sub">A design pass picks the layout, palette and type for each app. Pages are generated in parallel, type-checked and repaired, and the app opens in a live preview. These came from one-line prompts:</p>
+        <div class="gallery" id="gallery">
+          <div class="tabs" role="tablist">
+            <button class="tab on" data-img="img/app-hearth.webp" data-cap="Hearth">Hearth</button>
+            <button class="tab" data-img="img/app-chefflow.webp" data-cap="ChefFlow">ChefFlow</button>
+            <button class="tab" data-img="img/app-codementor.webp" data-cap="CodeMentor">CodeMentor</button>
+          </div>
+          <figure class="shot" data-zoom><img id="gallery-img" src="img/app-hearth.webp" alt="Hearth" loading="lazy"><figcaption id="gallery-cap">Hearth</figcaption></figure>
+        </div>
+      </div>
+    </section>
+
+    <section id="hub" class="section alt">
+      <div class="wrap">
+        <p class="eyebrow">Agent Hub</p>
+        <h2>Every agent you make lives here</h2>
+        <div class="step slide">
+          <div class="step-text">
+            <p>Agents are versioned like code. Test one, look at its runs, compare versions, or restore an old one.</p>
+            <ul class="ticks">
+              <li>Describe an agent in plain English and the Studio drafts it: purpose, tools, guardrails and schemas.</li>
+              <li>Guardrails and permissions are enforced at run time, not just suggested in a prompt.</li>
+              <li>Human in the loop: require approval of outputs or of specific tools.</li>
+            </ul>
+          </div>
+          <figure class="shot" data-zoom><img src="img/hub-agents.webp" alt="The Agent Hub" loading="lazy" width="1418" height="802"><figcaption>The Agent Hub</figcaption></figure>
+        </div>
+      </div>
+    </section>
+
+    <section id="workflows" class="section">
+      <div class="wrap">
+        <p class="eyebrow">Workflows</p>
+        <h2>Wire agents together, visually</h2>
+        <div class="step slide">
+          <figure class="shot" data-zoom><img src="img/flow-editor.webp" alt="Workflow editor" loading="lazy" width="1418" height="802"><figcaption>Workflow editor</figcaption></figure>
+          <div class="step-text">
+            <p>An n8n-style canvas: drag in agents and logic, branch on an agent's answer, and ask a person before anything goes out. Then talk to the workflow in the Playground.</p>
+            <ul class="ticks">
+              <li>Trigger, agent, branch, approval, HTTP and output nodes.</li>
+              <li>Every run is recorded and can be replayed on the canvas.</li>
+              <li>Saved as versions in git, so nothing is lost.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="api" class="section alt">
+      <div class="wrap">
+        <p class="eyebrow">New · APIs</p>
+        <h2>Every agent and workflow is an API</h2>
+        <div class="step slide">
+          <div class="step-text">
+            <p>Create an agent on the platform, click Get API, and call it from your own workflows and apps: n8n, Zapier, Make, a script or your backend.</p>
+            <ul class="ticks">
+              <li>One token per agent or workflow, shown once, stored only as a hash, revocable any time.</li>
+              <li>Ready-to-paste code in curl, JavaScript and Python, plus an n8n workflow download.</li>
+              <li>Same rules as inside: the agent's tools, guardrails, approvals and your AI limits still apply.</li>
+            </ul>
+          </div>
+          <pre class="codeblock"><code><span class="c"># Run an agent from anywhere</span>
+curl -X POST https://&lt;monarch-host&gt;/hooks/agents/triage/run \
+  -H "Authorization: Bearer $MONARCH_AGENT_TOKEN" \
+  -d '{"input": {"task": "Sort this email by urgency"}}'
+
+<span class="c"># Response</span>
+{ "status": "completed",
+  "output": { "urgency": "high" } }
+
+<span class="c"># Needs a person? You get 202 and a decisionUrl.</span></code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section id="ide" class="section">
+      <div class="wrap">
+        <p class="eyebrow">The IDE · for developers</p>
+        <h2>Your repo, in a sandbox, with a live preview</h2>
+        <div class="step slide">
+          <figure class="shot" data-zoom><img src="img/ide-preview.webp" alt="IDE with live preview" loading="lazy" width="1418" height="802"><figcaption>IDE with live preview</figcaption></figure>
+          <div class="step-text">
+            <p>Open any GitHub repo, private ones included. The stack, services and ports are detected and shown to you before anything runs.</p>
+            <ul class="ticks">
+              <li>Monaco editor, a terminal inside the container, logs and a preview on its own origin.</li>
+              <li>20+ stacks on 14 sandbox images: Node, React, Next.js, Python, Go, Rust and more.</li>
+              <li>Paste any repo URL into Run a repo to get it live without opening the IDE.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="coding-agents" class="section alt">
+      <div class="wrap">
+        <p class="eyebrow">Coding agents</p>
+        <h2>Plan first, then a team builds it</h2>
+        <div class="step slide">
+          <div class="step-text">
+            <p>Ask for a change and review the plan like a design doc, with inline comments. Then a team of coding agents builds it task by task and explains what changed.</p>
+            <ul class="ticks">
+              <li>Agents live in your repo as plain files, each owning its part of the code.</li>
+              <li>Guardrails enforced in code: edit and command guards run on the real content.</li>
+              <li>The AI proposes, the server decides: risky commands need your approval.</li>
+            </ul>
+          </div>
+          <figure class="shot" data-zoom><img src="img/plan-review.webp" alt="Implementation plan with an inline comment" loading="lazy" width="1418" height="802"><figcaption>Plan review: comment on the plan before anything is built</figcaption></figure>
+        </div>
+      </div>
+    </section>
+
+    <section id="github" class="section">
+      <div class="wrap">
+        <p class="eyebrow">GitHub</p>
+        <h2>Synced with GitHub, both ways</h2>
+        <div class="step slide">
+          <figure class="shot" data-zoom><img src="img/source-control.webp" alt="Source Control: commit and push to a new branch with a pull request" loading="lazy" width="1418" height="802"><figcaption>Source Control</figcaption></figure>
+          <div class="step-text">
+            <p>Commit, push to a new branch and open a pull request from the IDE. Apps made in Build mode are pushed to your GitHub automatically, private by default, with a README.</p>
+            <ul class="ticks">
+              <li>Your token never enters the sandbox: fetch and push run in a separate container that runs no repo code.</li>
+              <li>Secret files never reach GitHub; blank examples like <code>.env.example</code> are committed instead.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="under-the-hood" class="section alt">
+      <div class="wrap">
+        <p class="eyebrow">Under the hood</p>
+        <h2>Built to treat every repo, prompt and browser as untrusted</h2>
+        <div class="grid three">
+          <article class="card"><p class="eyebrow">Sandboxes</p><h3>One container per project</h3><p>CPU, memory and process limits, no extra privileges, only the project folder mounted.</p></article>
+          <article class="card"><p class="eyebrow">Server</p><h3>One Go binary</h3><p>UI and templates embedded, with a Node service beside it for agents, the Hub and workflows.</p></article>
+          <article class="card"><p class="eyebrow">Data</p><h3>MongoDB</h3><p>Users, projects, agents, workflows and runs. Secrets encrypted; API tokens kept only as hashes.</p></article>
+          <article class="card"><p class="eyebrow">Identity</p><h3>Sign in your way</h3><p>GitHub, Google or a beta code. Who you are comes from your session, never from the page.</p></article>
+          <article class="card"><p class="eyebrow">Files</p><h3>Stay inside the project</h3><p>Every read and write goes through a guarded root that refuses path escapes and symlinks.</p></article>
+          <article class="card"><p class="eyebrow">Tested</p><h3>Including the attacks</h3><p>170+ automated tests, with negative ones: other users' ids, path escapes and hostile repos.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="live" class="section live">
+      <div class="wrap">
+        <div class="live-card">
+          <p class="eyebrow">Live demo</p>
+          <h2>Try it yourself</h2>
+          <p class="live-lead">The platform runs on my laptop and is shared through Tailscale Funnel, so it is online while the laptop is open. Sign in with Google, GitHub or the beta code.</p>
+          <div class="live-actions">
+            <a class="btn btn-lg" id="live-link" href="#" target="_blank" rel="noopener">Open Monarch</a>
+            <a class="btn btn-lg btn-ghost" href="https://github.com/VivanRajath/Monarch" target="_blank" rel="noopener">View on GitHub</a>
+            <button class="btn btn-lg btn-ghost" type="button" id="beta-btn" aria-expanded="false" aria-controls="beta-box">Show beta code</button>
+          </div>
+          <div class="beta-box" id="beta-box" hidden>
+            <code id="beta-code"></code>
+            <button class="btn btn-sm" type="button" id="beta-copy">Copy</button>
+          </div>
+          <p class="ping-status" id="ping-status" role="status" aria-live="polite"></p>
+          <div class="note">
+            <p><b>How this works.</b> Opening Monarch also sends me a notification on my phone, so if the laptop is asleep I can switch the tunnel on. If the page doesn't load yet, give it a few minutes and try again.</p>
+          </div>
+          <p class="live-url"><code id="live-url-text"></code></p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap foot-in">
+      <span><img class="logo sm" src="img/brand/monarch-mark.png" alt=""> Monarch · built by Vivan Rajath</span>
+      <a href="https://github.com/VivanRajath/Monarch" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </footer>
+
+  <div class="lightbox" id="lightbox" hidden><img alt=""><button aria-label="Close">×</button></div>
+  <script src="script.js"></script>
+</body>
+</html>
